@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaker - 智能鸡尾酒推荐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+        }
+
+        .home-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #1f2937;
+        }
+
+        .btn-primary:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+        }
+
+        .form-page {
+            display: none;
+            padding: 2rem 0;
+        }
+
+        .step-container {
+            margin-bottom: 2rem;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .option-card {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-card.selected {
+            background: white;
+            color: #1f2937;
+            border-color: white;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回按钮 -->
+    <button class="back-btn hidden" id="backBtn" onclick="goBack()">←</button>
+
+    <!-- 首页 -->
+    <div class="home-page" id="homePage">
+        <div class="container">
+            <div class="logo">🍸</div>
+            <h1 class="title">Shaker</h1>
+            <p class="subtitle">智能鸡尾酒推荐专家，让每个人都能找到完美的那一杯</p>
+            
+            <div class="glass-effect feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>场景匹配</h3>
+                    <p>根据聚会、约会、独处等不同场景推荐</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>个性化推荐</h3>
+                    <p>基于心情、口味偏好智能匹配</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📖</div>
+                    <h3>详细指导</h3>
+                    <p>完整配方和制作步骤指导</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="startRecommendation()">
+                开始智能推荐
+            </button>
+        </div>
+    </div>
+
+    <!-- 表单页面 -->
+    <div class="form-page" id="formPage">
+        <div class="container">
+            <!-- 场景选择 -->
+            <div class="step-container" id="sceneStep">
+                <h2 class="step-title">选择使用场景</h2>
+                <div class="options-grid" id="sceneOptions">
+                    <div class="option-card" data-value="聚会派对">
+                        <div class="feature-icon">🎉</div>
+                        <h3>聚会派对</h3>
+                        <p>朋友聚会、生日party、节日庆祝</p>
+                    </div>
+                    <div class="option-card" data-value="浪漫约会">
+                        <div class="feature-icon">💕</div>
+                        <h3>浪漫约会</h3>
+                        <p>二人世界、烛光晚餐、求婚表白</p>
+                    </div>
+                    <div class="option-card" data-value="独处放松">
+                        <div class="feature-icon">🛋️</div>
+                        <h3>独处放松</h3>
+                        <p>下班后放松、阅读时光、洗澡后</p>
+                    </div>
+                    <div class="option-card" data-value="商务场合">
+                        <div class="feature-icon">💼</div>
+                        <h3>商务场合</h3>
+                        <p>客户招待、同事聚餐、庆祝成功</p>
+                    </div>
+                    <div class="option-card" data-value="餐前餐后">
+                        <div class="feature-icon">🍽️</div>
+                        <h3>餐前餐后</h3>
+                        <p>开胃酒、餐后消化、配餐搭配</p>
+                    </div>
+                    <div class="option-card" data-value="深夜时光">
+                        <div class="feature-icon">🌙</div>
+                        <h3>深夜时光</h3>
+                        <p>失眠夜晚、深度思考、创作灵感</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="nextStep()" id="nextBtn" style="display:none;">下一步</button>
+            </div>
+
+            <!-- 心情选择 -->
+            <div class="step-container hidden" id="moodStep">
+                <h2 class="step-title">描述你的心情</h2>
+                <p style="opacity: 0.8; margin-bottom: 1rem;">选择1-3个最符合你当前状态的心情</p>
+                <div class="options-grid" id="moodOptions">
+                    <div class="option-card" data-value="开心愉悦">
+                        <div class="feature-icon">😊</div>
+                        <h3>开心愉悦</h3>
+                        <p>心情很好、值得庆祝、兴高采烈</p>
+                    </div>
+                    <div class="option-card" data-value="沮丧低落">
+                        <div class="feature-icon">😢</div>
+                        <h3>沮丧低落</h3>
+                        <p>工作压力、感情困扰、生活烦恼</p>
+                    </div>
+                    <div class="option-card" data-value="兴奋激动">
+                        <div class="feature-icon">🔥</div>
+                        <h3>兴奋激动</h3>
+                        <p>获得成功、即将冒险、充满期待</p>
+                    </div>
+                    <div class="option-card" data-value="平静放松">
+                        <div class="feature-icon">😌</div>
+                        <h3>平静放松</h3>
+                        <p>需要舒缓、想要安静、寻求平衡</p>
+                    </div>
+                    <div class="option-card" data-value="自信满满">
+                        <div class="feature-icon">💪</div>
+                        <h3>自信满满</h3>
+                        <p>状态很好、充满能量、准备挑战</p>
+                    </div>
+                    <div class="option-card" data-value="深度思考">
+                        <div class="feature-icon">🤔</div>
+                        <h3>深度思考</h3>
+                        <p>需要专注、创意工作、哲学思辨</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="getRecommendation()" id="recommendBtn" style="display:none;">获取推荐</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div class="loading" id="loadingPage">
+        <div class="container">
+            <div class="spinner"></div>
+            <h2>AI正在为你推荐...</h2>
+            <p>这可能需要几秒钟</p>
+        </div>
+    </div>
+
+    <!-- 结果页面 -->
+    <div class="results" id="resultsPage">
+        <div class="container">
+            <h2 class="step-title">为你推荐的鸡尾酒</h2>
+            <div id="recommendationsList"></div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="startRecommendation()">重新推荐</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedScene = '';
+        let selectedMoods = [];
+
+        function startRecommendation() {
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('formPage').style.display = 'block';
+            document.getElementById('resultsPage').style.display = 'none';
+            document.getElementById('backBtn').classList.remove('hidden');
+            
+            // 重置选择
+            selectedScene = '';
+            selectedMoods = [];
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 显示场景选择步骤
+            document.getElementById('sceneStep').classList.remove('hidden');
+            document.getElementById('moodStep').classList.add('hidden');
+        }
+
+        function goBack() {
+            document.getElementById('homePage').style.display = 'flex';
+            document.getElementById('formPage').style.display = 'none';
+            document.getElementById('resultsPage').style.display = 'none';
+            document.getElementById('loadingPage').style.display = 'none';
+            document.getElementById('backBtn').classList.add('hidden');
+        }
+
+        // 场景选择
+        document.getElementById('sceneOptions').addEventListener('click', function(e) {
+            const card = e.target.closest('.option-card');
+            if (card) {
+                // 清除其他选择
+                document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // 选择当前卡片
+                card.classList.add('selected');
+                selectedScene = card.dataset.value;
+                
+                // 显示下一步按钮
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            }
+        });
+
+        // 心情选择
+        document.getElementById('moodOptions').addEventListener('click', function(e) {
+            const card = e.target.closest('.option-card');
+            if (card) {
+                const mood = card.dataset.value;
+                
+                if (card.classList.contains('selected')) {
+                    // 取消选择
+                    card.classList.remove('selected');
+                    selectedMoods = selectedMoods.filter(m => m !== mood);
+                } else if (selectedMoods.length < 3) {
+                    // 添加选择
+                    card.classList.add('selected');
+                    selectedMoods.push(mood);
+                }
+                
+                // 显示推荐按钮
+                if (selectedMoods.length > 0) {
+                    document.getElementById('recommendBtn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('recommendBtn').style.display = 'none';
+                }
+            }
+        });
+
+        function nextStep() {
+            if (selectedScene) {
+                document.getElementById('sceneStep').classList.add('hidden');
+                document.getElementById('moodStep').classList.remove('hidden');
+            }
+        }
+
+        async function getRecommendation() {
+            if (selectedScene && selectedMoods.length > 0) {
+                // 显示加载页面
+                document.getElementById('formPage').style.display = 'none';
+                document.getElementById('loadingPage').style.display = 'block';
+
+                const userInput = {
+                    scene: selectedScene,
+                    moods: selectedMoods,
+                    ingredients: {
+                        spirits: ['伏特加', '威士忌'],
+                        mixers: ['柠檬汁', '苏打水', '冰块'],
+                        tools: ['调酒器', '量杯']
+                    },
+                    preferences: {
+                        alcohol_level: '中度',
+                        sweetness: '微甜',
+                        acidity: '中酸',
+                        style: '清爽'
+                    }
+                };
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/recommend', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userInput)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success && result.data?.recommendations) {
+                        displayRecommendations(result.data.recommendations);
+                    } else {
+                        throw new Error('推荐获取失败');
+                    }
+                } catch (error) {
+                    console.error('推荐失败:', error);
+                    alert('获取推荐失败，请检查后端服务是否启动');
+                    goBack();
+                }
+            }
+        }
+
+        function displayRecommendations(recommendations) {
+            document.getElementById('loadingPage').style.display = 'none';
+            document.getElementById('resultsPage').style.display = 'block';
+
+            const container = document.getElementById('recommendationsList');
+            container.innerHTML = '';
+
+            recommendations.forEach((cocktail, index) => {
+                const card = document.createElement('div');
+                card.className = 'recommendation-card glass-effect';
+                card.innerHTML = `
+                    <h3>${cocktail.name.chinese}</h3>
+                    <p style="opacity: 0.8; font-style: italic;">${cocktail.name.english}</p>
+                    <p style="margin: 1rem 0;">${cocktail.reason}</p>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
+                        <span>🏷️ ${cocktail.recipe.difficulty}</span>
+                        <span>⏱️ ${cocktail.prep_time}</span>
+                        <span>🍺 ${cocktail.alcohol_content}</span>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    showCocktailDetails(cocktail);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        function showCocktailDetails(cocktail) {
+            let ingredientsList = cocktail.recipe.ingredients.map(ing => 
+                `<li>${ing.name}: ${ing.amount}</li>`
+            ).join('');
+            
+            let instructionsList = cocktail.instructions.map((step, index) => 
+                `<li>${index + 1}. ${step}</li>`
+            ).join('');
+
+            const details = `
+                <div style="background: rgba(0,0,0,0.8); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem;" onclick="this.remove()">
+                    <div class="glass-effect" style="max-width: 600px; padding: 2rem; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h2>${cocktail.name.chinese}</h2>
+                                <p style="opacity: 0.8;">${cocktail.name.english}</p>
+                            </div>
+                            <button onclick="this.closest('div').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+                        </div>
+                        
+                        <h3>💡 推荐理由</h3>
+                        <p style="margin-bottom: 1rem;">${cocktail.reason}</p>
+                        
+                        <h3>🧪 材料清单</h3>
+                        <ul style="margin-bottom: 1rem; padding-left: 1.5rem;">${ingredientsList}</ul>
+                        
+                        <h3>📝 制作步骤</h3>
+                        <ol style="margin-bottom: 1rem; padding-left: 1.5rem;">${instructionsList}</ol>
+                        
+                        <h3>👅 口感特点</h3>
+                        <p style="margin-bottom: 1rem;">${cocktail.taste_profile}</p>
+                        
+                        <h3>👁️ 视觉效果</h3>
+                        <p style="margin-bottom: 1rem;">${cocktail.visual}</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem;">⏰</div>
+                                <p>制作时间</p>
+                                <strong>${cocktail.prep_time}</strong>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem;">🍺</div>
+                                <p>酒精度</p>
+                                <strong>${cocktail.alcohol_content}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', details);
+        }
+    </script>
+</body>
+</html>
