@@ -31,6 +31,14 @@ class CozeService {
     async getCocktailRecommendation(userInput) {
         try {
             console.log('调用Coze API，用户输入:', JSON.stringify(userInput, null, 2));
+            console.log('Coze API配置检查:');
+            console.log('- API Key:', this.apiKey ? `${this.apiKey.substring(0, 10)}...` : '未设置');
+            console.log('- Bot ID:', this.botId || '未设置');
+            console.log('- Base URL:', this.baseURL || '未设置');
+            
+            if (!this.apiKey || !this.botId || !this.baseURL) {
+                throw new Error('Coze API配置不完整');
+            }
             
             const response = await axios.post(
                 `${this.baseURL}/v3/chat`,
@@ -96,25 +104,25 @@ class CozeService {
                             console.log('成功解析AI推荐:', JSON.stringify(recommendations, null, 2));
                             return recommendations;
                         } else {
-                            console.log('推荐格式不正确, 使用备用方案');
-                            return this.getFallbackRecommendations(userInput);
+                            console.log('推荐格式不正确');
+                            throw new Error('AI推荐格式不正确');
                         }
                     } catch (parseError) {
                         console.error('解析AI响应失败:', parseError);
                         console.error('原始内容:', botContent);
-                        return this.getFallbackRecommendations(userInput);
+                        throw new Error('AI响应解析失败');
                     }
                 } else {
                     console.log('没有找到有效的响应内容');
+                    throw new Error('AI没有返回有效内容');
                 }
             } else {
                 console.log('响应数据为空');
+                throw new Error('AI响应数据为空');
             }
-            
-            return this.getFallbackRecommendations(userInput);
         } catch (error) {
             console.error('Coze API调用失败:', error.response?.data || error.message);
-            return this.getFallbackRecommendations(userInput);
+            throw error;
         }
     }
 
@@ -206,13 +214,21 @@ app.post('/api/recommend', async (req, res) => {
 
         console.log('收到推荐请求:', userInput);
         
-        // 直接使用本地推荐算法，不依赖外部API
-        const recommendations = cozeService.getFallbackRecommendations(userInput);
-        
-        res.json({
-            success: true,
-            data: recommendations
-        });
+        try {
+            const recommendations = await cozeService.getCocktailRecommendation(userInput);
+            
+            res.json({
+                success: true,
+                data: recommendations
+            });
+        } catch (apiError) {
+            console.error('Coze API调用失败:', apiError.message);
+            res.status(500).json({
+                success: false,
+                error: 'AI服务暂时不可用',
+                message: apiError.message
+            });
+        }
         
     } catch (error) {
         console.error('API错误:', error);
