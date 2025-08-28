@@ -11,7 +11,11 @@ const PORT = process.env.PORT || 3001;
 
 // 中间件配置
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+        'http://localhost:3000',
+        'https://shaker-cocktail-app.vercel.app',
+        process.env.FRONTEND_URL
+    ].filter(Boolean),
     credentials: true
 }));
 app.use(express.json());
