@@ -46,7 +46,7 @@ class CozeService {
                     bot_id: this.botId,
                     user_id: `shaker-user-${Date.now()}`,
                     stream: false,
-                    auto_save_history: false,
+                    auto_save_history: true,
                     additional_messages: [{
                         role: "user",
                         content: JSON.stringify(userInput),
