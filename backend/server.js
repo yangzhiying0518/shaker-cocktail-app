@@ -200,6 +200,14 @@ class CozeService {
 
 const cozeService = new CozeService();
 
+// 启动时检查环境变量
+console.log('=== 服务启动时环境变量检查 ===');
+console.log('COZE_API_KEY:', process.env.COZE_API_KEY ? `${process.env.COZE_API_KEY.substring(0, 15)}...` : '未设置');
+console.log('COZE_BOT_ID:', process.env.COZE_BOT_ID || '未设置');
+console.log('COZE_API_BASE_URL:', process.env.COZE_API_BASE_URL || '未设置');
+console.log('NODE_ENV:', process.env.NODE_ENV || '未设置');
+console.log('=== 环境变量检查完成 ===');
+
 // API路由
 app.post('/api/recommend', async (req, res) => {
     try {
