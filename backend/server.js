@@ -206,7 +206,8 @@ app.post('/api/recommend', async (req, res) => {
 
         console.log('收到推荐请求:', userInput);
         
-        const recommendations = await cozeService.getCocktailRecommendation(userInput);
+        // 直接使用本地推荐算法，不依赖外部API
+        const recommendations = cozeService.getFallbackRecommendations(userInput);
         
         res.json({
             success: true,
