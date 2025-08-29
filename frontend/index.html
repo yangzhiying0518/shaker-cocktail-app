@@ -3,8 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shaker - 智能鸡尾酒推荐</title>
+    <title>Shaker - 智能鸡尾酒推荐专家</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            /* 主色调 - 科技蓝紫渐变 */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-dark: #1a1a2e;
+            --primary-purple: #6c5ce7;
+            --primary-blue: #74b9ff;
+            
+            /* 背景色 */
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --bg-glass-hover: rgba(255, 255, 255, 0.1);
+            
+            /* 文本色 */
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            
+            /* 边框和阴影 */
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.3);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,143 +38,524 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
+        /* 背景动效 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: var(--primary-gradient);
+            opacity: 0.8;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(116, 185, 255, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(167, 112, 239, 0.3) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* 容器 */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 0 2rem;
         }
 
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
+        /* 玻璃态效果 */
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
         }
 
-        .home-page {
-            min-height: 100vh;
+        .glass-card:hover {
+            background: var(--bg-glass-hover);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* 头部导航 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .header .container {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            text-align: center;
         }
 
         .logo {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
         }
 
-        .title {
+        .logo-icon {
+            font-size: 2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            padding-top: 5rem;
+            min-height: 100vh;
+        }
+
+        /* 英雄区域 */
+        .hero-section {
+            padding: 4rem 0 6rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a7a7a7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--primary-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.6);
+        }
+
+        /* 功能展示区域 */
+        .features-section {
+            padding: 4rem 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .features-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .feature-icon {
             font-size: 3rem;
-            font-weight: bold;
             margin-bottom: 1rem;
+            display: block;
         }
 
-        .subtitle {
-            font-size: 1.25rem;
-            opacity: 0.8;
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* 推荐流程区域 */
+        .recommendation-section {
+            padding: 4rem 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .recommendation-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a7a7a7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 步骤容器 */
+        .steps-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 3rem;
+            gap: 1rem;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border-glass);
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: var(--primary-purple);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.6);
+        }
+
+        .progress-dot.completed {
+            background: var(--primary-blue);
+        }
+
+        .progress-line {
+            width: 40px;
+            height: 2px;
+            background: var(--border-glass);
+            transition: all 0.3s ease;
+        }
+
+        .progress-line.active {
+            background: var(--primary-purple);
+        }
+
+        /* 步骤内容 */
+        .step-content {
+            display: none;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+        .step-description {
+            text-align: center;
+            color: var(--text-secondary);
             margin-bottom: 2rem;
         }
 
-        .feature-grid {
+        /* 选项网格 */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .option-card {
+            padding: 1.5rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            background: var(--bg-glass-hover);
+            transform: translateY(-3px);
+            border-color: var(--primary-purple);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(116, 185, 255, 0.2) 100%);
+            border-color: var(--primary-purple);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .option-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .option-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .option-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* 材料选择 */
+        .ingredients-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
             margin: 2rem 0;
         }
 
-        .feature-card {
+        .ingredient-category {
             padding: 1.5rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
             text-align: center;
         }
 
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+        .ingredient-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
+        .ingredient-tag {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .ingredient-tag:hover {
+            border-color: var(--primary-purple);
+            background: rgba(108, 92, 231, 0.2);
+        }
+
+        .ingredient-tag.selected {
+            background: var(--primary-purple);
+            border-color: var(--primary-purple);
+            color: white;
+        }
+
+        /* 偏好设置 */
+        .preferences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .preference-item {
+            padding: 1.5rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+        }
+
+        .preference-label {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-secondary);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-purple);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-purple);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* 按钮样式 */
         .btn {
             padding: 1rem 2rem;
             border: none;
-            border-radius: 2rem;
-            font-size: 1.1rem;
+            border-radius: 50px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn-primary {
-            background: white;
-            color: #1f2937;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
         }
 
         .btn-primary:hover {
-            background: #f3f4f6;
             transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.6);
         }
 
-        .form-page {
-            display: none;
-            padding: 2rem 0;
+        .btn-secondary {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border: 1px solid var(--border-glass);
         }
 
-        .step-container {
-            margin-bottom: 2rem;
+        .btn-secondary:hover {
+            background: var(--bg-glass-hover);
+            border-color: var(--primary-purple);
         }
 
-        .step-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        .step-navigation {
+            display: flex;
+            justify-content: center;
             gap: 1rem;
-            margin: 1rem 0;
+            margin-top: 3rem;
         }
 
-        .option-card {
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid transparent;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .option-card.selected {
-            background: white;
-            color: #1f2937;
-            border-color: white;
-        }
-
-        .loading {
+        /* 加载状态 */
+        .loading-section {
             display: none;
             text-align: center;
-            padding: 2rem;
+            padding: 4rem 0;
         }
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
+        .loading-animation {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            border: 4px solid var(--border-glass);
+            border-top: 4px solid var(--primary-purple);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
         }
 
         @keyframes spin {
@@ -157,335 +563,737 @@
             100% { transform: rotate(360deg); }
         }
 
-        .results {
-            display: none;
+        .loading-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
         }
 
-        .recommendation-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin: 1rem 0;
+        .loading-subtitle {
+            color: var(--text-secondary);
+        }
+
+        /* 结果展示 */
+        .results-section {
+            display: none;
+            padding: 4rem 0;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .cocktail-card {
+            padding: 2rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .recommendation-card:hover {
+        .cocktail-card:hover {
             transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--bg-glass-hover);
+            box-shadow: var(--shadow-glow);
         }
 
-        .hidden {
-            display: none;
+        .cocktail-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
 
-        .back-btn {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 3rem;
-            height: 3rem;
-            color: white;
-            cursor: pointer;
-            font-size: 1.2rem;
+        .cocktail-subtitle {
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
         }
 
+        .cocktail-reason {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .cocktail-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* 响应式设计 */
         @media (max-width: 768px) {
             .container {
-                padding: 1rem;
+                padding: 0 1rem;
             }
             
-            .title {
-                font-size: 2rem;
+            .hero-title {
+                font-size: 2.5rem;
             }
             
             .options-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .ingredients-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .preferences-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <!-- 返回按钮 -->
-    <button class="back-btn hidden" id="backBtn" onclick="goBack()">←</button>
+    <!-- 背景动效 -->
+    <div class="bg-animation"></div>
 
-    <!-- 首页 -->
-    <div class="home-page" id="homePage">
+    <!-- 头部导航 -->
+    <header class="header">
         <div class="container">
-            <div class="logo">🍸</div>
-            <h1 class="title">Shaker</h1>
-            <p class="subtitle">智能鸡尾酒推荐专家，让每个人都能找到完美的那一杯</p>
-            
-            <div class="glass-effect feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>场景匹配</h3>
-                    <p>根据聚会、约会、独处等不同场景推荐</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>个性化推荐</h3>
-                    <p>基于心情、口味偏好智能匹配</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📖</div>
-                    <h3>详细指导</h3>
-                    <p>完整配方和制作步骤指导</p>
+            <a href="#" class="logo">
+                <span class="logo-icon">🍸</span>
+                <span>Shaker</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <!-- 英雄区域 -->
+        <section class="hero-section" id="heroSection">
+            <div class="container">
+                <h1 class="hero-title">AI 智能鸡尾酒推荐专家</h1>
+                <p class="hero-subtitle">
+                    基于场景、心情和个人偏好，为你推荐最完美的鸡尾酒配方。
+                    让每一次调酒都成为艺术创作。
+                </p>
+                <a href="#" class="hero-cta" onclick="startRecommendation()">
+                    <span>🎯</span>
+                    开始智能推荐
+                </a>
+            </div>
+        </section>
+
+        <!-- 功能特色 -->
+        <section class="features-section" id="featuresSection">
+            <div class="container">
+                <div class="features-grid">
+                    <div class="feature-card glass-card">
+                        <span class="feature-icon">🎯</span>
+                        <h3 class="feature-title">场景匹配</h3>
+                        <p class="feature-desc">智能识别聚会、约会、独处等不同场景，推荐最适合当下氛围的鸡尾酒</p>
+                    </div>
+                    <div class="feature-card glass-card">
+                        <span class="feature-icon">🎨</span>
+                        <h3 class="feature-title">个性化定制</h3>
+                        <p class="feature-desc">基于心情状态和口味偏好，生成专属于你的鸡尾酒配方</p>
+                    </div>
+                    <div class="feature-card glass-card">
+                        <span class="feature-icon">📖</span>
+                        <h3 class="feature-title">专业指导</h3>
+                        <p class="feature-desc">详细的制作步骤、材料配比和调酒技巧，让新手也能调出大师级作品</p>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <button class="btn btn-primary" onclick="startRecommendation()">
-                开始智能推荐
-            </button>
-        </div>
-    </div>
+        <!-- 推荐流程 -->
+        <section class="recommendation-section" id="recommendationSection">
+            <div class="container">
+                <h2 class="section-title">智能推荐流程</h2>
+                
+                <div class="steps-container">
+                    <!-- 进度指示器 -->
+                    <div class="step-progress" id="stepProgress">
+                        <div class="progress-dot active" data-step="1"></div>
+                        <div class="progress-line"></div>
+                        <div class="progress-dot" data-step="2"></div>
+                        <div class="progress-line"></div>
+                        <div class="progress-dot" data-step="3"></div>
+                        <div class="progress-line"></div>
+                        <div class="progress-dot" data-step="4"></div>
+                        <div class="progress-line"></div>
+                        <div class="progress-dot" data-step="5"></div>
+                    </div>
 
-    <!-- 表单页面 -->
-    <div class="form-page" id="formPage">
-        <div class="container">
-            <!-- 场景选择 -->
-            <div class="step-container" id="sceneStep">
-                <h2 class="step-title">选择使用场景</h2>
-                <div class="options-grid" id="sceneOptions">
-                    <div class="option-card" data-value="聚会派对">
-                        <div class="feature-icon">🎉</div>
-                        <h3>聚会派对</h3>
-                        <p>朋友聚会、生日party、节日庆祝</p>
+                    <!-- 步骤1: 场景选择 -->
+                    <div class="step-content active" id="step1">
+                        <h3 class="step-title">选择使用场景</h3>
+                        <p class="step-description">告诉我们你计划在什么场合享用这杯鸡尾酒</p>
+                        <div class="options-grid" id="sceneOptions">
+                            <div class="option-card" data-value="聚会派对">
+                                <span class="option-icon">🎉</span>
+                                <h4 class="option-title">聚会派对</h4>
+                                <p class="option-desc">朋友聚会、生日party、节日庆祝</p>
+                            </div>
+                            <div class="option-card" data-value="浪漫约会">
+                                <span class="option-icon">💕</span>
+                                <h4 class="option-title">浪漫约会</h4>
+                                <p class="option-desc">二人世界、烛光晚餐、求婚表白</p>
+                            </div>
+                            <div class="option-card" data-value="独处放松">
+                                <span class="option-icon">🛋️</span>
+                                <h4 class="option-title">独处放松</h4>
+                                <p class="option-desc">下班后放松、阅读时光、冥想休息</p>
+                            </div>
+                            <div class="option-card" data-value="商务场合">
+                                <span class="option-icon">💼</span>
+                                <h4 class="option-title">商务场合</h4>
+                                <p class="option-desc">客户招待、同事聚餐、庆祝成功</p>
+                            </div>
+                            <div class="option-card" data-value="餐前餐后">
+                                <span class="option-icon">🍽️</span>
+                                <h4 class="option-title">餐前餐后</h4>
+                                <p class="option-desc">开胃酒、餐后消化、配餐搭配</p>
+                            </div>
+                            <div class="option-card" data-value="深夜时光">
+                                <span class="option-icon">🌙</span>
+                                <h4 class="option-title">深夜时光</h4>
+                                <p class="option-desc">失眠夜晚、深度思考、创作灵感</p>
+                            </div>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-primary hidden" id="step1Next" onclick="nextStep()">下一步 →</button>
+                        </div>
                     </div>
-                    <div class="option-card" data-value="浪漫约会">
-                        <div class="feature-icon">💕</div>
-                        <h3>浪漫约会</h3>
-                        <p>二人世界、烛光晚餐、求婚表白</p>
+
+                    <!-- 步骤2: 心情描述 -->
+                    <div class="step-content" id="step2">
+                        <h3 class="step-title">描述你的心情</h3>
+                        <p class="step-description">选择1-3个最符合你当前状态的心情标签</p>
+                        <div class="options-grid" id="moodOptions">
+                            <div class="option-card" data-value="开心愉悦">
+                                <span class="option-icon">😊</span>
+                                <h4 class="option-title">开心愉悦</h4>
+                                <p class="option-desc">心情很好、值得庆祝、兴高采烈</p>
+                            </div>
+                            <div class="option-card" data-value="沮丧低落">
+                                <span class="option-icon">😢</span>
+                                <h4 class="option-title">沮丧低落</h4>
+                                <p class="option-desc">工作压力、感情困扰、生活烦恼</p>
+                            </div>
+                            <div class="option-card" data-value="兴奋激动">
+                                <span class="option-icon">🔥</span>
+                                <h4 class="option-title">兴奋激动</h4>
+                                <p class="option-desc">获得成功、即将冒险、充满期待</p>
+                            </div>
+                            <div class="option-card" data-value="平静放松">
+                                <span class="option-icon">😌</span>
+                                <h4 class="option-title">平静放松</h4>
+                                <p class="option-desc">需要舒缓、想要安静、寻求平衡</p>
+                            </div>
+                            <div class="option-card" data-value="自信满满">
+                                <span class="option-icon">💪</span>
+                                <h4 class="option-title">自信满满</h4>
+                                <p class="option-desc">状态很好、充满能量、准备挑战</p>
+                            </div>
+                            <div class="option-card" data-value="深度思考">
+                                <span class="option-icon">🤔</span>
+                                <h4 class="option-title">深度思考</h4>
+                                <p class="option-desc">需要专注、创意工作、哲学思辨</p>
+                            </div>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary hidden" id="step2Next" onclick="nextStep()">下一步 →</button>
+                        </div>
                     </div>
-                    <div class="option-card" data-value="独处放松">
-                        <div class="feature-icon">🛋️</div>
-                        <h3>独处放松</h3>
-                        <p>下班后放松、阅读时光、洗澡后</p>
+
+                    <!-- 步骤3: 材料选择 -->
+                    <div class="step-content" id="step3">
+                        <h3 class="step-title">选择可用材料</h3>
+                        <p class="step-description">选择你目前拥有或容易获得的材料</p>
+                        <div class="ingredients-section">
+                            <div class="ingredient-category glass-card">
+                                <h4 class="category-title">🥃 基酒</h4>
+                                <div class="ingredient-list" data-category="spirits">
+                                    <span class="ingredient-tag" data-value="威士忌">威士忌</span>
+                                    <span class="ingredient-tag" data-value="伏特加">伏特加</span>
+                                    <span class="ingredient-tag" data-value="金酒">金酒</span>
+                                    <span class="ingredient-tag" data-value="朗姆酒">朗姆酒</span>
+                                    <span class="ingredient-tag" data-value="龙舌兰">龙舌兰</span>
+                                    <span class="ingredient-tag" data-value="白兰地">白兰地</span>
+                                </div>
+                            </div>
+                            <div class="ingredient-category glass-card">
+                                <h4 class="category-title">🍋 调料</h4>
+                                <div class="ingredient-list" data-category="mixers">
+                                    <span class="ingredient-tag" data-value="柠檬汁">柠檬汁</span>
+                                    <span class="ingredient-tag" data-value="青柠汁">青柠汁</span>
+                                    <span class="ingredient-tag" data-value="橙汁">橙汁</span>
+                                    <span class="ingredient-tag" data-value="苏打水">苏打水</span>
+                                    <span class="ingredient-tag" data-value="汤力水">汤力水</span>
+                                    <span class="ingredient-tag" data-value="薄荷叶">薄荷叶</span>
+                                    <span class="ingredient-tag" data-value="糖浆">糖浆</span>
+                                    <span class="ingredient-tag" data-value="蜂蜜">蜂蜜</span>
+                                </div>
+                            </div>
+                            <div class="ingredient-category glass-card">
+                                <h4 class="category-title">🛠️ 工具</h4>
+                                <div class="ingredient-list" data-category="tools">
+                                    <span class="ingredient-tag" data-value="调酒器">调酒器</span>
+                                    <span class="ingredient-tag" data-value="量杯">量杯</span>
+                                    <span class="ingredient-tag" data-value="搅拌棒">搅拌棒</span>
+                                    <span class="ingredient-tag" data-value="滤网">滤网</span>
+                                    <span class="ingredient-tag" data-value="冰块">冰块</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+                        </div>
                     </div>
-                    <div class="option-card" data-value="商务场合">
-                        <div class="feature-icon">💼</div>
-                        <h3>商务场合</h3>
-                        <p>客户招待、同事聚餐、庆祝成功</p>
+
+                    <!-- 步骤4: 偏好设置 -->
+                    <div class="step-content" id="step4">
+                        <h3 class="step-title">设置口味偏好</h3>
+                        <p class="step-description">调整滑块来设置你的口味偏好</p>
+                        <div class="preferences-grid">
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">酒精度</div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="100" value="50" class="slider" id="alcoholLevel">
+                                    <div class="slider-labels">
+                                        <span>无酒精</span>
+                                        <span>中度</span>
+                                        <span>高度</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">甜度</div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="100" value="50" class="slider" id="sweetness">
+                                    <div class="slider-labels">
+                                        <span>不甜</span>
+                                        <span>微甜</span>
+                                        <span>很甜</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">酸度</div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="100" value="50" class="slider" id="acidity">
+                                    <div class="slider-labels">
+                                        <span>不酸</span>
+                                        <span>适中</span>
+                                        <span>很酸</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">口感风格</div>
+                                <div class="options-grid" style="grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 1rem;">
+                                    <div class="option-card" data-value="清爽" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">清爽</h4>
+                                    </div>
+                                    <div class="option-card" data-value="浓郁" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">浓郁</h4>
+                                    </div>
+                                    <div class="option-card" data-value="顺滑" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">顺滑</h4>
+                                    </div>
+                                    <div class="option-card" data-value="刺激" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">刺激</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+                        </div>
                     </div>
-                    <div class="option-card" data-value="餐前餐后">
-                        <div class="feature-icon">🍽️</div>
-                        <h3>餐前餐后</h3>
-                        <p>开胃酒、餐后消化、配餐搭配</p>
-                    </div>
-                    <div class="option-card" data-value="深夜时光">
-                        <div class="feature-icon">🌙</div>
-                        <h3>深夜时光</h3>
-                        <p>失眠夜晚、深度思考、创作灵感</p>
+
+                    <!-- 步骤5: 特殊要求 -->
+                    <div class="step-content" id="step5">
+                        <h3 class="step-title">特殊要求 (可选)</h3>
+                        <p class="step-description">有什么特别的要求或想法吗？</p>
+                        <div class="glass-card" style="padding: 2rem; margin: 2rem 0;">
+                            <textarea 
+                                id="specialRequirements" 
+                                placeholder="例如：希望颜值高一些、适合拍照、口感清淡、无需复杂工具等..."
+                                style="width: 100%; height: 120px; background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1rem; color: var(--text-primary); font-family: inherit; font-size: 1rem; resize: vertical;"
+                            ></textarea>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary" onclick="getRecommendation()">🎯 获取推荐</button>
+                        </div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="nextStep()" id="nextBtn" style="display:none;">下一步</button>
             </div>
+        </section>
 
-            <!-- 心情选择 -->
-            <div class="step-container hidden" id="moodStep">
-                <h2 class="step-title">描述你的心情</h2>
-                <p style="opacity: 0.8; margin-bottom: 1rem;">选择1-3个最符合你当前状态的心情</p>
-                <div class="options-grid" id="moodOptions">
-                    <div class="option-card" data-value="开心愉悦">
-                        <div class="feature-icon">😊</div>
-                        <h3>开心愉悦</h3>
-                        <p>心情很好、值得庆祝、兴高采烈</p>
-                    </div>
-                    <div class="option-card" data-value="沮丧低落">
-                        <div class="feature-icon">😢</div>
-                        <h3>沮丧低落</h3>
-                        <p>工作压力、感情困扰、生活烦恼</p>
-                    </div>
-                    <div class="option-card" data-value="兴奋激动">
-                        <div class="feature-icon">🔥</div>
-                        <h3>兴奋激动</h3>
-                        <p>获得成功、即将冒险、充满期待</p>
-                    </div>
-                    <div class="option-card" data-value="平静放松">
-                        <div class="feature-icon">😌</div>
-                        <h3>平静放松</h3>
-                        <p>需要舒缓、想要安静、寻求平衡</p>
-                    </div>
-                    <div class="option-card" data-value="自信满满">
-                        <div class="feature-icon">💪</div>
-                        <h3>自信满满</h3>
-                        <p>状态很好、充满能量、准备挑战</p>
-                    </div>
-                    <div class="option-card" data-value="深度思考">
-                        <div class="feature-icon">🤔</div>
-                        <h3>深度思考</h3>
-                        <p>需要专注、创意工作、哲学思辨</p>
-                    </div>
+        <!-- 加载状态 -->
+        <section class="loading-section" id="loadingSection">
+            <div class="container">
+                <div class="loading-animation"></div>
+                <h2 class="loading-title">AI 正在为你推荐...</h2>
+                <p class="loading-subtitle">基于你的偏好分析最适合的鸡尾酒配方</p>
+            </div>
+        </section>
+
+        <!-- 推荐结果 -->
+        <section class="results-section" id="resultsSection">
+            <div class="container">
+                <h2 class="section-title">为你推荐的鸡尾酒</h2>
+                <div class="results-grid" id="resultsGrid">
+                    <!-- 结果将在这里动态填充 -->
                 </div>
-                <button class="btn btn-primary" onclick="getRecommendation()" id="recommendBtn" style="display:none;">获取推荐</button>
+                <div style="text-align: center; margin-top: 3rem;">
+                    <button class="btn btn-secondary" onclick="startRecommendation()">🔄 重新推荐</button>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- 加载状态 -->
-    <div class="loading" id="loadingPage">
-        <div class="container">
-            <div class="spinner"></div>
-            <h2>AI正在为你推荐...</h2>
-            <p>这可能需要几秒钟</p>
-        </div>
-    </div>
-
-    <!-- 结果页面 -->
-    <div class="results" id="resultsPage">
-        <div class="container">
-            <h2 class="step-title">为你推荐的鸡尾酒</h2>
-            <div id="recommendationsList"></div>
-            <div style="text-align: center; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="startRecommendation()">重新推荐</button>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script>
-        let selectedScene = '';
-        let selectedMoods = [];
+        // 全局状态
+        let currentStep = 1;
+        let userInput = {
+            scene: '',
+            moods: [],
+            ingredients: {
+                spirits: [],
+                mixers: [],
+                tools: []
+            },
+            preferences: {
+                alcohol_level: 50,
+                sweetness: 50,
+                acidity: 50,
+                style: ''
+            },
+            special_requirements: ''
+        };
 
-        function startRecommendation() {
-            document.getElementById('homePage').style.display = 'none';
-            document.getElementById('formPage').style.display = 'block';
-            document.getElementById('resultsPage').style.display = 'none';
-            document.getElementById('backBtn').classList.remove('hidden');
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        // 初始化应用
+        function initializeApp() {
+            setupIntersectionObserver();
+            setupEventListeners();
+            updateStepProgress();
+        }
+
+        // 设置滚动动画观察器
+        function setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.features-section, .recommendation-section').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 场景选择
+            document.getElementById('sceneOptions').addEventListener('click', handleSceneSelection);
             
-            // 重置选择
-            selectedScene = '';
-            selectedMoods = [];
+            // 心情选择
+            document.getElementById('moodOptions').addEventListener('click', handleMoodSelection);
+            
+            // 材料选择
+            document.querySelectorAll('.ingredient-list').forEach(list => {
+                list.addEventListener('click', handleIngredientSelection);
+            });
+            
+            // 口感风格选择
+            document.querySelector('#step4 .options-grid').addEventListener('click', handleStyleSelection);
+            
+            // 偏好滑块
+            document.querySelectorAll('.slider').forEach(slider => {
+                slider.addEventListener('input', handlePreferenceChange);
+            });
+        }
+
+        // 处理场景选择
+        function handleSceneSelection(e) {
+            const card = e.target.closest('.option-card');
+            if (!card) return;
+            
+            // 清除其他选择
+            document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // 选择当前卡片
+            card.classList.add('selected');
+            userInput.scene = card.dataset.value;
+            
+            // 显示下一步按钮
+            document.getElementById('step1Next').classList.remove('hidden');
+        }
+
+        // 处理心情选择
+        function handleMoodSelection(e) {
+            const card = e.target.closest('.option-card');
+            if (!card) return;
+            
+            const mood = card.dataset.value;
+            
+            if (card.classList.contains('selected')) {
+                // 取消选择
+                card.classList.remove('selected');
+                userInput.moods = userInput.moods.filter(m => m !== mood);
+            } else if (userInput.moods.length < 3) {
+                // 添加选择
+                card.classList.add('selected');
+                userInput.moods.push(mood);
+            }
+            
+            // 显示下一步按钮
+            const nextBtn = document.getElementById('step2Next');
+            if (userInput.moods.length > 0) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.add('hidden');
+            }
+        }
+
+        // 处理材料选择
+        function handleIngredientSelection(e) {
+            const tag = e.target.closest('.ingredient-tag');
+            if (!tag) return;
+            
+            const category = e.currentTarget.dataset.category;
+            const value = tag.dataset.value;
+            
+            tag.classList.toggle('selected');
+            
+            if (tag.classList.contains('selected')) {
+                userInput.ingredients[category].push(value);
+            } else {
+                userInput.ingredients[category] = userInput.ingredients[category].filter(item => item !== value);
+            }
+        }
+
+        // 处理口感风格选择
+        function handleStyleSelection(e) {
+            const card = e.target.closest('.option-card');
+            if (!card) return;
+            
+            // 清除其他选择
+            document.querySelectorAll('#step4 .options-grid .option-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // 选择当前卡片
+            card.classList.add('selected');
+            userInput.preferences.style = card.dataset.value;
+        }
+
+        // 处理偏好变化
+        function handlePreferenceChange(e) {
+            const slider = e.target;
+            const value = parseInt(slider.value);
+            userInput.preferences[slider.id] = value;
+        }
+
+        // 开始推荐流程
+        function startRecommendation() {
+            // 重置状态
+            currentStep = 1;
+            userInput = {
+                scene: '',
+                moods: [],
+                ingredients: { spirits: [], mixers: [], tools: [] },
+                preferences: { alcohol_level: 50, sweetness: 50, acidity: 50, style: '' },
+                special_requirements: ''
+            };
+            
+            // 清除所有选择
             document.querySelectorAll('.option-card').forEach(card => {
                 card.classList.remove('selected');
             });
+            document.querySelectorAll('.ingredient-tag').forEach(tag => {
+                tag.classList.remove('selected');
+            });
             
-            // 显示场景选择步骤
-            document.getElementById('sceneStep').classList.remove('hidden');
-            document.getElementById('moodStep').classList.add('hidden');
+            // 重置滑块
+            document.querySelectorAll('.slider').forEach(slider => {
+                slider.value = 50;
+            });
+            
+            // 清空文本框
+            document.getElementById('specialRequirements').value = '';
+            
+            // 显示推荐区域，隐藏其他区域
+            showSection('recommendationSection');
+            showStep(1);
+            updateStepProgress();
+            
+            // 滚动到推荐区域
+            document.getElementById('recommendationSection').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
 
-        function goBack() {
-            document.getElementById('homePage').style.display = 'flex';
-            document.getElementById('formPage').style.display = 'none';
-            document.getElementById('resultsPage').style.display = 'none';
-            document.getElementById('loadingPage').style.display = 'none';
-            document.getElementById('backBtn').classList.add('hidden');
-        }
-
-        // 场景选择
-        document.getElementById('sceneOptions').addEventListener('click', function(e) {
-            const card = e.target.closest('.option-card');
-            if (card) {
-                // 清除其他选择
-                document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
-                    c.classList.remove('selected');
-                });
-                
-                // 选择当前卡片
-                card.classList.add('selected');
-                selectedScene = card.dataset.value;
-                
-                // 显示下一步按钮
-                document.getElementById('nextBtn').style.display = 'inline-block';
-            }
-        });
-
-        // 心情选择
-        document.getElementById('moodOptions').addEventListener('click', function(e) {
-            const card = e.target.closest('.option-card');
-            if (card) {
-                const mood = card.dataset.value;
-                
-                if (card.classList.contains('selected')) {
-                    // 取消选择
-                    card.classList.remove('selected');
-                    selectedMoods = selectedMoods.filter(m => m !== mood);
-                } else if (selectedMoods.length < 3) {
-                    // 添加选择
-                    card.classList.add('selected');
-                    selectedMoods.push(mood);
-                }
-                
-                // 显示推荐按钮
-                if (selectedMoods.length > 0) {
-                    document.getElementById('recommendBtn').style.display = 'inline-block';
-                } else {
-                    document.getElementById('recommendBtn').style.display = 'none';
-                }
-            }
-        });
-
+        // 下一步
         function nextStep() {
-            if (selectedScene) {
-                document.getElementById('sceneStep').classList.add('hidden');
-                document.getElementById('moodStep').classList.remove('hidden');
+            if (currentStep < 5) {
+                currentStep++;
+                showStep(currentStep);
+                updateStepProgress();
             }
         }
 
-        async function getRecommendation() {
-            if (selectedScene && selectedMoods.length > 0) {
-                // 显示加载页面
-                document.getElementById('formPage').style.display = 'none';
-                document.getElementById('loadingPage').style.display = 'block';
+        // 上一步
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+                updateStepProgress();
+            }
+        }
 
-                const userInput = {
-                    scene: selectedScene,
-                    moods: selectedMoods,
-                    ingredients: {
-                        spirits: ['伏特加', '威士忌'],
-                        mixers: ['柠檬汁', '苏打水', '冰块'],
-                        tools: ['调酒器', '量杯']
-                    },
-                    preferences: {
-                        alcohol_level: '中度',
-                        sweetness: '微甜',
-                        acidity: '中酸',
-                        style: '清爽'
-                    }
-                };
+        // 显示指定步骤
+        function showStep(step) {
+            // 隐藏所有步骤
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 显示当前步骤
+            document.getElementById(`step${step}`).classList.add('active');
+        }
 
-                try {
-                    const response = await fetch('http://localhost:3001/api/recommend', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(userInput)
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success && result.data?.recommendations) {
-                        displayRecommendations(result.data.recommendations);
-                    } else {
-                        throw new Error('推荐获取失败');
-                    }
-                } catch (error) {
-                    console.error('推荐失败:', error);
-                    alert('获取推荐失败，请检查后端服务是否启动');
-                    goBack();
+        // 更新步骤进度
+        function updateStepProgress() {
+            const dots = document.querySelectorAll('.progress-dot');
+            const lines = document.querySelectorAll('.progress-line');
+            
+            dots.forEach((dot, index) => {
+                const step = index + 1;
+                dot.classList.remove('active', 'completed');
+                
+                if (step < currentStep) {
+                    dot.classList.add('completed');
+                } else if (step === currentStep) {
+                    dot.classList.add('active');
                 }
+            });
+            
+            lines.forEach((line, index) => {
+                line.classList.remove('active');
+                if (index < currentStep - 1) {
+                    line.classList.add('active');
+                }
+            });
+        }
+
+        // 显示指定区域
+        function showSection(sectionId) {
+            const sections = ['heroSection', 'featuresSection', 'recommendationSection', 'loadingSection', 'resultsSection'];
+            
+            sections.forEach(id => {
+                const element = document.getElementById(id);
+                if (id === sectionId) {
+                    element.style.display = 'block';
+                } else {
+                    element.style.display = 'none';
+                }
+            });
+        }
+
+        // 获取推荐
+        async function getRecommendation() {
+            // 收集特殊要求
+            userInput.special_requirements = document.getElementById('specialRequirements').value;
+            
+            // 显示加载状态
+            showSection('loadingSection');
+            
+            // 准备请求数据
+            const requestData = {
+                scene: userInput.scene,
+                moods: userInput.moods,
+                ingredients: userInput.ingredients,
+                preferences: {
+                    alcohol_level: getAlcoholLevelText(userInput.preferences.alcohol_level),
+                    sweetness: getSweetnessText(userInput.preferences.sweetness),
+                    acidity: getAcidityText(userInput.preferences.acidity),
+                    style: userInput.preferences.style || '清爽'
+                },
+                special_requirements: userInput.special_requirements
+            };
+            
+            try {
+                console.log('发送推荐请求:', requestData);
+                
+                const response = await fetch('http://localhost:3001/api/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+                console.log('推荐响应:', result);
+
+                if (result.success && result.data?.recommendations) {
+                    displayRecommendations(result.data.recommendations);
+                } else {
+                    throw new Error('推荐获取失败');
+                }
+            } catch (error) {
+                console.error('推荐失败:', error);
+                alert('获取推荐失败，请检查后端服务是否启动');
+                showSection('recommendationSection');
             }
         }
 
+        // 显示推荐结果
         function displayRecommendations(recommendations) {
-            document.getElementById('loadingPage').style.display = 'none';
-            document.getElementById('resultsPage').style.display = 'block';
-
-            const container = document.getElementById('recommendationsList');
+            showSection('resultsSection');
+            
+            const container = document.getElementById('resultsGrid');
             container.innerHTML = '';
 
             recommendations.forEach((cocktail, index) => {
                 const card = document.createElement('div');
-                card.className = 'recommendation-card glass-effect';
+                card.className = 'cocktail-card glass-card';
                 card.innerHTML = `
-                    <h3>${cocktail.name.chinese}</h3>
-                    <p style="opacity: 0.8; font-style: italic;">${cocktail.name.english}</p>
-                    <p style="margin: 1rem 0;">${cocktail.reason}</p>
-                    <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
+                    <h3 class="cocktail-title">${cocktail.name.chinese}</h3>
+                    <p class="cocktail-subtitle">${cocktail.name.english}</p>
+                    <p class="cocktail-reason">${cocktail.reason}</p>
+                    <div class="cocktail-meta">
                         <span>🏷️ ${cocktail.recipe.difficulty}</span>
                         <span>⏱️ ${cocktail.prep_time}</span>
                         <span>🍺 ${cocktail.alcohol_content}</span>
@@ -498,8 +1306,15 @@
                 
                 container.appendChild(card);
             });
+            
+            // 滚动到结果区域
+            document.getElementById('resultsSection').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
 
+        // 显示鸡尾酒详情
         function showCocktailDetails(cocktail) {
             let ingredientsList = cocktail.recipe.ingredients.map(ing => 
                 `<li>${ing.name}: ${ing.amount}</li>`
@@ -509,49 +1324,108 @@
                 `<li>${index + 1}. ${step}</li>`
             ).join('');
 
-            const details = `
-                <div style="background: rgba(0,0,0,0.8); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem;" onclick="this.remove()">
-                    <div class="glass-effect" style="max-width: 600px; padding: 2rem; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                            <div>
-                                <h2>${cocktail.name.chinese}</h2>
-                                <p style="opacity: 0.8;">${cocktail.name.english}</p>
-                            </div>
-                            <button onclick="this.closest('div').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2000;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div class="glass-card" style="max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+                        <div>
+                            <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;">${cocktail.name.chinese}</h2>
+                            <p style="color: var(--text-secondary); font-style: italic;">${cocktail.name.english}</p>
                         </div>
-                        
-                        <h3>💡 推荐理由</h3>
-                        <p style="margin-bottom: 1rem;">${cocktail.reason}</p>
-                        
-                        <h3>🧪 材料清单</h3>
-                        <ul style="margin-bottom: 1rem; padding-left: 1.5rem;">${ingredientsList}</ul>
-                        
-                        <h3>📝 制作步骤</h3>
-                        <ol style="margin-bottom: 1rem; padding-left: 1.5rem;">${instructionsList}</ol>
-                        
-                        <h3>👅 口感特点</h3>
-                        <p style="margin-bottom: 1rem;">${cocktail.taste_profile}</p>
-                        
-                        <h3>👁️ 视觉效果</h3>
-                        <p style="margin-bottom: 1rem;">${cocktail.visual}</p>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.5rem;">⏰</div>
-                                <p>制作时间</p>
-                                <strong>${cocktail.prep_time}</strong>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.5rem;">🍺</div>
-                                <p>酒精度</p>
-                                <strong>${cocktail.alcohol_content}</strong>
-                            </div>
+                        <button onclick="this.closest('div').remove()" style="background: none; border: none; color: var(--text-primary); font-size: 2rem; cursor: pointer; padding: 0; line-height: 1;">×</button>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: var(--primary-purple); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>💡</span> 推荐理由
+                        </h3>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">${cocktail.reason}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: var(--primary-purple); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🧪</span> 材料清单
+                        </h3>
+                        <ul style="color: var(--text-secondary); padding-left: 1.5rem; line-height: 1.8;">${ingredientsList}</ul>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: var(--primary-purple); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📝</span> 制作步骤
+                        </h3>
+                        <ol style="color: var(--text-secondary); padding-left: 1.5rem; line-height: 1.8;">${instructionsList}</ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: var(--primary-purple); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>👅</span> 口感特点
+                        </h3>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">${cocktail.taste_profile}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: var(--primary-purple); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>👁️</span> 视觉效果
+                        </h3>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">${cocktail.visual}</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem;">
+                        <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 12px;">
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏰</div>
+                            <p style="color: var(--text-muted); margin-bottom: 0.25rem;">制作时间</p>
+                            <strong>${cocktail.prep_time}</strong>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 12px;">
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🍺</div>
+                            <p style="color: var(--text-muted); margin-bottom: 0.25rem;">酒精度</p>
+                            <strong>${cocktail.alcohol_content}</strong>
                         </div>
                     </div>
                 </div>
             `;
             
-            document.body.insertAdjacentHTML('beforeend', details);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+
+        // 工具函数
+        function getAlcoholLevelText(value) {
+            if (value < 33) return '低度';
+            if (value < 67) return '中度';
+            return '高度';
+        }
+
+        function getSweetnessText(value) {
+            if (value < 33) return '不甜';
+            if (value < 67) return '微甜';
+            return '很甜';
+        }
+
+        function getAcidityText(value) {
+            if (value < 33) return '不酸';
+            if (value < 67) return '适中';
+            return '很酸';
         }
     </script>
 </body>

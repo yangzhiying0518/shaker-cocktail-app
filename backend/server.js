@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const axios = require('axios');
+const AIServiceFactory = require('./services/ai-service-factory');
 
 // 加载环境变量
 dotenv.config();
@@ -16,7 +16,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Coze API服务
+// 创建AI服务实例
+const aiProvider = process.env.AI_PROVIDER || 'coze'; // 默认使用Coze，可切换为volcano
+const aiService = AIServiceFactory.createService(aiProvider);
+
+console.log(`🤖 使用AI服务提供商: ${aiProvider.toUpperCase()}`);
+
+// 保持向后兼容的Coze服务类（用于现有代码）
 class CozeService {
     constructor() {
         this.apiKey = process.env.COZE_API_KEY;
@@ -186,7 +192,7 @@ class CozeService {
     }
 }
 
-const cozeService = new CozeService();
+const cozeService = new CozeService(); // 保持向后兼容
 
 // API路由
 app.post('/api/recommend', async (req, res) => {
@@ -200,9 +206,11 @@ app.post('/api/recommend', async (req, res) => {
             });
         }
 
-        console.log('收到推荐请求:', userInput);
+        console.log('📥 收到推荐请求:', userInput);
+        console.log(`🤖 使用 ${aiProvider.toUpperCase()} 生成推荐...`);
         
-        const recommendations = await cozeService.getCocktailRecommendation(userInput);
+        // 使用配置的AI服务
+        const recommendations = await aiService.getCocktailRecommendation(userInput);
         
         res.json({
             success: true,
