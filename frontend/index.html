@@ -44,7 +44,7 @@
             overflow-x: hidden;
         }
 
-        /* 背景动效 */
+        /* 背景动效 - 增强科技感 */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -54,6 +54,7 @@
             z-index: -1;
             background: var(--primary-gradient);
             opacity: 0.8;
+            overflow: hidden;
         }
 
         .bg-animation::before {
@@ -63,16 +64,37 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(116, 185, 255, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, rgba(167, 112, 239, 0.3) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.4) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(116, 185, 255, 0.4) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(167, 112, 239, 0.4) 0%, transparent 50%);
             animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-animation::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px, 80px 80px, 120px 120px;
+            animation: twinkle 3s ease-in-out infinite alternate;
         }
 
         @keyframes float {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             33% { transform: translate(30px, -30px) rotate(120deg); }
             66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.8; }
         }
 
         /* 容器 */
@@ -98,7 +120,7 @@
             box-shadow: var(--shadow-glow);
         }
 
-        /* 头部导航 */
+        /* 头部导航 - 完全透明 */
         .header {
             position: fixed;
             top: 0;
@@ -106,6 +128,11 @@
             right: 0;
             z-index: 1000;
             padding: 1rem 0;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
             background: rgba(10, 10, 15, 0.8);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-glass);
@@ -253,10 +280,31 @@
             background-clip: text;
         }
 
-        /* 步骤容器 */
+        /* 步骤容器 - 垂直滚动布局 */
         .steps-container {
             max-width: 800px;
             margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* 步骤自动切换动画 */
+        .step-content {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .step-content.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .step-content.completed {
+            opacity: 0.3;
+            transform: translateY(-20px) scale(0.9);
+            pointer-events: none;
         }
 
         .step-progress {
@@ -272,27 +320,77 @@
             height: 12px;
             border-radius: 50%;
             background: var(--border-glass);
-            transition: all 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-dot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-purple), var(--primary-blue));
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .progress-dot.active {
             background: var(--primary-purple);
-            box-shadow: 0 0 20px rgba(108, 92, 231, 0.6);
+            box-shadow: 0 0 30px rgba(108, 92, 231, 0.8);
+            transform: scale(1.3);
+        }
+
+        .progress-dot.active::before {
+            transform: scale(1);
+            animation: pulse 2s infinite;
         }
 
         .progress-dot.completed {
             background: var(--primary-blue);
+            box-shadow: 0 0 20px rgba(116, 185, 255, 0.6);
+        }
+
+        .progress-dot.completed::before {
+            transform: scale(1);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
         }
 
         .progress-line {
             width: 40px;
             height: 2px;
             background: var(--border-glass);
-            transition: all 0.3s ease;
+            transition: all 0.8s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1px;
+        }
+
+        .progress-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--primary-purple), var(--primary-blue), transparent);
+            transition: left 0.8s ease;
         }
 
         .progress-line.active {
-            background: var(--primary-purple);
+            background: linear-gradient(90deg, var(--primary-purple), var(--primary-blue));
+            box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+        }
+
+        .progress-line.active::before {
+            left: 100%;
         }
 
         /* 步骤内容 */
@@ -669,7 +767,7 @@
     <!-- 背景动效 -->
     <div class="bg-animation"></div>
 
-    <!-- 头部导航 -->
+    <!-- 头部导航 - 移除黑色背景 -->
     <header class="header">
         <div class="container">
             <a href="#" class="logo">
@@ -693,7 +791,7 @@
                     <span>🎯</span>
                     开始智能推荐
                 </a>
-            </div>
+                </div>
         </section>
 
         <!-- 功能特色 -->
@@ -704,24 +802,24 @@
                         <span class="feature-icon">🎯</span>
                         <h3 class="feature-title">场景匹配</h3>
                         <p class="feature-desc">智能识别聚会、约会、独处等不同场景，推荐最适合当下氛围的鸡尾酒</p>
-                    </div>
+                </div>
                     <div class="feature-card glass-card">
                         <span class="feature-icon">🎨</span>
                         <h3 class="feature-title">个性化定制</h3>
                         <p class="feature-desc">基于心情状态和口味偏好，生成专属于你的鸡尾酒配方</p>
-                    </div>
+                </div>
                     <div class="feature-card glass-card">
                         <span class="feature-icon">📖</span>
                         <h3 class="feature-title">专业指导</h3>
                         <p class="feature-desc">详细的制作步骤、材料配比和调酒技巧，让新手也能调出大师级作品</p>
-                    </div>
-                </div>
             </div>
+        </div>
+    </div>
         </section>
 
         <!-- 推荐流程 -->
         <section class="recommendation-section" id="recommendationSection">
-            <div class="container">
+        <div class="container">
                 <h2 class="section-title">智能推荐流程</h2>
                 
                 <div class="steps-container">
@@ -742,83 +840,81 @@
                     <div class="step-content active" id="step1">
                         <h3 class="step-title">选择使用场景</h3>
                         <p class="step-description">告诉我们你计划在什么场合享用这杯鸡尾酒</p>
-                        <div class="options-grid" id="sceneOptions">
-                            <div class="option-card" data-value="聚会派对">
+                <div class="options-grid" id="sceneOptions">
+                    <div class="option-card" data-value="聚会派对">
                                 <span class="option-icon">🎉</span>
                                 <h4 class="option-title">聚会派对</h4>
                                 <p class="option-desc">朋友聚会、生日party、节日庆祝</p>
-                            </div>
-                            <div class="option-card" data-value="浪漫约会">
+                    </div>
+                    <div class="option-card" data-value="浪漫约会">
                                 <span class="option-icon">💕</span>
                                 <h4 class="option-title">浪漫约会</h4>
                                 <p class="option-desc">二人世界、烛光晚餐、求婚表白</p>
-                            </div>
-                            <div class="option-card" data-value="独处放松">
+                    </div>
+                    <div class="option-card" data-value="独处放松">
                                 <span class="option-icon">🛋️</span>
                                 <h4 class="option-title">独处放松</h4>
                                 <p class="option-desc">下班后放松、阅读时光、冥想休息</p>
-                            </div>
-                            <div class="option-card" data-value="商务场合">
+                    </div>
+                    <div class="option-card" data-value="商务场合">
                                 <span class="option-icon">💼</span>
                                 <h4 class="option-title">商务场合</h4>
                                 <p class="option-desc">客户招待、同事聚餐、庆祝成功</p>
-                            </div>
-                            <div class="option-card" data-value="餐前餐后">
+                    </div>
+                    <div class="option-card" data-value="餐前餐后">
                                 <span class="option-icon">🍽️</span>
                                 <h4 class="option-title">餐前餐后</h4>
                                 <p class="option-desc">开胃酒、餐后消化、配餐搭配</p>
-                            </div>
-                            <div class="option-card" data-value="深夜时光">
+                    </div>
+                    <div class="option-card" data-value="深夜时光">
                                 <span class="option-icon">🌙</span>
                                 <h4 class="option-title">深夜时光</h4>
                                 <p class="option-desc">失眠夜晚、深度思考、创作灵感</p>
-                            </div>
-                        </div>
-                        <div class="step-navigation">
-                            <button class="btn btn-primary hidden" id="step1Next" onclick="nextStep()">下一步 →</button>
-                        </div>
                     </div>
+                </div>
+                        <!-- 自动推进，无需按钮 -->
+            </div>
 
                     <!-- 步骤2: 心情描述 -->
                     <div class="step-content" id="step2">
                         <h3 class="step-title">描述你的心情</h3>
                         <p class="step-description">选择1-3个最符合你当前状态的心情标签</p>
-                        <div class="options-grid" id="moodOptions">
-                            <div class="option-card" data-value="开心愉悦">
+                <div class="options-grid" id="moodOptions">
+                    <div class="option-card" data-value="开心愉悦">
                                 <span class="option-icon">😊</span>
                                 <h4 class="option-title">开心愉悦</h4>
                                 <p class="option-desc">心情很好、值得庆祝、兴高采烈</p>
-                            </div>
-                            <div class="option-card" data-value="沮丧低落">
+                    </div>
+                    <div class="option-card" data-value="沮丧低落">
                                 <span class="option-icon">😢</span>
                                 <h4 class="option-title">沮丧低落</h4>
                                 <p class="option-desc">工作压力、感情困扰、生活烦恼</p>
-                            </div>
-                            <div class="option-card" data-value="兴奋激动">
+                    </div>
+                    <div class="option-card" data-value="兴奋激动">
                                 <span class="option-icon">🔥</span>
                                 <h4 class="option-title">兴奋激动</h4>
                                 <p class="option-desc">获得成功、即将冒险、充满期待</p>
-                            </div>
-                            <div class="option-card" data-value="平静放松">
+                    </div>
+                    <div class="option-card" data-value="平静放松">
                                 <span class="option-icon">😌</span>
                                 <h4 class="option-title">平静放松</h4>
                                 <p class="option-desc">需要舒缓、想要安静、寻求平衡</p>
-                            </div>
-                            <div class="option-card" data-value="自信满满">
+                    </div>
+                    <div class="option-card" data-value="自信满满">
                                 <span class="option-icon">💪</span>
                                 <h4 class="option-title">自信满满</h4>
                                 <p class="option-desc">状态很好、充满能量、准备挑战</p>
-                            </div>
-                            <div class="option-card" data-value="深度思考">
+                    </div>
+                    <div class="option-card" data-value="深度思考">
                                 <span class="option-icon">🤔</span>
                                 <h4 class="option-title">深度思考</h4>
                                 <p class="option-desc">需要专注、创意工作、哲学思辨</p>
-                            </div>
-                        </div>
+                    </div>
+                </div>
+                                                <!-- 自动推进，显示返回按钮 -->
                         <div class="step-navigation">
                             <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
-                            <button class="btn btn-primary hidden" id="step2Next" onclick="nextStep()">下一步 →</button>
-                        </div>
+            </div>
                     </div>
 
                     <!-- 步骤3: 材料选择 -->
@@ -864,8 +960,8 @@
                         <div class="step-navigation">
                             <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
                             <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
-                        </div>
-                    </div>
+        </div>
+    </div>
 
                     <!-- 步骤4: 偏好设置 -->
                     <div class="step-content" id="step4">
@@ -923,9 +1019,10 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- 材料选择后自动推进 -->
                         <div class="step-navigation">
                             <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
-                            <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+                            <button class="btn btn-primary" onclick="nextStep()">继续设置偏好 →</button>
                         </div>
                     </div>
 
@@ -949,26 +1046,26 @@
             </div>
         </section>
 
-        <!-- 加载状态 -->
+    <!-- 加载状态 -->
         <section class="loading-section" id="loadingSection">
-            <div class="container">
+        <div class="container">
                 <div class="loading-animation"></div>
                 <h2 class="loading-title">AI 正在为你推荐...</h2>
                 <p class="loading-subtitle">基于你的偏好分析最适合的鸡尾酒配方</p>
-            </div>
+        </div>
         </section>
 
         <!-- 推荐结果 -->
         <section class="results-section" id="resultsSection">
-            <div class="container">
+        <div class="container">
                 <h2 class="section-title">为你推荐的鸡尾酒</h2>
                 <div class="results-grid" id="resultsGrid">
                     <!-- 结果将在这里动态填充 -->
-                </div>
+            </div>
                 <div style="text-align: center; margin-top: 3rem;">
                     <button class="btn btn-secondary" onclick="startRecommendation()">🔄 重新推荐</button>
-                </div>
-            </div>
+        </div>
+    </div>
         </section>
     </main>
 
@@ -995,6 +1092,7 @@
         // 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
+            setupScrollEffects();
         });
 
         // 初始化应用
@@ -1002,6 +1100,19 @@
             setupIntersectionObserver();
             setupEventListeners();
             updateStepProgress();
+        }
+
+        // 设置滚动效果
+        function setupScrollEffects() {
+            const header = document.querySelector('.header');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
         }
 
         // 设置滚动动画观察器
@@ -1021,7 +1132,7 @@
 
         // 设置事件监听器
         function setupEventListeners() {
-            // 场景选择
+        // 场景选择
             document.getElementById('sceneOptions').addEventListener('click', handleSceneSelection);
             
             // 心情选择
@@ -1041,47 +1152,65 @@
             });
         }
 
-        // 处理场景选择
+                // 处理场景选择 - 自动推进
         function handleSceneSelection(e) {
             const card = e.target.closest('.option-card');
             if (!card) return;
             
-            // 清除其他选择
-            document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
-                c.classList.remove('selected');
-            });
-            
-            // 选择当前卡片
-            card.classList.add('selected');
+                // 清除其他选择
+                document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // 选择当前卡片
+                card.classList.add('selected');
             userInput.scene = card.dataset.value;
             
-            // 显示下一步按钮
-            document.getElementById('step1Next').classList.remove('hidden');
+            // 添加选择动画
+            card.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                card.style.transform = '';
+            }, 200);
+            
+            // 1.5秒后自动进入下一步
+            setTimeout(() => {
+                nextStep();
+            }, 1500);
         }
 
-        // 处理心情选择
+                // 处理心情选择 - 延迟自动推进
         function handleMoodSelection(e) {
             const card = e.target.closest('.option-card');
             if (!card) return;
             
-            const mood = card.dataset.value;
-            
-            if (card.classList.contains('selected')) {
-                // 取消选择
-                card.classList.remove('selected');
+                const mood = card.dataset.value;
+                
+                if (card.classList.contains('selected')) {
+                    // 取消选择
+                    card.classList.remove('selected');
                 userInput.moods = userInput.moods.filter(m => m !== mood);
             } else if (userInput.moods.length < 3) {
-                // 添加选择
-                card.classList.add('selected');
+                    // 添加选择
+                    card.classList.add('selected');
                 userInput.moods.push(mood);
+                
+                // 添加选择动画
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 200);
             }
             
-            // 显示下一步按钮
-            const nextBtn = document.getElementById('step2Next');
+            // 清除之前的定时器
+            if (window.moodTimer) {
+                clearTimeout(window.moodTimer);
+            }
+            
+            // 选择后2秒自动进入下一步
             if (userInput.moods.length > 0) {
-                nextBtn.classList.remove('hidden');
-            } else {
-                nextBtn.classList.add('hidden');
+                window.moodTimer = setTimeout(() => {
+                    nextStep();
+                }, 2000);
             }
         }
 
@@ -1097,7 +1226,7 @@
             
             if (tag.classList.contains('selected')) {
                 userInput.ingredients[category].push(value);
-            } else {
+                } else {
                 userInput.ingredients[category] = userInput.ingredients[category].filter(item => item !== value);
             }
         }
@@ -1244,37 +1373,37 @@
                 scene: userInput.scene,
                 moods: userInput.moods,
                 ingredients: userInput.ingredients,
-                preferences: {
+                    preferences: {
                     alcohol_level: getAlcoholLevelText(userInput.preferences.alcohol_level),
                     sweetness: getSweetnessText(userInput.preferences.sweetness),
                     acidity: getAcidityText(userInput.preferences.acidity),
                     style: userInput.preferences.style || '清爽'
                 },
                 special_requirements: userInput.special_requirements
-            };
-            
-            try {
+                };
+
+                try {
                 console.log('发送推荐请求:', requestData);
                 
-                const response = await fetch('http://localhost:3001/api/recommend', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    const response = await fetch('http://localhost:3001/api/recommend', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                     body: JSON.stringify(requestData)
-                });
+                    });
 
-                const result = await response.json();
+                    const result = await response.json();
                 console.log('推荐响应:', result);
 
-                if (result.success && result.data?.recommendations) {
-                    displayRecommendations(result.data.recommendations);
-                } else {
-                    throw new Error('推荐获取失败');
-                }
-            } catch (error) {
-                console.error('推荐失败:', error);
-                alert('获取推荐失败，请检查后端服务是否启动');
+                    if (result.success && result.data?.recommendations) {
+                        displayRecommendations(result.data.recommendations);
+                    } else {
+                        throw new Error('推荐获取失败');
+                    }
+                } catch (error) {
+                    console.error('推荐失败:', error);
+                    alert('获取推荐失败，请检查后端服务是否启动');
                 showSection('recommendationSection');
             }
         }
@@ -1282,7 +1411,7 @@
         // 显示推荐结果
         function displayRecommendations(recommendations) {
             showSection('resultsSection');
-            
+
             const container = document.getElementById('resultsGrid');
             container.innerHTML = '';
 
@@ -1343,13 +1472,13 @@
             modal.innerHTML = `
                 <div class="glass-card" style="max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2rem;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
-                        <div>
+                            <div>
                             <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;">${cocktail.name.chinese}</h2>
                             <p style="color: var(--text-secondary); font-style: italic;">${cocktail.name.english}</p>
-                        </div>
+                            </div>
                         <button onclick="this.closest('div').remove()" style="background: none; border: none; color: var(--text-primary); font-size: 2rem; cursor: pointer; padding: 0; line-height: 1;">×</button>
-                    </div>
-                    
+                        </div>
+                        
                     <div style="margin-bottom: 2rem;">
                         <h3 style="color: var(--primary-purple); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                             <span>💡</span> 推荐理由
@@ -1389,12 +1518,12 @@
                         <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 12px;">
                             <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏰</div>
                             <p style="color: var(--text-muted); margin-bottom: 0.25rem;">制作时间</p>
-                            <strong>${cocktail.prep_time}</strong>
-                        </div>
+                                <strong>${cocktail.prep_time}</strong>
+                            </div>
                         <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 12px;">
                             <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🍺</div>
                             <p style="color: var(--text-muted); margin-bottom: 0.25rem;">酒精度</p>
-                            <strong>${cocktail.alcohol_content}</strong>
+                                <strong>${cocktail.alcohol_content}</strong>
                         </div>
                     </div>
                 </div>
