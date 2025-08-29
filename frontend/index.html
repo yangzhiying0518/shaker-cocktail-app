@@ -16,6 +16,12 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: white;
+            overflow-x: hidden;
+        }
+
+        /* 所有页面元素的过渡效果 */
+        .home-page, .form-page, .results, .loading {
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
         .container {
@@ -83,16 +89,40 @@
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-primary {
             background: white;
             color: #1f2937;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary:hover {
             background: #f3f4f6;
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px) scale(0.98);
+            transition: all 0.1s ease;
         }
 
         .form-page {
@@ -118,43 +148,142 @@
         }
 
         .option-card {
-            padding: 1rem;
+            padding: 1.2rem;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid transparent;
-            border-radius: 0.5rem;
+            border-radius: 0.8rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .option-card:hover::before {
+            opacity: 1;
         }
 
         .option-card:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .option-card.selected {
             background: white;
             color: #1f2937;
             border-color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .option-card.selected::before {
+            opacity: 0;
+        }
+
+        .option-card .feature-icon {
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .option-card:hover .feature-icon,
+        .option-card.selected .feature-icon {
+            transform: scale(1.1);
         }
 
         .loading {
             display: none;
             text-align: center;
             padding: 2rem;
+            animation: fadeIn 0.3s ease-in;
         }
 
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 2rem;
+        }
+
+        .spinner::before {
+            content: '';
+            position: absolute;
+            border: 4px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
+        }
+
+        .spinner::after {
+            content: '';
+            position: absolute;
+            border: 4px solid transparent;
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loading-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            animation: pulse 2s ease-in-out infinite 0.5s;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 页面切换动画 */
+        .page-transition {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .step-container {
+            animation: slideInRight 0.4s ease-out;
+        }
+
+        .step-container.hidden {
+            animation: none;
         }
 
         .results {
@@ -329,8 +458,8 @@
     <div class="loading" id="loadingPage">
         <div class="container">
             <div class="spinner"></div>
-            <h2>AI正在为你推荐...</h2>
-            <p>这可能需要几秒钟</p>
+            <div class="loading-text">🤖 AI正在为你推荐...</div>
+            <div class="loading-subtitle">正在分析你的喜好，生成专属鸡尾酒配方</div>
         </div>
     </div>
 
@@ -350,29 +479,53 @@
         let selectedMoods = [];
 
         function startRecommendation() {
-            document.getElementById('homePage').style.display = 'none';
-            document.getElementById('formPage').style.display = 'block';
-            document.getElementById('resultsPage').style.display = 'none';
-            document.getElementById('backBtn').classList.remove('hidden');
+            // 添加淡出效果
+            const homePage = document.getElementById('homePage');
+            homePage.style.opacity = '0';
             
-            // 重置选择
-            selectedScene = '';
-            selectedMoods = [];
-            document.querySelectorAll('.option-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // 显示场景选择步骤
-            document.getElementById('sceneStep').classList.remove('hidden');
-            document.getElementById('moodStep').classList.add('hidden');
+            setTimeout(() => {
+                homePage.style.display = 'none';
+                const formPage = document.getElementById('formPage');
+                formPage.style.display = 'block';
+                formPage.classList.add('page-transition');
+                document.getElementById('resultsPage').style.display = 'none';
+                document.getElementById('backBtn').classList.remove('hidden');
+                
+                // 重置选择
+                selectedScene = '';
+                selectedMoods = [];
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // 显示场景选择步骤
+                document.getElementById('sceneStep').classList.remove('hidden');
+                document.getElementById('moodStep').classList.add('hidden');
+                
+                // 重置透明度
+                setTimeout(() => {
+                    formPage.style.opacity = '1';
+                }, 50);
+            }, 150);
         }
 
         function goBack() {
-            document.getElementById('homePage').style.display = 'flex';
-            document.getElementById('formPage').style.display = 'none';
-            document.getElementById('resultsPage').style.display = 'none';
-            document.getElementById('loadingPage').style.display = 'none';
-            document.getElementById('backBtn').classList.add('hidden');
+            // 添加淡出效果
+            const currentPage = document.querySelector('[style*="display: block"], [style*="display: flex"]');
+            if (currentPage) {
+                currentPage.style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('homePage').style.display = 'flex';
+                    document.getElementById('formPage').style.display = 'none';
+                    document.getElementById('resultsPage').style.display = 'none';
+                    document.getElementById('loadingPage').style.display = 'none';
+                    document.getElementById('backBtn').classList.add('hidden');
+                    
+                    // 恢复首页透明度
+                    const homePage = document.getElementById('homePage');
+                    homePage.style.opacity = '1';
+                }, 150);
+            }
         }
 
         // 场景选择
@@ -420,8 +573,23 @@
 
         function nextStep() {
             if (selectedScene) {
-                document.getElementById('sceneStep').classList.add('hidden');
-                document.getElementById('moodStep').classList.remove('hidden');
+                const sceneStep = document.getElementById('sceneStep');
+                const moodStep = document.getElementById('moodStep');
+                
+                // 淡出当前步骤
+                sceneStep.style.opacity = '0';
+                sceneStep.style.transform = 'translateX(-30px)';
+                
+                setTimeout(() => {
+                    sceneStep.classList.add('hidden');
+                    moodStep.classList.remove('hidden');
+                    
+                    // 淡入新步骤
+                    setTimeout(() => {
+                        moodStep.style.opacity = '1';
+                        moodStep.style.transform = 'translateX(0)';
+                    }, 50);
+                }, 200);
             }
         }
 
