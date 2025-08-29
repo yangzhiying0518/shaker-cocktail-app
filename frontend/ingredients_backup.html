@@ -1,0 +1,131 @@
+<!-- 备份：当前材料选择区域的HTML和CSS代码 -->
+
+<!-- HTML部分 -->
+<section class="choice-section" id="ingredientSection">
+    <div class="container">
+        <h2 class="section-title">🍸 选择材料</h2>
+        <p class="section-subtitle">选择你拥有或喜欢的调酒材料</p>
+        
+        <div class="ingredient-container">
+            <div class="ingredient-category glass-card">
+                <h4 class="category-title">🥃 基酒</h4>
+                <div class="ingredient-list spirits-grid" data-category="spirits">
+                    <span class="ingredient-tag" data-value="威士忌">威士忌</span>
+                    <span class="ingredient-tag" data-value="伏特加">伏特加</span>
+                    <span class="ingredient-tag" data-value="金酒">金酒</span>
+                    <span class="ingredient-tag" data-value="龙舌兰">龙舌兰</span>
+                    <span class="ingredient-tag" data-value="朗姆酒">朗姆酒</span>
+                    <span class="ingredient-tag" data-value="白兰地">白兰地</span>
+                </div>
+            </div>
+            <div class="ingredient-category glass-card">
+                <h4 class="category-title">🍋 调味料</h4>
+                <div class="ingredient-list" data-category="mixers">
+                    <span class="ingredient-tag" data-value="柠檬汁">柠檬汁</span>
+                    <span class="ingredient-tag" data-value="青柠汁">青柠汁</span>
+                    <span class="ingredient-tag" data-value="橙汁">橙汁</span>
+                    <span class="ingredient-tag" data-value="苏打水">苏打水</span>
+                    <span class="ingredient-tag" data-value="汤力水">汤力水</span>
+                    <span class="ingredient-tag" data-value="薄荷">薄荷</span>
+                    <span class="ingredient-tag" data-value="蜂蜜">蜂蜜</span>
+                    <span class="ingredient-tag" data-value="糖浆">糖浆</span>
+                </div>
+            </div>
+            <div class="ingredient-category glass-card">
+                <h4 class="category-title">🔧 工具</h4>
+                <div class="ingredient-list" data-category="tools">
+                    <span class="ingredient-tag" data-value="调酒器">调酒器</span>
+                    <span class="ingredient-tag" data-value="量杯">量杯</span>
+                    <span class="ingredient-tag" data-value="搅拌棒">搅拌棒</span>
+                    <span class="ingredient-tag" data-value="过滤器">过滤器</span>
+                    <span class="ingredient-tag" data-value="冰块">冰块</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CSS部分 -->
+<style>
+/* 材料选择 */
+.ingredient-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.ingredient-category {
+    padding: 2rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.category-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.ingredient-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ingredient-tag {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.ingredient-tag:hover {
+    border-color: var(--forest-green);
+    background: rgba(34, 139, 34, 0.1);
+    transform: translateY(-1px);
+}
+
+.ingredient-tag.selected {
+    background: linear-gradient(135deg, rgba(34, 139, 34, 0.2), rgba(143, 188, 143, 0.3));
+    border-color: var(--forest-green);
+    color: var(--forest-dark);
+    box-shadow: 0 0 8px rgba(34, 139, 34, 0.3);
+    transform: translateY(-1px);
+    animation: ingredientPulse 2s ease-in-out infinite;
+}
+
+/* 基酒双列布局 */
+.ingredient-list.spirits-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+    justify-items: center;
+}
+
+.spirits-grid .ingredient-tag {
+    width: auto !important;
+    min-width: 80px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 材料选择动画 */
+@keyframes ingredientPulse {
+    0%, 100% { 
+        box-shadow: 0 0 8px rgba(34, 139, 34, 0.3);
+        border-color: var(--forest-green);
+    }
+    50% { 
+        box-shadow: 0 0 12px rgba(34, 139, 34, 0.5);
+        border-color: var(--warm-green);
+    }
+}
+</style>

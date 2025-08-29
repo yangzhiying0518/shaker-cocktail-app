@@ -169,6 +169,20 @@
             background-clip: text;
         }
 
+        /* 树叶装饰 - 只在标题前面 */
+        .title-leaf {
+            display: inline-block;
+            margin-right: 1rem;
+            font-size: 3rem;
+            animation: leafSway 3s ease-in-out infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes leafSway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
         /* 主要内容区域 */
         .main-content {
             padding-top: 5rem;
@@ -177,14 +191,23 @@
 
         /* 英雄区域 */
         .hero-section {
-            padding: 4rem 0 6rem;
+            padding: 12rem 0 8rem;
             text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+            padding-top: 20vh;
         }
 
         .hero-title {
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 800;
             margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .gradient-text {
             background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest-green) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -221,47 +244,572 @@
             background: linear-gradient(135deg, var(--warm-green), var(--leaf-green));
         }
 
-        /* 功能展示区域 */
-        .features-section {
-            padding: 4rem 0;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.8s ease;
+        /* 右侧进度指示器 */
+        .progress-sidebar {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .features-section.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .progress-line-main {
+            width: 2px;
+            height: 400px;
+            background: linear-gradient(180deg, var(--border-natural) 0%, var(--forest-green) 50%, var(--border-natural) 100%);
+            position: relative;
         }
 
-        .features-grid {
+        .progress-indicator {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--forest-green);
+            top: 0%;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 10px rgba(34, 139, 34, 0.5);
+        }
+
+        /* 移动端隐藏进度条 */
+        @media (max-width: 768px) {
+            .progress-sidebar {
+                display: none;
+            }
+        }
+
+        /* 场景卡片样式 - 一排3个 */
+        .scene-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
-        .feature-card {
-            padding: 2rem;
+        .scene-card {
+            padding: 2rem 1.5rem;
+            background: var(--bg-warm);
+            border: 2px solid var(--border-natural);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-align: center;
         }
 
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .scene-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .scene-card.selected {
+            background: linear-gradient(135deg, rgba(34, 139, 34, 0.15), rgba(143, 188, 143, 0.2));
+            border-color: var(--forest-green);
+            box-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 场景特定动画 */
+        .scene-card[data-value="聚会派对"].selected .scene-icon {
+            animation: partyPulse 2s ease-in-out infinite;
+        }
+
+        .scene-card[data-value="浪漫约会"].selected .scene-icon {
+            animation: heartBeat 1.5s ease-in-out infinite;
+        }
+
+        .scene-card[data-value="独处放松"].selected .scene-icon {
+            animation: meditateFloat 3s ease-in-out infinite;
+        }
+
+        .scene-card[data-value="商务会面"].selected .scene-icon {
+            animation: businessShake 2s ease-in-out infinite;
+        }
+
+        .scene-card[data-value="夜晚时光"].selected .scene-icon {
+            animation: moonGlow 2.5s ease-in-out infinite;
+        }
+
+        .scene-card[data-value="午后惬意"].selected .scene-icon {
+            animation: sunRays 3s ease-in-out infinite;
+        }
+
+        /* 场景动画关键帧 */
+        @keyframes partyPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); filter: brightness(1.5); }
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
+            75% { transform: scale(1.1); }
+        }
+
+        @keyframes meditateFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes businessShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        @keyframes sunRays {
+            0%, 100% { transform: rotate(0deg); filter: brightness(1); }
+            50% { transform: rotate(5deg); filter: brightness(1.3); }
+        }
+
+
+
+        .scene-icon {
+            font-size: 2.5rem;
             display: block;
-        }
-
-        .feature-title {
-            font-size: 1.2rem;
-            font-weight: 600;
             margin-bottom: 1rem;
-            color: var(--text-primary);
         }
 
-        .feature-desc {
-            color: var(--text-secondary);
+        .scene-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: inherit;
+        }
+
+        .scene-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .scene-card.selected .scene-desc {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .scene-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 心情卡片样式 - 一排3个 */
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .mood-card {
+            padding: 2rem 1.5rem;
+            background: var(--bg-warm);
+            border: 2px solid var(--border-natural);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mood-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .mood-card.selected {
+            background: linear-gradient(135deg, rgba(34, 139, 34, 0.12), rgba(143, 188, 143, 0.18));
+            border-color: var(--forest-green);
+            box-shadow: 0 0 15px rgba(34, 139, 34, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* 心情特定动画 */
+        .mood-card[data-value="春日愉悦"].selected .mood-icon {
+            animation: springBloom 2s ease-in-out infinite;
+        }
+
+        .mood-card[data-value="雨后忧郁"].selected {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mood-card[data-value="雨后忧郁"].selected::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(45deg, transparent 30%, rgba(173, 216, 230, 0.3) 50%, transparent 70%);
+            animation: rainDrop 1.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .mood-card[data-value="雨后忧郁"].selected .mood-icon {
+            animation: rainGlow 2s ease-in-out infinite;
+        }
+
+        .mood-card[data-value="夏日激情"].selected .mood-icon {
+            animation: fireIntensity 1.8s ease-in-out infinite;
+        }
+
+        .mood-card[data-value="秋叶宁静"].selected .mood-icon {
+            animation: leafFall 3s ease-in-out infinite;
+        }
+
+        .mood-card[data-value="山峰自信"].selected .mood-icon {
+            animation: mountainStand 2.5s ease-in-out infinite;
+        }
+
+        .mood-card[data-value="深林沉思"].selected .mood-icon {
+            animation: forestWisdom 3.5s ease-in-out infinite;
+        }
+
+        /* 心情动画关键帧 */
+        @keyframes springBloom {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+            50% { transform: scale(1.15) rotate(5deg); filter: brightness(1.4); }
+        }
+
+        @keyframes rainDrop {
+            0% { transform: translateY(-100px); opacity: 0; }
+            50% { opacity: 0.7; }
+            100% { transform: translateY(100px); opacity: 0; }
+        }
+
+        @keyframes rainGlow {
+            0%, 100% { filter: brightness(1) contrast(1); }
+            50% { filter: brightness(1.2) contrast(1.3) hue-rotate(10deg); }
+        }
+
+        @keyframes fireIntensity {
+            0%, 100% { transform: scale(1); filter: brightness(1) hue-rotate(0deg); }
+            25% { transform: scale(1.1); filter: brightness(1.3) hue-rotate(5deg); }
+            75% { transform: scale(1.05); filter: brightness(1.2) hue-rotate(-5deg); }
+        }
+
+        @keyframes leafFall {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(2deg); }
+            75% { transform: translateY(3px) rotate(-2deg); }
+        }
+
+        @keyframes mountainStand {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.08); filter: brightness(1.25) contrast(1.1); }
+        }
+
+        @keyframes forestWisdom {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: brightness(1) sepia(0%); }
+            33% { transform: scale(1.05) rotate(1deg); filter: brightness(1.1) sepia(10%); }
+            66% { transform: scale(1.03) rotate(-1deg); filter: brightness(1.15) sepia(5%); }
+        }
+
+        .mood-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .mood-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: inherit;
+        }
+
+        .mood-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .mood-card.selected .mood-desc {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .mood-grid, .scene-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .preference-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                max-width: 400px;
+            }
+            
+            .preference-card {
+                padding: 2rem 1.5rem;
+                min-height: 180px;
+            }
+            
+            .slider-container {
+                margin: 2rem 0;
+            }
+        }
+
+        /* 偏好设置样式 */
+        .preference-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            margin: 3rem 0;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .preference-card {
+            padding: 3rem 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        .preference-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--forest-green), var(--warm-green), var(--leaf-green));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .preference-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(34, 139, 34, 0.15);
+        }
+
+        .preference-card:hover::before {
+            opacity: 1;
+        }
+
+        .preference-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 2.5rem;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .preference-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--forest-green), var(--warm-green));
+            border-radius: 1px;
+        }
+
+        .slider-container {
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .slider-value {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--forest-green), var(--warm-green));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.3);
+            white-space: nowrap;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .slider-value::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: var(--forest-green);
+        }
+
+        .slider:hover + .slider-value,
+        .slider:focus + .slider-value {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px) !important;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 50px;
+            background: linear-gradient(90deg, 
+                rgba(34, 139, 34, 0.2) 0%, 
+                rgba(143, 188, 143, 0.3) 50%, 
+                rgba(34, 139, 34, 0.2) 100%);
+            outline: none;
+            -webkit-appearance: none;
+            margin: 1.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider:hover {
+            background: linear-gradient(90deg, 
+                rgba(34, 139, 34, 0.3) 0%, 
+                rgba(143, 188, 143, 0.4) 50%, 
+                rgba(34, 139, 34, 0.3) 100%);
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--forest-green), var(--warm-green));
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(34, 139, 34, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.9);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--forest-green), var(--warm-green));
+            cursor: pointer;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 8px rgba(34, 139, 34, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.6);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .slider-labels span {
+            padding: 0.5rem 1rem;
+            background: rgba(34, 139, 34, 0.08);
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .slider-labels span:hover {
+            background: rgba(34, 139, 34, 0.15);
+            color: var(--forest-dark);
+            transform: translateY(-1px);
+        }
+
+        /* 特殊要求样式 */
+        .requirement-container {
+            margin-top: 2rem;
+        }
+
+        .requirement-input {
+            width: 100%;
+            padding: 1.5rem;
+            border: 2px solid var(--border-natural);
+            border-radius: 15px;
+            background: var(--bg-warm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
             line-height: 1.6;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .requirement-input:focus {
+            outline: none;
+            border-color: var(--forest-green);
+            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+        }
+
+        .requirement-tags {
+            margin-top: 1.5rem;
+        }
+
+        .requirement-tags h5 {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .requirement-tag {
+            padding: 0.5rem 1rem;
+            background: var(--bg-warm);
+            border: 1px solid var(--border-natural);
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .requirement-tag:hover {
+            background: rgba(34, 139, 34, 0.1);
+            border-color: var(--forest-green);
+            transform: translateY(-1px);
+        }
+
+        .requirement-tag.selected {
+            background: linear-gradient(45deg, var(--forest-green), var(--warm-green));
+            color: white;
+            border-color: var(--forest-green);
+        }
+
+        /* 基酒布局 - 气泡模式下不需要特殊grid */
+        .ingredient-list.spirits-grid {
+            /* 气泡模式下所有标签都是绝对定位，不需要特殊布局 */
+        }
+
+        .spirits-grid .ingredient-tag {
+            /* 气泡模式下统一样式 */
         }
 
         /* 推荐流程区域 */
@@ -503,19 +1051,58 @@
             line-height: 1.4;
         }
 
-        /* 材料选择 */
+        /* 材料选择 - 主题容器横向布局 */
         .ingredients-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-direction: row;
             gap: 1.5rem;
             margin: 2rem 0;
+            overflow-x: auto;
+            padding: 1rem 0;
+            justify-content: center;
         }
 
         .ingredient-category {
-            padding: 1.5rem;
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+            min-height: 120px;
             background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
+            border: 2px solid var(--border-glass);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+        }
+
+        /* 正常容器样式 */
+        .ingredient-category[data-theme="spirits"] {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.08), rgba(160, 82, 45, 0.12));
+            border-color: rgba(139, 69, 19, 0.3);
+        }
+
+        .ingredient-category[data-theme="mixers"] {
+            background: linear-gradient(135deg, rgba(34, 139, 34, 0.08), rgba(50, 205, 50, 0.12));
+            border-color: rgba(34, 139, 34, 0.3);
+        }
+
+        .ingredient-category[data-theme="tools"] {
+            background: linear-gradient(135deg, rgba(70, 130, 180, 0.08), rgba(100, 149, 237, 0.12));
+            border-color: rgba(70, 130, 180, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .ingredients-section {
+                flex-direction: column;
+                gap: 1.5rem;
+                max-width: unset;
+            }
+            
+            .ingredient-category {
+                min-width: unset;
+                width: 100%;
+                min-height: 120px;
+            }
         }
 
         .category-title {
@@ -524,12 +1111,15 @@
             margin-bottom: 1rem;
             color: var(--text-primary);
             text-align: center;
+            position: relative;
+            z-index: 10;
         }
 
         .ingredient-list {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
+            padding: 1rem;
         }
 
         .ingredient-tag {
@@ -540,17 +1130,67 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            white-space: nowrap;
+            user-select: none;
         }
 
         .ingredient-tag:hover {
-            border-color: var(--primary-purple);
-            background: rgba(108, 92, 231, 0.2);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
         }
 
-        .ingredient-tag.selected {
-            background: var(--primary-purple);
-            border-color: var(--primary-purple);
-            color: white;
+        /* 基酒标签选中效果 - 棕色系 */
+        .ingredient-category[data-theme="spirits"] .ingredient-tag:hover {
+            border-color: rgba(139, 69, 19, 0.6);
+            background: rgba(139, 69, 19, 0.1);
+        }
+
+        .ingredient-category[data-theme="spirits"] .ingredient-tag.selected {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.2), rgba(160, 82, 45, 0.3));
+            border-color: rgba(139, 69, 19, 0.6);
+            color: rgba(101, 45, 12, 0.9);
+            box-shadow: 0 0 8px rgba(139, 69, 19, 0.4);
+            transform: translateY(-1px);
+            animation: selectShake 0.5s ease-in-out;
+        }
+
+        /* 调味料标签选中效果 - 绿色系 */
+        .ingredient-category[data-theme="mixers"] .ingredient-tag:hover {
+            border-color: rgba(34, 139, 34, 0.6);
+            background: rgba(34, 139, 34, 0.1);
+        }
+
+        .ingredient-category[data-theme="mixers"] .ingredient-tag.selected {
+            background: linear-gradient(135deg, rgba(34, 139, 34, 0.2), rgba(50, 205, 50, 0.3));
+            border-color: rgba(34, 139, 34, 0.6);
+            color: rgba(25, 100, 25, 0.9);
+            box-shadow: 0 0 8px rgba(34, 139, 34, 0.4);
+            transform: translateY(-1px);
+            animation: selectShake 0.5s ease-in-out;
+        }
+
+        /* 工具标签选中效果 - 蓝色系 */
+        .ingredient-category[data-theme="tools"] .ingredient-tag:hover {
+            border-color: rgba(70, 130, 180, 0.6);
+            background: rgba(70, 130, 180, 0.1);
+        }
+
+        .ingredient-category[data-theme="tools"] .ingredient-tag.selected {
+            background: linear-gradient(135deg, rgba(70, 130, 180, 0.2), rgba(100, 149, 237, 0.3));
+            border-color: rgba(70, 130, 180, 0.6);
+            color: rgba(45, 85, 120, 0.9);
+            box-shadow: 0 0 8px rgba(70, 130, 180, 0.4);
+            transform: translateY(-1px);
+            animation: selectShake 0.5s ease-in-out;
+        }
+
+        /* 选中抖动动画 */
+        @keyframes selectShake {
+            0% { transform: translateY(-1px) translateX(0); }
+            25% { transform: translateY(-1px) translateX(-2px); }
+            50% { transform: translateY(-1px) translateX(2px); }
+            75% { transform: translateY(-1px) translateX(-1px); }
+            100% { transform: translateY(-1px) translateX(0); }
         }
 
         /* 偏好设置 */
@@ -799,7 +1439,7 @@
                 <span class="logo-icon">🍸</span>
                 <span>Shaker</span>
             </a>
-        </div>
+                </div>
     </header>
 
         <!-- 主内容 -->
@@ -807,76 +1447,61 @@
         <!-- 英雄区域 -->
         <section class="hero-section" id="heroSection">
             <div class="container">
-                <h1 class="hero-title">🌿 Shaker 自然调酒师</h1>
+                <h1 class="hero-title">
+                    <span class="title-leaf">🌿</span><span class="gradient-text">Shaker</span> 你的调酒师
+                </h1>
                 <p class="hero-subtitle">
-                    在森林的怀抱中，为你调制最适合的天然鸡尾酒。
-                    让每一杯都充满自然的气息与温暖。
+                    在我的小脑袋瓜里，有你最完美的那一杯，它懂你，让我来告诉你。
                 </p>
                 <a href="#sceneSection" class="hero-cta">
-                    <span>🍃</span>
-                    开始自然之旅
+                    <span>🍸</span>
+                    开始寻找之旅
                 </a>
                 </div>
         </section>
 
-        <!-- 功能特色 -->
-        <section class="features-section" id="featuresSection">
-            <div class="container">
-                <div class="features-grid">
-                    <div class="feature-card glass-card">
-                        <span class="feature-icon">🎯</span>
-                        <h3 class="feature-title">场景匹配</h3>
-                        <p class="feature-desc">智能识别聚会、约会、独处等不同场景，推荐最适合当下氛围的鸡尾酒</p>
+        <!-- 右侧进度指示器 -->
+        <div class="progress-sidebar">
+            <div class="progress-line-main">
+                <div class="progress-indicator"></div>
                 </div>
-                    <div class="feature-card glass-card">
-                        <span class="feature-icon">🎨</span>
-                        <h3 class="feature-title">个性化定制</h3>
-                        <p class="feature-desc">基于心情状态和口味偏好，生成专属于你的鸡尾酒配方</p>
                 </div>
-                    <div class="feature-card glass-card">
-                        <span class="feature-icon">📖</span>
-                        <h3 class="feature-title">专业指导</h3>
-                        <p class="feature-desc">详细的制作步骤、材料配比和调酒技巧，让新手也能调出大师级作品</p>
-            </div>
-        </div>
-    </div>
-        </section>
 
-                        <!-- 场景选择区域 -->
+        <!-- 场景选择区域 -->
         <section class="choice-section" id="sceneSection">
-            <div class="container">
-                <h2 class="section-title">🌲 选择你的场景</h2>
-                <p class="section-subtitle">告诉我们你希望在什么情境下享用这杯自然调酒</p>
-                <div class="options-grid" id="sceneOptions">
-                    <div class="option-card" data-value="森林聚会">
-                        <span class="option-icon">🌲</span>
-                        <h4 class="option-title">森林聚会</h4>
-                        <p class="option-desc">朋友野餐、户外派对、篝火聚会</p>
+        <div class="container">
+                                <h2 class="section-title">✨ 选择你的时光</h2>
+                <p class="section-subtitle">每一个时刻，都值得用一杯特别的酒来纪念</p>
+                <div class="scene-grid" id="sceneOptions">
+                    <div class="scene-card" data-value="聚会派对">
+                        <span class="scene-icon">🎉</span>
+                        <h4 class="scene-title">聚会派对</h4>
+                        <p class="scene-desc">朋友聚会、生日庆祝、社交活动</p>
+            </div>
+                    <div class="scene-card" data-value="浪漫约会">
+                        <span class="scene-icon">💕</span>
+                        <h4 class="scene-title">浪漫约会</h4>
+                        <p class="scene-desc">情侣约会、纪念日、浪漫晚餐</p>
                     </div>
-                    <div class="option-card" data-value="浪漫野餐">
-                        <span class="option-icon">🌺</span>
-                        <h4 class="option-title">浪漫野餐</h4>
-                        <p class="option-desc">森林约会、花间小憩、月下相会</p>
+                    <div class="scene-card" data-value="独处放松">
+                        <span class="scene-icon">🧘</span>
+                        <h4 class="scene-title">独处放松</h4>
+                        <p class="scene-desc">下班后、阅读时光、放松心情</p>
                     </div>
-                    <div class="option-card" data-value="独享宁静">
-                        <span class="option-icon">🧘</span>
-                        <h4 class="option-title">独享宁静</h4>
-                        <p class="option-desc">森林冥想、独处思考、自然疗愈</p>
+                    <div class="scene-card" data-value="商务会面">
+                        <span class="scene-icon">🤝</span>
+                        <h4 class="scene-title">商务会面</h4>
+                        <p class="scene-desc">商务聚餐、工作庆祝、客户招待</p>
                     </div>
-                    <div class="option-card" data-value="商务自然">
-                        <span class="option-icon">🍃</span>
-                        <h4 class="option-title">商务自然</h4>
-                        <p class="option-desc">户外会议、自然交流、绿色庆祝</p>
+                    <div class="scene-card" data-value="夜晚时光">
+                        <span class="scene-icon">🌙</span>
+                        <h4 class="scene-title">夜晚时光</h4>
+                        <p class="scene-desc">夜店聚会、深夜聊天、不眠夜</p>
                     </div>
-                    <div class="option-card" data-value="田园用餐">
-                        <span class="option-icon">🥗</span>
-                        <h4 class="option-title">田园用餐</h4>
-                        <p class="option-desc">农场晚餐、有机美食、自然搭配</p>
-                    </div>
-                    <div class="option-card" data-value="夜间森林">
-                        <span class="option-icon">🌙</span>
-                        <h4 class="option-title">夜间森林</h4>
-                        <p class="option-desc">星空下的思考、夜间漫步、宁静时光</p>
+                    <div class="scene-card" data-value="午后惬意">
+                        <span class="scene-icon">☀️</span>
+                        <h4 class="scene-title">午后惬意</h4>
+                        <p class="scene-desc">下午茶时光、悠闲午后、享受生活</p>
                     </div>
                 </div>
             </div>
@@ -885,98 +1510,176 @@
         <!-- 心情选择区域 -->
         <section class="choice-section" id="moodSection">
             <div class="container">
-                <h2 class="section-title">🌸 描述你的心情</h2>
-                <p class="section-subtitle">选择1-3个最符合你当前状态的自然心境</p>
-                <div class="options-grid" id="moodOptions">
-                    <div class="option-card" data-value="春日愉悦">
-                        <span class="option-icon">🌻</span>
-                        <h4 class="option-title">春日愉悦</h4>
-                        <p class="option-desc">心情如春花般绽放，充满活力</p>
+                <h2 class="section-title">💫 描述你的心情</h2>
+                <p class="section-subtitle">选择1-3个最符合你当前状态的心情</p>
+                                <div class="mood-grid" id="moodOptions">
+                    <div class="mood-card" data-value="春日愉悦">
+                        <span class="mood-icon">🌻</span>
+                        <h4 class="mood-title">春日愉悦</h4>
+                        <p class="mood-desc">心情如春花般绽放，充满活力</p>
+        </div>
+                    <div class="mood-card" data-value="雨后忧郁">
+                        <span class="mood-icon">🌧️</span>
+                        <h4 class="mood-title">雨后忧郁</h4>
+                        <p class="mood-desc">如雨后森林般沉静，需要抚慰</p>
+    </div>
+                    <div class="mood-card" data-value="夏日激情">
+                        <span class="mood-icon">☀️</span>
+                        <h4 class="mood-title">夏日激情</h4>
+                        <p class="mood-desc">如火焰般热烈，充满期待</p>
                     </div>
-                    <div class="option-card" data-value="雨后忧郁">
-                        <span class="option-icon">🌧️</span>
-                        <h4 class="option-title">雨后忧郁</h4>
-                        <p class="option-desc">如雨后森林般沉静，需要抚慰</p>
+                    <div class="mood-card" data-value="秋叶宁静">
+                        <span class="mood-icon">🍂</span>
+                        <h4 class="mood-title">秋叶宁静</h4>
+                        <p class="mood-desc">如秋日般平和，寻求内心平衡</p>
                     </div>
-                    <div class="option-card" data-value="夏日激情">
-                        <span class="option-icon">☀️</span>
-                        <h4 class="option-title">夏日激情</h4>
-                        <p class="option-desc">如火焰般热烈，充满期待</p>
+                    <div class="mood-card" data-value="山峰自信">
+                        <span class="mood-icon">⛰️</span>
+                        <h4 class="mood-title">山峰自信</h4>
+                        <p class="mood-desc">如高山般坚定，充满力量</p>
                     </div>
-                    <div class="option-card" data-value="秋叶宁静">
-                        <span class="option-icon">🍂</span>
-                        <h4 class="option-title">秋叶宁静</h4>
-                        <p class="option-desc">如秋日般平和，寻求内心平衡</p>
-                    </div>
-                    <div class="option-card" data-value="山峰自信">
-                        <span class="option-icon">⛰️</span>
-                        <h4 class="option-title">山峰自信</h4>
-                        <p class="option-desc">如高山般坚定，充满力量</p>
-                    </div>
-                    <div class="option-card" data-value="深林沉思">
-                        <span class="option-icon">🌳</span>
-                        <h4 class="option-title">深林沉思</h4>
-                        <p class="option-desc">如古树般深邃，专注思考</p>
+                    <div class="mood-card" data-value="深林沉思">
+                        <span class="mood-icon">🌳</span>
+                        <h4 class="mood-title">深林沉思</h4>
+                        <p class="mood-desc">如古树般深邃，专注思考</p>
                     </div>
                 </div>
             </div>
         </section>
 
-                            <!-- 材料选择区域 -->
+        <!-- 材料选择区域 -->
         <section class="choice-section" id="ingredientSection">
-            <div class="container">
-                <h2 class="section-title">🌿 选择天然材料</h2>
-                <p class="section-subtitle">选择你拥有或喜欢的自然原料</p>
+        <div class="container">
+                <h2 class="section-title">🍹 选择材料</h2>
+                <p class="section-subtitle">选择你拥有或喜欢的调酒材料</p>
                 <div class="ingredients-section">
-                    <div class="ingredient-category glass-card">
-                        <h4 class="category-title">🌾 天然基酒</h4>
+                    <div class="ingredient-category glass-card" data-theme="spirits">
+                        <h4 class="category-title">🥃 基酒</h4>
                         <div class="ingredient-list" data-category="spirits">
-                            <span class="ingredient-tag" data-value="有机威士忌">有机威士忌</span>
-                            <span class="ingredient-tag" data-value="土豆伏特加">土豆伏特加</span>
-                            <span class="ingredient-tag" data-value="杜松子酒">杜松子酒</span>
-                            <span class="ingredient-tag" data-value="甘蔗朗姆">甘蔗朗姆</span>
-                            <span class="ingredient-tag" data-value="龙舌兰酒">龙舌兰酒</span>
-                            <span class="ingredient-tag" data-value="果渣白兰地">果渣白兰地</span>
-                        </div>
+                            <span class="ingredient-tag" data-value="威士忌">威士忌</span>
+                            <span class="ingredient-tag" data-value="伏特加">伏特加</span>
+                            <span class="ingredient-tag" data-value="金酒">金酒</span>
+                            <span class="ingredient-tag" data-value="龙舌兰">龙舌兰</span>
+                            <span class="ingredient-tag" data-value="朗姆酒">朗姆酒</span>
+                            <span class="ingredient-tag" data-value="白兰地">白兰地</span>
                     </div>
-                    <div class="ingredient-category glass-card">
-                        <h4 class="category-title">🍃 新鲜调料</h4>
+                    </div>
+                    <div class="ingredient-category glass-card" data-theme="mixers">
+                        <h4 class="category-title">🍋 调味料</h4>
                         <div class="ingredient-list" data-category="mixers">
-                            <span class="ingredient-tag" data-value="鲜柠檬汁">鲜柠檬汁</span>
-                            <span class="ingredient-tag" data-value="青柠檬汁">青柠檬汁</span>
-                            <span class="ingredient-tag" data-value="新鲜橙汁">新鲜橙汁</span>
-                            <span class="ingredient-tag" data-value="气泡水">气泡水</span>
+                            <span class="ingredient-tag" data-value="柠檬汁">柠檬汁</span>
+                            <span class="ingredient-tag" data-value="青柠汁">青柠汁</span>
+                            <span class="ingredient-tag" data-value="橙汁">橙汁</span>
+                            <span class="ingredient-tag" data-value="苏打水">苏打水</span>
                             <span class="ingredient-tag" data-value="汤力水">汤力水</span>
-                            <span class="ingredient-tag" data-value="薄荷叶">薄荷叶</span>
+                            <span class="ingredient-tag" data-value="薄荷">薄荷</span>
                             <span class="ingredient-tag" data-value="蜂蜜">蜂蜜</span>
-                            <span class="ingredient-tag" data-value="枫糖浆">枫糖浆</span>
-                        </div>
+                            <span class="ingredient-tag" data-value="糖浆">糖浆</span>
                     </div>
-                    <div class="ingredient-category glass-card">
-                        <h4 class="category-title">🥄 调酒工具</h4>
+                    </div>
+                    <div class="ingredient-category glass-card" data-theme="tools">
+                        <h4 class="category-title">🧊 工具</h4>
                         <div class="ingredient-list" data-category="tools">
                             <span class="ingredient-tag" data-value="调酒器">调酒器</span>
                             <span class="ingredient-tag" data-value="量杯">量杯</span>
                             <span class="ingredient-tag" data-value="搅拌棒">搅拌棒</span>
-                            <span class="ingredient-tag" data-value="滤网">滤网</span>
+                            <span class="ingredient-tag" data-value="过滤器">过滤器</span>
                             <span class="ingredient-tag" data-value="冰块">冰块</span>
-                        </div>
+                    </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- 偏好设置区域 -->
+        <section class="choice-section" id="preferenceSection">
+        <div class="container">
+                <h2 class="section-title">✨ 偏好设置</h2>
+                <p class="section-subtitle">调整你的口味偏好，让每一杯都更合你心意</p>
+                
+                <div class="preference-grid">
+                    <div class="preference-card glass-card">
+                        <h4 class="preference-title">甜度</h4>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="5" class="slider" id="sweetnessSlider">
+                            <div class="slider-value" id="sweetnessValue">适中</div>
+                            <div class="slider-labels">
+                                <span>清淡</span>
+                                <span>适中</span>
+                                <span>浓郁</span>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="preference-card glass-card">
+                        <h4 class="preference-title">酒精度</h4>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="5" class="slider" id="alcoholSlider">
+                            <div class="slider-value" id="alcoholValue">中度</div>
+                            <div class="slider-labels">
+                                <span>低度</span>
+                                <span>中度</span>
+                                <span>高度</span>
+                    </div>
+                    </div>
+                    </div>
+                    
+                    <div class="preference-card glass-card">
+                        <h4 class="preference-title">口感</h4>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="5" class="slider" id="textureSlider">
+                            <div class="slider-value" id="textureValue">平衡</div>
+                            <div class="slider-labels">
+                                <span>清爽</span>
+                                <span>平衡</span>
+                                <span>浓厚</span>
+                </div>
+            </div>
+        </div>
+    </div>
+            </div>
+        </section>
+
+        <!-- 特殊要求区域 -->
+        <section class="choice-section" id="requirementSection">
+        <div class="container">
+                <h2 class="section-title">💭 特殊要求</h2>
+                <p class="section-subtitle">告诉我们你的特别需求，让调酒更贴心</p>
+                
+                <div class="requirement-container">
+                    <textarea 
+                        id="specialRequirement" 
+                        class="requirement-input" 
+                        placeholder="比如：我希望有薄荷的清香，或者想要一杯能让人放松的酒..."
+                        rows="4"
+                    ></textarea>
+                    
+                    <div class="requirement-tags">
+                        <h5>快速选择：</h5>
+                        <div class="tag-list">
+                            <span class="requirement-tag" data-value="不含咖啡因">不含咖啡因</span>
+                            <span class="requirement-tag" data-value="低糖">低糖</span>
+                            <span class="requirement-tag" data-value="颜值要高">颜值要高</span>
+                            <span class="requirement-tag" data-value="制作简单">制作简单</span>
+                            <span class="requirement-tag" data-value="有层次感">有层次感</span>
+                            <span class="requirement-tag" data-value="适合拍照">适合拍照</span>
+        </div>
+    </div>
+    </div>
             </div>
         </section>
 
         <!-- 获取推荐区域 -->
         <section class="choice-section" id="recommendSection">
-            <div class="container">
-                <h2 class="section-title">🍃 获取你的自然调酒</h2>
-                <p class="section-subtitle">基于你的选择，为你调制完美的天然鸡尾酒</p>
+        <div class="container">
+                <h2 class="section-title">🎭 答案即将揭晓</h2>
+                <p class="section-subtitle">寻找之旅即将结束，让我在小脑袋瓜里找到属于你的那一杯</p>
                 <div style="text-align: center; margin: 3rem 0;">
                     <button class="hero-cta" onclick="getRecommendation()">
-                        <span>🌿</span>
-                        开始调制
+                        <span>✨</span>
+                        揭晓答案
                     </button>
-                </div>
+            </div>
             </div>
         </section>
                     <div class="step-content" id="step3">
@@ -1113,7 +1816,7 @@
                 <div class="loading-animation"></div>
                 <h2 class="loading-title">AI 正在为你推荐...</h2>
                 <p class="loading-subtitle">基于你的偏好分析最适合的鸡尾酒配方</p>
-        </div>
+            </div>
         </section>
 
         <!-- 推荐结果 -->
@@ -1122,10 +1825,10 @@
                 <h2 class="section-title">为你推荐的鸡尾酒</h2>
                 <div class="results-grid" id="resultsGrid">
                     <!-- 结果将在这里动态填充 -->
-            </div>
+        </div>
                 <div style="text-align: center; margin-top: 3rem;">
                     <button class="btn btn-secondary" onclick="startRecommendation()">🔄 重新推荐</button>
-        </div>
+    </div>
     </div>
         </section>
     </main>
@@ -1154,13 +1857,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
             setupScrollEffects();
+            setupSliders();
         });
 
         // 初始化应用
         function initializeApp() {
+            setupScrollEffects();
             setupIntersectionObserver();
             setupEventListeners();
-            updateStepProgress();
+            updateProgressBar(); // 初始化进度条
+            // initializeBubblePhysics(); // 关闭气泡物理效果，使用正常布局
         }
 
         // 设置滚动效果
@@ -1173,7 +1879,45 @@
                 } else {
                     header.classList.remove('scrolled');
                 }
+                
+                // 更新进度条
+                updateProgressBar();
             });
+        }
+
+        // 更新进度条
+        function updateProgressBar() {
+            const sections = [
+                'sceneSection',
+                'moodSection', 
+                'ingredientSection',
+                'preferenceSection',
+                'requirementSection',
+                'recommendSection'
+            ];
+            
+            const indicator = document.querySelector('.progress-indicator');
+            let activeSection = 0;
+            
+            // 找到当前在视窗中的区域
+            sections.forEach((sectionId, index) => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const rect = section.getBoundingClientRect();
+                    const windowHeight = window.innerHeight;
+                    
+                    // 如果区域在视窗中间部分
+                    if (rect.top <= windowHeight / 2 && rect.bottom >= windowHeight / 2) {
+                        activeSection = index;
+                    }
+                }
+            });
+            
+            // 更新进度条位置
+            if (indicator) {
+                const progress = (activeSection / (sections.length - 1)) * 100;
+                indicator.style.top = `${progress}%`;
+            }
         }
 
         // 设置滚动动画观察器
@@ -1194,10 +1938,10 @@
         // 设置事件监听器
         function setupEventListeners() {
         // 场景选择
-            document.getElementById('sceneOptions').addEventListener('click', handleSceneSelection);
+            document.querySelector('.scene-grid').addEventListener('click', handleSceneSelection);
             
             // 心情选择
-            document.getElementById('moodOptions').addEventListener('click', handleMoodSelection);
+            document.querySelector('.mood-grid').addEventListener('click', handleMoodSelection);
             
             // 材料选择
             document.querySelectorAll('.ingredient-list').forEach(list => {
@@ -1211,51 +1955,57 @@
             document.querySelectorAll('.slider').forEach(slider => {
                 slider.addEventListener('input', handlePreferenceChange);
             });
+            
+            // 特殊要求便捷输入
+            document.querySelector('.requirement-tags .tag-list').addEventListener('click', handleRequirementTagClick);
         }
 
                         // 处理场景选择
         function handleSceneSelection(e) {
-            const card = e.target.closest('.option-card');
+            const card = e.target.closest('.scene-card');
             if (!card) return;
             
-            // 清除其他选择
-            document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
-                c.classList.remove('selected');
-            });
+            const scene = card.dataset.value;
             
-            // 选择当前卡片
-            card.classList.add('selected');
-            userInput.scene = card.dataset.value;
+            if (card.classList.contains('selected')) {
+                // 如果已选中，则取消选中
+                card.classList.remove('selected');
+                userInput.scene = '';
+            } else {
+                // 清除其他选择
+                document.querySelectorAll('.scene-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // 选择当前卡片
+                card.classList.add('selected');
+                userInput.scene = scene;
+            }
             
-            // 添加选择动画
-            card.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                card.style.transform = '';
-            }, 200);
+            console.log('选择的场景:', userInput.scene);
         }
 
                         // 处理心情选择
         function handleMoodSelection(e) {
-            const card = e.target.closest('.option-card');
+            const card = e.target.closest('.mood-card');
             if (!card) return;
             
-            const mood = card.dataset.value;
-            
-            if (card.classList.contains('selected')) {
-                // 取消选择
-                card.classList.remove('selected');
-                userInput.moods = userInput.moods.filter(m => m !== mood);
-            } else if (userInput.moods.length < 3) {
-                // 添加选择
-                card.classList.add('selected');
-                userInput.moods.push(mood);
+                const mood = card.dataset.value;
                 
-                // 添加选择动画
-                card.style.transform = 'scale(1.05)';
-                setTimeout(() => {
-                    card.style.transform = '';
-                }, 200);
+                if (card.classList.contains('selected')) {
+                    // 取消选择
+                    card.classList.remove('selected');
+                if (userInput.moods) {
+                    userInput.moods = userInput.moods.filter(m => m !== mood);
+                }
+            } else if (!userInput.moods || userInput.moods.length < 3) {
+                    // 添加选择
+                    card.classList.add('selected');
+                if (!userInput.moods) userInput.moods = [];
+                userInput.moods.push(mood);
             }
+            
+            console.log('选择的心情:', userInput.moods);
         }
 
         // 处理材料选择
@@ -1280,13 +2030,13 @@
             const card = e.target.closest('.option-card');
             if (!card) return;
             
-            // 清除其他选择
+                // 清除其他选择
             document.querySelectorAll('#step4 .options-grid .option-card').forEach(c => {
-                c.classList.remove('selected');
-            });
-            
-            // 选择当前卡片
-            card.classList.add('selected');
+                    c.classList.remove('selected');
+                });
+                
+                // 选择当前卡片
+                card.classList.add('selected');
             userInput.preferences.style = card.dataset.value;
         }
 
@@ -1296,6 +2046,195 @@
             const value = parseInt(slider.value);
             userInput.preferences[slider.id] = value;
         }
+
+        // 处理特殊要求便捷输入
+        function handleRequirementTagClick(e) {
+            const tag = e.target.closest('.requirement-tag');
+            if (!tag) return;
+            
+            const value = tag.dataset.value;
+            const textarea = document.getElementById('specialRequirement');
+            const currentText = textarea.value.trim();
+            
+            // 如果文本框为空，直接添加
+            if (!currentText) {
+                textarea.value = value;
+            } else {
+                // 如果已有内容，用逗号分隔添加
+                textarea.value = currentText + '，' + value;
+            }
+            
+            // 触发变化事件并聚焦到文本框
+            textarea.dispatchEvent(new Event('input'));
+            textarea.focus();
+            
+            // 添加视觉反馈
+            tag.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                tag.style.transform = '';
+            }, 150);
+        }
+
+        // 设置滑动条智能反馈
+        function setupSliders() {
+            const sliders = [
+                { 
+                    id: 'sweetnessSlider', 
+                    valueId: 'sweetnessValue',
+                    labels: ['清淡', '微甜', '轻甜', '适中', '偏甜', '中甜', '浓甜', '很甜', '超甜', '极甜', '浓郁']
+                },
+                { 
+                    id: 'alcoholSlider', 
+                    valueId: 'alcoholValue',
+                    labels: ['无酒精', '微量', '轻度', '低度', '偏低', '中度', '偏中', '偏高', '高度', '很高', '极高']
+                },
+                { 
+                    id: 'textureSlider', 
+                    valueId: 'textureValue',
+                    labels: ['清爽', '轻盈', '顺滑', '平衡', '醇厚', '丰富', '浓郁', '厚重', '浓厚', '粘稠', '浓重']
+                }
+            ];
+
+            sliders.forEach(sliderConfig => {
+                const slider = document.getElementById(sliderConfig.id);
+                const valueDisplay = document.getElementById(sliderConfig.valueId);
+                
+                if (slider && valueDisplay) {
+                    // 初始化显示
+                    updateSliderValue(slider, valueDisplay, sliderConfig.labels);
+                    
+                    // 监听变化 - 滑动时显示数值并更新
+                    slider.addEventListener('input', () => {
+                        updateSliderValue(slider, valueDisplay, sliderConfig.labels);
+                        valueDisplay.style.opacity = '1';
+                        valueDisplay.style.transform = 'translateX(-50%) translateY(-5px)';
+                        
+                        // 0.5秒后自动隐藏
+                        clearTimeout(slider.hideTimeout);
+                        slider.hideTimeout = setTimeout(() => {
+                            if (!slider.matches(':hover')) {
+                                valueDisplay.style.opacity = '0';
+                                valueDisplay.style.transform = 'translateX(-50%)';
+                            }
+                        }, 500);
+                    });
+                    
+                    // 鼠标移入显示数值
+                    slider.addEventListener('mouseenter', () => {
+                        clearTimeout(slider.hideTimeout);
+                        valueDisplay.style.opacity = '1';
+                        valueDisplay.style.transform = 'translateX(-50%) translateY(-5px)';
+                    });
+                    
+                    // 鼠标移出隐藏数值
+                    slider.addEventListener('mouseleave', () => {
+                        valueDisplay.style.opacity = '0';
+                        valueDisplay.style.transform = 'translateX(-50%)';
+                    });
+                }
+            });
+        }
+
+        function updateSliderValue(slider, valueDisplay, labels) {
+            const value = parseInt(slider.value);
+            const label = labels[value] || labels[Math.floor(labels.length / 2)];
+            valueDisplay.textContent = label;
+            
+            // 根据数值更新位置，并限制在容器范围内
+            const percentage = (value / (slider.max - slider.min)) * 100;
+            
+            // 限制在10%到90%之间，避免超出容器边界
+            const clampedPercentage = Math.max(10, Math.min(90, percentage));
+            valueDisplay.style.left = clampedPercentage + '%';
+            
+            // 确保文字始终水平显示
+            valueDisplay.style.transform = 'translateX(-50%)';
+            valueDisplay.style.whiteSpace = 'nowrap';
+        }
+
+        // 初始化气泡物理效果 - 绝对无重叠的简单网格布局
+        function initializeBubblePhysics() {
+            const categories = document.querySelectorAll('.ingredient-category');
+            
+            categories.forEach(category => {
+                const tags = category.querySelectorAll('.ingredient-tag');
+                const container = category.querySelector('.ingredient-list');
+                
+                // 等待布局完成
+                setTimeout(() => {
+                    layoutBubblesNoOverlap(tags, container);
+                }, 300);
+            });
+        }
+        
+        // 改进的自然分布布局算法
+        function layoutBubblesNoOverlap(tags, container) {
+            const containerWidth = container.offsetWidth - 30;
+            const containerHeight = container.offsetHeight - 30;
+            
+            // 计算每个标签的实际尺寸，确保文字完整显示
+            const tagInfos = Array.from(tags).map(tag => {
+                const text = tag.textContent.trim();
+                // 增加宽度计算，确保文字完整显示
+                const width = Math.max(80, text.length * 12 + 30);
+                const height = 40;
+                return { tag, width, height, text };
+            });
+            
+            const margin = 12;
+            const positions = [];
+            
+            // 动态换行布局 - 从底部开始，自然换行
+            let currentX = margin;
+            let currentY = containerHeight - 50; // 从底部开始
+            const rowHeight = 55; // 行间距
+            
+            tagInfos.forEach((info, index) => {
+                const { tag, width, height } = info;
+                
+                // 检查当前行是否能放下这个标签
+                if (currentX + width + margin > containerWidth) {
+                    // 换到上一行
+                    currentX = margin;
+                    currentY -= rowHeight;
+                    
+                    // 如果超出顶部，重新从底部右侧开始
+                    if (currentY < 0) {
+                        currentY = containerHeight - 50;
+                        currentX = containerWidth * 0.6; // 从右侧60%位置开始
+                    }
+                }
+                
+                // 添加一些随机偏移让布局更自然
+                const xOffset = (Math.random() - 0.5) * 12; // ±6px
+                const yOffset = (Math.random() - 0.5) * 12; // ±6px
+                
+                const finalX = Math.max(margin, Math.min(
+                    containerWidth - width - margin,
+                    currentX + xOffset
+                ));
+                
+                const finalY = Math.max(margin, Math.min(
+                    containerHeight - height - margin,
+                    currentY + yOffset
+                ));
+                
+                // 设置位置
+                tag.style.left = finalX + 'px';
+                tag.style.top = finalY + 'px';
+                
+                // 添加随机动画延迟
+                tag.style.animationDelay = (Math.random() * 3) + 's';
+                
+                // 记录位置
+                positions.push({ x: finalX, y: finalY, width, height });
+                
+                // 更新X位置
+                currentX += width + margin;
+            });
+        }
+
+
 
         // 重置所有选择
         function resetSelections() {
@@ -1309,7 +2248,7 @@
             
             // 清除所有选择状态
             document.querySelectorAll('.option-card').forEach(card => {
-                card.classList.remove('selected');
+                    card.classList.remove('selected');
             });
             document.querySelectorAll('.ingredient-tag').forEach(tag => {
                 tag.classList.remove('selected');
@@ -1386,7 +2325,7 @@
         // 获取推荐
         async function getRecommendation() {
             // 收集特殊要求
-            userInput.special_requirements = document.getElementById('specialRequirements').value;
+            userInput.special_requirements = document.getElementById('specialRequirement').value;
             
             // 显示加载状态
             showSection('loadingSection');
