@@ -7,27 +7,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* 主色调 - 科技蓝紫渐变 */
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-dark: #1a1a2e;
-            --primary-purple: #6c5ce7;
-            --primary-blue: #74b9ff;
+            /* 森林主题色调 - 绿意清新温暖 */
+            --primary-gradient: linear-gradient(135deg, #2d5016 0%, #4a7c59 50%, #8fbc8f 100%);
+            --forest-dark: #1a2e1a;
+            --forest-green: #228b22;
+            --warm-green: #8fbc8f;
+            --leaf-green: #9acd32;
+            --soft-beige: #f5f5dc;
             
-            /* 背景色 */
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #1a1a2e;
-            --bg-glass: rgba(255, 255, 255, 0.05);
-            --bg-glass-hover: rgba(255, 255, 255, 0.1);
+            /* 背景色 - 温暖自然 */
+            --bg-primary: #f8f5f0;
+            --bg-secondary: #e8f5e8;
+            --bg-glass: rgba(143, 188, 143, 0.1);
+            --bg-glass-hover: rgba(143, 188, 143, 0.2);
+            --bg-warm: rgba(245, 245, 220, 0.9);
             
-            /* 文本色 */
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.8);
-            --text-muted: rgba(255, 255, 255, 0.6);
+            /* 文本色 - 自然温暖 */
+            --text-primary: #2d4a2d;
+            --text-secondary: #4a7c59;
+            --text-muted: #6b8e6b;
+            --text-warm: #8b4513;
             
-            /* 边框和阴影 */
-            --border-glass: rgba(255, 255, 255, 0.1);
-            --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.3);
-            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+            /* 边框和阴影 - 柔和自然 */
+            --border-natural: rgba(143, 188, 143, 0.3);
+            --shadow-soft: 0 4px 20px rgba(34, 139, 34, 0.1);
+            --shadow-warm: 0 8px 32px rgba(139, 69, 19, 0.1);
         }
 
         * {
@@ -42,9 +46,10 @@
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
-        /* 背景动效 - 增强科技感 */
+        /* 森林背景 - 绿意清新温暖 */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -52,8 +57,7 @@
             right: 0;
             bottom: 0;
             z-index: -1;
-            background: var(--primary-gradient);
-            opacity: 0.8;
+            background: linear-gradient(180deg, #f8f5f0 0%, #e8f5e8 50%, #d0e7d0 100%);
             overflow: hidden;
         }
 
@@ -64,10 +68,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.4) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(116, 185, 255, 0.4) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, rgba(167, 112, 239, 0.4) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
+            background: 
+                radial-gradient(circle at 15% 30%, rgba(34, 139, 34, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 70% 20%, rgba(143, 188, 143, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 70%, rgba(154, 205, 50, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 30% 80%, rgba(34, 139, 34, 0.08) 0%, transparent 60%);
+            animation: forestSway 15s ease-in-out infinite;
         }
 
         .bg-animation::after {
@@ -78,23 +84,23 @@
             right: 0;
             bottom: 0;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-            background-size: 100px 100px, 150px 150px, 80px 80px, 120px 120px;
-            animation: twinkle 3s ease-in-out infinite alternate;
+                radial-gradient(circle at 25% 60%, rgba(154, 205, 50, 0.2) 2px, transparent 2px),
+                radial-gradient(circle at 75% 40%, rgba(143, 188, 143, 0.15) 1px, transparent 1px),
+                radial-gradient(circle at 50% 20%, rgba(34, 139, 34, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 90% 90%, rgba(139, 69, 19, 0.1) 1px, transparent 1px);
+            background-size: 120px 120px, 80px 80px, 150px 150px, 200px 200px;
+            animation: leafDance 8s ease-in-out infinite alternate;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(120deg); }
-            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        @keyframes forestSway {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10px, -5px) scale(1.02); }
+            66% { transform: translate(-8px, 8px) scale(0.98); }
         }
 
-        @keyframes twinkle {
-            0% { opacity: 0.3; }
-            100% { opacity: 0.8; }
+        @keyframes leafDance {
+            0% { opacity: 0.4; transform: translateY(0px); }
+            100% { opacity: 0.7; transform: translateY(-10px); }
         }
 
         /* 容器 */
@@ -120,7 +126,7 @@
             box-shadow: var(--shadow-glow);
         }
 
-        /* 头部导航 - 完全透明 */
+        /* 头部导航 - 森林风格 */
         .header {
             position: fixed;
             top: 0;
@@ -133,9 +139,10 @@
         }
 
         .header.scrolled {
-            background: rgba(10, 10, 15, 0.8);
+            background: rgba(248, 245, 240, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-natural);
+            box-shadow: var(--shadow-soft);
         }
 
         .header .container {
@@ -156,7 +163,7 @@
 
         .logo-icon {
             font-size: 2rem;
-            background: var(--primary-gradient);
+            background: linear-gradient(45deg, var(--forest-green), var(--warm-green));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -178,7 +185,7 @@
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 800;
             margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ffffff 0%, #a7a7a7 100%);
+            background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest-green) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -198,19 +205,20 @@
             align-items: center;
             gap: 0.5rem;
             padding: 1rem 2rem;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--forest-green), var(--warm-green));
             color: white;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 600;
             font-size: 1.1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+            box-shadow: var(--shadow-soft);
         }
 
         .hero-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.6);
+            box-shadow: var(--shadow-warm);
+            background: linear-gradient(135deg, var(--warm-green), var(--leaf-green));
         }
 
         /* 功能展示区域 */
@@ -273,11 +281,27 @@
             font-size: 2.5rem;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 3rem;
-            background: linear-gradient(135deg, #ffffff 0%, #a7a7a7 100%);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest-green) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 3rem;
+            font-style: italic;
+        }
+
+        /* 选择区域样式 */
+        .choice-section {
+            padding: 4rem 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
         }
 
         /* 步骤容器 - 垂直滚动布局 */
@@ -438,25 +462,26 @@
 
         .option-card {
             padding: 1.5rem;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
+            background: var(--bg-warm);
+            border: 1px solid var(--border-natural);
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            box-shadow: var(--shadow-soft);
         }
 
         .option-card:hover {
             background: var(--bg-glass-hover);
             transform: translateY(-3px);
-            border-color: var(--primary-purple);
-            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+            border-color: var(--warm-green);
+            box-shadow: var(--shadow-warm);
         }
 
         .option-card.selected {
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(116, 185, 255, 0.2) 100%);
-            border-color: var(--primary-purple);
-            box-shadow: var(--shadow-glow);
+            background: linear-gradient(135deg, rgba(143, 188, 143, 0.2) 0%, rgba(154, 205, 50, 0.2) 100%);
+            border-color: var(--forest-green);
+            box-shadow: 0 8px 25px rgba(34, 139, 34, 0.3);
         }
 
         .option-icon {
@@ -777,19 +802,19 @@
         </div>
     </header>
 
-    <!-- 主内容 -->
+        <!-- 主内容 -->
     <main class="main-content">
         <!-- 英雄区域 -->
         <section class="hero-section" id="heroSection">
             <div class="container">
-                <h1 class="hero-title">AI 智能鸡尾酒推荐专家</h1>
+                <h1 class="hero-title">🌿 Shaker 自然调酒师</h1>
                 <p class="hero-subtitle">
-                    基于场景、心情和个人偏好，为你推荐最完美的鸡尾酒配方。
-                    让每一次调酒都成为艺术创作。
+                    在森林的怀抱中，为你调制最适合的天然鸡尾酒。
+                    让每一杯都充满自然的气息与温暖。
                 </p>
-                <a href="#" class="hero-cta" onclick="startRecommendation()">
-                    <span>🎯</span>
-                    开始智能推荐
+                <a href="#sceneSection" class="hero-cta">
+                    <span>🍃</span>
+                    开始自然之旅
                 </a>
                 </div>
         </section>
@@ -817,107 +842,143 @@
     </div>
         </section>
 
-        <!-- 推荐流程 -->
-        <section class="recommendation-section" id="recommendationSection">
-        <div class="container">
-                <h2 class="section-title">智能推荐流程</h2>
-                
-                <div class="steps-container">
-                    <!-- 进度指示器 -->
-                    <div class="step-progress" id="stepProgress">
-                        <div class="progress-dot active" data-step="1"></div>
-                        <div class="progress-line"></div>
-                        <div class="progress-dot" data-step="2"></div>
-                        <div class="progress-line"></div>
-                        <div class="progress-dot" data-step="3"></div>
-                        <div class="progress-line"></div>
-                        <div class="progress-dot" data-step="4"></div>
-                        <div class="progress-line"></div>
-                        <div class="progress-dot" data-step="5"></div>
-                    </div>
-
-                    <!-- 步骤1: 场景选择 -->
-                    <div class="step-content active" id="step1">
-                        <h3 class="step-title">选择使用场景</h3>
-                        <p class="step-description">告诉我们你计划在什么场合享用这杯鸡尾酒</p>
+                        <!-- 场景选择区域 -->
+        <section class="choice-section" id="sceneSection">
+            <div class="container">
+                <h2 class="section-title">🌲 选择你的场景</h2>
+                <p class="section-subtitle">告诉我们你希望在什么情境下享用这杯自然调酒</p>
                 <div class="options-grid" id="sceneOptions">
-                    <div class="option-card" data-value="聚会派对">
-                                <span class="option-icon">🎉</span>
-                                <h4 class="option-title">聚会派对</h4>
-                                <p class="option-desc">朋友聚会、生日party、节日庆祝</p>
+                    <div class="option-card" data-value="森林聚会">
+                        <span class="option-icon">🌲</span>
+                        <h4 class="option-title">森林聚会</h4>
+                        <p class="option-desc">朋友野餐、户外派对、篝火聚会</p>
                     </div>
-                    <div class="option-card" data-value="浪漫约会">
-                                <span class="option-icon">💕</span>
-                                <h4 class="option-title">浪漫约会</h4>
-                                <p class="option-desc">二人世界、烛光晚餐、求婚表白</p>
+                    <div class="option-card" data-value="浪漫野餐">
+                        <span class="option-icon">🌺</span>
+                        <h4 class="option-title">浪漫野餐</h4>
+                        <p class="option-desc">森林约会、花间小憩、月下相会</p>
                     </div>
-                    <div class="option-card" data-value="独处放松">
-                                <span class="option-icon">🛋️</span>
-                                <h4 class="option-title">独处放松</h4>
-                                <p class="option-desc">下班后放松、阅读时光、冥想休息</p>
+                    <div class="option-card" data-value="独享宁静">
+                        <span class="option-icon">🧘</span>
+                        <h4 class="option-title">独享宁静</h4>
+                        <p class="option-desc">森林冥想、独处思考、自然疗愈</p>
                     </div>
-                    <div class="option-card" data-value="商务场合">
-                                <span class="option-icon">💼</span>
-                                <h4 class="option-title">商务场合</h4>
-                                <p class="option-desc">客户招待、同事聚餐、庆祝成功</p>
+                    <div class="option-card" data-value="商务自然">
+                        <span class="option-icon">🍃</span>
+                        <h4 class="option-title">商务自然</h4>
+                        <p class="option-desc">户外会议、自然交流、绿色庆祝</p>
                     </div>
-                    <div class="option-card" data-value="餐前餐后">
-                                <span class="option-icon">🍽️</span>
-                                <h4 class="option-title">餐前餐后</h4>
-                                <p class="option-desc">开胃酒、餐后消化、配餐搭配</p>
+                    <div class="option-card" data-value="田园用餐">
+                        <span class="option-icon">🥗</span>
+                        <h4 class="option-title">田园用餐</h4>
+                        <p class="option-desc">农场晚餐、有机美食、自然搭配</p>
                     </div>
-                    <div class="option-card" data-value="深夜时光">
-                                <span class="option-icon">🌙</span>
-                                <h4 class="option-title">深夜时光</h4>
-                                <p class="option-desc">失眠夜晚、深度思考、创作灵感</p>
+                    <div class="option-card" data-value="夜间森林">
+                        <span class="option-icon">🌙</span>
+                        <h4 class="option-title">夜间森林</h4>
+                        <p class="option-desc">星空下的思考、夜间漫步、宁静时光</p>
                     </div>
                 </div>
-                        <!-- 自动推进，无需按钮 -->
             </div>
+        </section>
 
-                    <!-- 步骤2: 心情描述 -->
-                    <div class="step-content" id="step2">
-                        <h3 class="step-title">描述你的心情</h3>
-                        <p class="step-description">选择1-3个最符合你当前状态的心情标签</p>
+        <!-- 心情选择区域 -->
+        <section class="choice-section" id="moodSection">
+            <div class="container">
+                <h2 class="section-title">🌸 描述你的心情</h2>
+                <p class="section-subtitle">选择1-3个最符合你当前状态的自然心境</p>
                 <div class="options-grid" id="moodOptions">
-                    <div class="option-card" data-value="开心愉悦">
-                                <span class="option-icon">😊</span>
-                                <h4 class="option-title">开心愉悦</h4>
-                                <p class="option-desc">心情很好、值得庆祝、兴高采烈</p>
+                    <div class="option-card" data-value="春日愉悦">
+                        <span class="option-icon">🌻</span>
+                        <h4 class="option-title">春日愉悦</h4>
+                        <p class="option-desc">心情如春花般绽放，充满活力</p>
                     </div>
-                    <div class="option-card" data-value="沮丧低落">
-                                <span class="option-icon">😢</span>
-                                <h4 class="option-title">沮丧低落</h4>
-                                <p class="option-desc">工作压力、感情困扰、生活烦恼</p>
+                    <div class="option-card" data-value="雨后忧郁">
+                        <span class="option-icon">🌧️</span>
+                        <h4 class="option-title">雨后忧郁</h4>
+                        <p class="option-desc">如雨后森林般沉静，需要抚慰</p>
                     </div>
-                    <div class="option-card" data-value="兴奋激动">
-                                <span class="option-icon">🔥</span>
-                                <h4 class="option-title">兴奋激动</h4>
-                                <p class="option-desc">获得成功、即将冒险、充满期待</p>
+                    <div class="option-card" data-value="夏日激情">
+                        <span class="option-icon">☀️</span>
+                        <h4 class="option-title">夏日激情</h4>
+                        <p class="option-desc">如火焰般热烈，充满期待</p>
                     </div>
-                    <div class="option-card" data-value="平静放松">
-                                <span class="option-icon">😌</span>
-                                <h4 class="option-title">平静放松</h4>
-                                <p class="option-desc">需要舒缓、想要安静、寻求平衡</p>
+                    <div class="option-card" data-value="秋叶宁静">
+                        <span class="option-icon">🍂</span>
+                        <h4 class="option-title">秋叶宁静</h4>
+                        <p class="option-desc">如秋日般平和，寻求内心平衡</p>
                     </div>
-                    <div class="option-card" data-value="自信满满">
-                                <span class="option-icon">💪</span>
-                                <h4 class="option-title">自信满满</h4>
-                                <p class="option-desc">状态很好、充满能量、准备挑战</p>
+                    <div class="option-card" data-value="山峰自信">
+                        <span class="option-icon">⛰️</span>
+                        <h4 class="option-title">山峰自信</h4>
+                        <p class="option-desc">如高山般坚定，充满力量</p>
                     </div>
-                    <div class="option-card" data-value="深度思考">
-                                <span class="option-icon">🤔</span>
-                                <h4 class="option-title">深度思考</h4>
-                                <p class="option-desc">需要专注、创意工作、哲学思辨</p>
+                    <div class="option-card" data-value="深林沉思">
+                        <span class="option-icon">🌳</span>
+                        <h4 class="option-title">深林沉思</h4>
+                        <p class="option-desc">如古树般深邃，专注思考</p>
                     </div>
                 </div>
-                                                <!-- 自动推进，显示返回按钮 -->
-                        <div class="step-navigation">
-                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
             </div>
-                    </div>
+        </section>
 
-                    <!-- 步骤3: 材料选择 -->
+                            <!-- 材料选择区域 -->
+        <section class="choice-section" id="ingredientSection">
+            <div class="container">
+                <h2 class="section-title">🌿 选择天然材料</h2>
+                <p class="section-subtitle">选择你拥有或喜欢的自然原料</p>
+                <div class="ingredients-section">
+                    <div class="ingredient-category glass-card">
+                        <h4 class="category-title">🌾 天然基酒</h4>
+                        <div class="ingredient-list" data-category="spirits">
+                            <span class="ingredient-tag" data-value="有机威士忌">有机威士忌</span>
+                            <span class="ingredient-tag" data-value="土豆伏特加">土豆伏特加</span>
+                            <span class="ingredient-tag" data-value="杜松子酒">杜松子酒</span>
+                            <span class="ingredient-tag" data-value="甘蔗朗姆">甘蔗朗姆</span>
+                            <span class="ingredient-tag" data-value="龙舌兰酒">龙舌兰酒</span>
+                            <span class="ingredient-tag" data-value="果渣白兰地">果渣白兰地</span>
+                        </div>
+                    </div>
+                    <div class="ingredient-category glass-card">
+                        <h4 class="category-title">🍃 新鲜调料</h4>
+                        <div class="ingredient-list" data-category="mixers">
+                            <span class="ingredient-tag" data-value="鲜柠檬汁">鲜柠檬汁</span>
+                            <span class="ingredient-tag" data-value="青柠檬汁">青柠檬汁</span>
+                            <span class="ingredient-tag" data-value="新鲜橙汁">新鲜橙汁</span>
+                            <span class="ingredient-tag" data-value="气泡水">气泡水</span>
+                            <span class="ingredient-tag" data-value="汤力水">汤力水</span>
+                            <span class="ingredient-tag" data-value="薄荷叶">薄荷叶</span>
+                            <span class="ingredient-tag" data-value="蜂蜜">蜂蜜</span>
+                            <span class="ingredient-tag" data-value="枫糖浆">枫糖浆</span>
+                        </div>
+                    </div>
+                    <div class="ingredient-category glass-card">
+                        <h4 class="category-title">🥄 调酒工具</h4>
+                        <div class="ingredient-list" data-category="tools">
+                            <span class="ingredient-tag" data-value="调酒器">调酒器</span>
+                            <span class="ingredient-tag" data-value="量杯">量杯</span>
+                            <span class="ingredient-tag" data-value="搅拌棒">搅拌棒</span>
+                            <span class="ingredient-tag" data-value="滤网">滤网</span>
+                            <span class="ingredient-tag" data-value="冰块">冰块</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 获取推荐区域 -->
+        <section class="choice-section" id="recommendSection">
+            <div class="container">
+                <h2 class="section-title">🍃 获取你的自然调酒</h2>
+                <p class="section-subtitle">基于你的选择，为你调制完美的天然鸡尾酒</p>
+                <div style="text-align: center; margin: 3rem 0;">
+                    <button class="hero-cta" onclick="getRecommendation()">
+                        <span>🌿</span>
+                        开始调制
+                    </button>
+                </div>
+            </div>
+        </section>
                     <div class="step-content" id="step3">
                         <h3 class="step-title">选择可用材料</h3>
                         <p class="step-description">选择你目前拥有或容易获得的材料</p>
@@ -1152,18 +1213,18 @@
             });
         }
 
-                // 处理场景选择 - 自动推进
+                        // 处理场景选择
         function handleSceneSelection(e) {
             const card = e.target.closest('.option-card');
             if (!card) return;
             
-                // 清除其他选择
-                document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
-                    c.classList.remove('selected');
-                });
-                
-                // 选择当前卡片
-                card.classList.add('selected');
+            // 清除其他选择
+            document.querySelectorAll('#sceneOptions .option-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // 选择当前卡片
+            card.classList.add('selected');
             userInput.scene = card.dataset.value;
             
             // 添加选择动画
@@ -1171,27 +1232,22 @@
             setTimeout(() => {
                 card.style.transform = '';
             }, 200);
-            
-            // 1.5秒后自动进入下一步
-            setTimeout(() => {
-                nextStep();
-            }, 1500);
         }
 
-                // 处理心情选择 - 延迟自动推进
+                        // 处理心情选择
         function handleMoodSelection(e) {
             const card = e.target.closest('.option-card');
             if (!card) return;
             
-                const mood = card.dataset.value;
-                
-                if (card.classList.contains('selected')) {
-                    // 取消选择
-                    card.classList.remove('selected');
+            const mood = card.dataset.value;
+            
+            if (card.classList.contains('selected')) {
+                // 取消选择
+                card.classList.remove('selected');
                 userInput.moods = userInput.moods.filter(m => m !== mood);
             } else if (userInput.moods.length < 3) {
-                    // 添加选择
-                    card.classList.add('selected');
+                // 添加选择
+                card.classList.add('selected');
                 userInput.moods.push(mood);
                 
                 // 添加选择动画
@@ -1199,18 +1255,6 @@
                 setTimeout(() => {
                     card.style.transform = '';
                 }, 200);
-            }
-            
-            // 清除之前的定时器
-            if (window.moodTimer) {
-                clearTimeout(window.moodTimer);
-            }
-            
-            // 选择后2秒自动进入下一步
-            if (userInput.moods.length > 0) {
-                window.moodTimer = setTimeout(() => {
-                    nextStep();
-                }, 2000);
             }
         }
 
@@ -1253,10 +1297,8 @@
             userInput.preferences[slider.id] = value;
         }
 
-        // 开始推荐流程
-        function startRecommendation() {
-            // 重置状态
-            currentStep = 1;
+        // 重置所有选择
+        function resetSelections() {
             userInput = {
                 scene: '',
                 moods: [],
@@ -1265,31 +1307,12 @@
                 special_requirements: ''
             };
             
-            // 清除所有选择
+            // 清除所有选择状态
             document.querySelectorAll('.option-card').forEach(card => {
                 card.classList.remove('selected');
             });
             document.querySelectorAll('.ingredient-tag').forEach(tag => {
                 tag.classList.remove('selected');
-            });
-            
-            // 重置滑块
-            document.querySelectorAll('.slider').forEach(slider => {
-                slider.value = 50;
-            });
-            
-            // 清空文本框
-            document.getElementById('specialRequirements').value = '';
-            
-            // 显示推荐区域，隐藏其他区域
-            showSection('recommendationSection');
-            showStep(1);
-            updateStepProgress();
-            
-            // 滚动到推荐区域
-            document.getElementById('recommendationSection').scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
             });
         }
 
