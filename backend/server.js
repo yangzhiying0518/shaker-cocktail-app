@@ -2,6 +2,48 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const AIServiceFactory = require('./services/ai-service-factory');
+const StreamService = require('./services/stream-service');
+
+// 导入优化工具
+const connectionPool = require('./utils/connection-pool');
+const cacheManager = require('./utils/cache-manager');
+
+// 请求去重管理器
+class RequestDeduplicator {
+    constructor() {
+        this.activeRequests = new Map();
+    }
+
+    // 生成请求键
+    generateKey(userInput) {
+        return require('crypto').createHash('md5')
+            .update(JSON.stringify(userInput))
+            .digest('hex');
+    }
+
+    // 检查是否有相同的进行中请求
+    async deduplicateRequest(userInput, processor) {
+        const key = this.generateKey(userInput);
+        
+        // 如果已有相同请求在处理，等待结果
+        if (this.activeRequests.has(key)) {
+            console.log('🔄 [去重] 发现重复请求，等待结果:', key.substring(0, 12) + '...');
+            return await this.activeRequests.get(key);
+        }
+
+        // 创建新的请求Promise
+        const requestPromise = processor().finally(() => {
+            this.activeRequests.delete(key);
+        });
+
+        this.activeRequests.set(key, requestPromise);
+        console.log('🆕 [去重] 处理新请求:', key.substring(0, 12) + '...');
+        
+        return await requestPromise;
+    }
+}
+
+const requestDeduplicator = new RequestDeduplicator();
 
 // 加载环境变量
 dotenv.config();
@@ -17,212 +59,217 @@ app.use(cors({
 app.use(express.json());
 
 // 创建AI服务实例
-const aiProvider = process.env.AI_PROVIDER || 'coze'; // 默认使用Coze，可切换为volcano
+const aiProvider = process.env.AI_PROVIDER || 'volcano'; // 默认使用火山引擎
 const aiService = AIServiceFactory.createService(aiProvider);
+const streamService = new StreamService();
 
 console.log(`🤖 使用AI服务提供商: ${aiProvider.toUpperCase()}`);
 
-// 保持向后兼容的Coze服务类（用于现有代码）
-class CozeService {
-    constructor() {
-        this.apiKey = process.env.COZE_API_KEY;
-        this.botId = process.env.COZE_BOT_ID;
-        this.baseURL = process.env.COZE_API_BASE_URL;
-    }
 
-    async getCocktailRecommendation(userInput) {
-        try {
-            console.log('调用Coze API，用户输入:', JSON.stringify(userInput, null, 2));
-            
-            const response = await axios.post(
-                `${this.baseURL}/v3/chat`,
-                {
-                    bot_id: this.botId,
-                    user_id: `shaker-user-${Date.now()}`,
-                    stream: false,
-                    auto_save_history: false,
-                    additional_messages: [{
-                        role: "user",
-                        content: JSON.stringify(userInput),
-                        content_type: "text"
-                    }]
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${this.apiKey}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
 
-            console.log('Coze API响应状态:', response.status);
-            console.log('Coze API完整响应:', JSON.stringify(response.data, null, 2));
-            
-            // 尝试多种响应格式解析
-            if (response.data) {
-                let botContent = null;
-                
-                // 格式1: messages数组
-                if (response.data.messages && response.data.messages.length > 0) {
-                    const botMessage = response.data.messages.find(msg => msg.role === 'assistant' || msg.type === 'answer');
-                    if (botMessage) {
-                        botContent = botMessage.content;
-                        console.log('从messages找到内容:', botContent);
-                    }
-                }
-                
-                // 格式2: 直接在data中
-                if (!botContent && response.data.content) {
-                    botContent = response.data.content;
-                    console.log('从data.content找到内容:', botContent);
-                }
-                
-                // 格式3: 在data.data中
-                if (!botContent && response.data.data) {
-                    botContent = response.data.data;
-                    console.log('从data.data找到内容:', botContent);
-                }
-                
-                if (botContent) {
-                    try {
-                        // 如果是字符串，尝试JSON解析
-                        let recommendations;
-                        if (typeof botContent === 'string') {
-                            recommendations = JSON.parse(botContent);
-                        } else {
-                            recommendations = botContent;
-                        }
-                        
-                        // 验证推荐格式
-                        if (recommendations.recommendations && Array.isArray(recommendations.recommendations)) {
-                            console.log('成功解析AI推荐:', JSON.stringify(recommendations, null, 2));
-                            return recommendations;
-                        } else {
-                            console.log('推荐格式不正确, 使用备用方案');
-                            return this.getFallbackRecommendations(userInput);
-                        }
-                    } catch (parseError) {
-                        console.error('解析AI响应失败:', parseError);
-                        console.error('原始内容:', botContent);
-                        return this.getFallbackRecommendations(userInput);
-                    }
-                } else {
-                    console.log('没有找到有效的响应内容');
-                }
-            } else {
-                console.log('响应数据为空');
-            }
-            
-            return this.getFallbackRecommendations(userInput);
-        } catch (error) {
-            console.error('Coze API调用失败:', error.response?.data || error.message);
-            return this.getFallbackRecommendations(userInput);
-        }
-    }
-
-    getFallbackRecommendations(userInput) {
-        // 根据场景生成不同的推荐
-        const sceneRecommendations = {
-            "聚会派对": [
-                { name: "伏特加柠檬气泡", spirit: "伏特加", style: "清爽活力" },
-                { name: "威士忌苏打", spirit: "威士忌", style: "经典时尚" },
-                { name: "柠檬薄荷特调", spirit: "伏特加", style: "清新怡人" }
-            ],
-            "浪漫约会": [
-                { name: "威士忌蜂蜜", spirit: "威士忌", style: "温暖甜蜜" },
-                { name: "伏特加玫瑰", spirit: "伏特加", style: "浪漫优雅" },
-                { name: "经典马天尼", spirit: "伏特加", style: "成熟魅力" }
-            ],
-            "独处放松": [
-                { name: "威士忌纯饮", spirit: "威士忌", style: "深度品味" },
-                { name: "柠檬威士忌", spirit: "威士忌", style: "舒缓平静" },
-                { name: "伏特加橙汁", spirit: "伏特加", style: "轻松愉悦" }
-            ],
-            "深夜时光": [
-                { name: "深夜威士忌", spirit: "威士忌", style: "沉思专注" },
-                { name: "月光伏特加", spirit: "伏特加", style: "神秘优雅" },
-                { name: "夜猫子特调", spirit: "威士忌", style: "创意灵感" }
-            ]
-        };
-
-        const defaults = [
-            { name: "经典莫吉托", spirit: "朗姆酒", style: "经典清爽" },
-            { name: "伏特加柠檬", spirit: "伏特加", style: "简约时尚" },
-            { name: "威士忌苏打", spirit: "威士忌", style: "成熟稳重" }
-        ];
-
-        const recommendations = sceneRecommendations[userInput.scene] || defaults;
-        const selectedRec = recommendations[Math.floor(Math.random() * recommendations.length)];
-
-        return {
-            recommendations: [
-                {
-                    name: {
-                        chinese: selectedRec.name,
-                        english: selectedRec.name.replace(/[\u4e00-\u9fa5]/g, 'Classic Cocktail')
-                    },
-                    reason: `根据您的${userInput.scene}场景和${userInput.moods?.join('、') || '心情'}，推荐这款${selectedRec.style}的鸡尾酒`,
-                    recipe: {
-                        ingredients: [
-                            {"name": "白朗姆酒", "amount": "50ml"},
-                            {"name": "青柠汁", "amount": "30ml"},
-                            {"name": "薄荷叶", "amount": "8-10片"},
-                            {"name": "白糖", "amount": "2茶匙"},
-                            {"name": "苏打水", "amount": "适量"},
-                            {"name": "冰块", "amount": "适量"}
-                        ],
-                        tools: ["调酒器", "量杯"],
-                        difficulty: "简单"
-                    },
-                    instructions: [
-                        "在高球杯中放入薄荷叶和白糖，轻轻捣压释放薄荷香味",
-                        "加入青柠汁和朗姆酒，搅拌均匀",
-                        "填满冰块，用苏打水补至杯口",
-                        "用薄荷枝装饰"
-                    ],
-                    taste_profile: "清爽薄荷香配柠檬酸甜，口感轻盈",
-                    visual: "淡绿色透明酒液，薄荷叶点缀其中",
-                    prep_time: "5分钟",
-                    alcohol_content: "中度（约12%）",
-                    serving_temp: "冰饮",
-                    best_time: "适合任何时候饮用"
-                }
-            ]
-        };
-    }
-}
-
-const cozeService = new CozeService(); // 保持向后兼容
-
-// API路由
-app.post('/api/recommend', async (req, res) => {
+// 优化的流式推荐API - 添加缓存检查
+app.post('/api/stream-recommendation', async (req, res) => {
+    const startTime = Date.now();
+    
     try {
         const userInput = req.body;
         
-        // 验证必需字段
-        if (!userInput.scene || !userInput.moods || !userInput.ingredients) {
-            return res.status(400).json({
-                error: '缺少必需字段：scene, moods, ingredients'
-            });
+        // 不再强制验证字段，允许任意输入
+
+        console.log('🍸 收到流式推荐请求:', userInput);
+        
+        // 设置SSE响应头
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Cache-Control'
+        });
+
+        // 发送连接成功信号
+        res.write(`data: ${JSON.stringify({
+            type: 'connected',
+            message: 'Shaker开始为您分析...'
+        })}\n\n`);
+
+        // 检查缓存 - 如果有缓存，快速返回
+        const cachedResult = cacheManager.get(userInput);
+        if (cachedResult) {
+            const responseTime = Date.now() - startTime;
+            console.log(`⚡ [流式缓存命中] 响应时间: ${responseTime}ms`);
+            
+            // 模拟分析过程（快速版本）
+            res.write(`data: ${JSON.stringify({
+                type: 'segmented_analysis',
+                segments: [
+                    { title: '理解您的需求', content: '基于之前的分析，我已经了解您的偏好...', focus: 'scene' },
+                    { title: '准备推荐', content: '正在为您调制最适合的鸡尾酒...', focus: 'preparation' }
+                ]
+            })}\n\n`);
+            
+            setTimeout(() => {
+                res.write(`data: ${JSON.stringify({
+                    type: 'phase_transition',
+                    phase: 'recommendations',
+                    message: '分析完成，开始调制推荐...'
+                })}\n\n`);
+                
+                // 发送缓存的推荐结果
+                if (cachedResult.recommendations) {
+                    cachedResult.recommendations.forEach((recommendation, index) => {
+                        setTimeout(() => {
+                            res.write(`data: ${JSON.stringify({
+                                type: 'recommendation',
+                                index: index,
+                                content: { recommendations: [recommendation] },
+                                glassType: recommendation.glassType || '🍸'
+                            })}\n\n`);
+                        }, index * 800);
+                    });
+                    
+                    setTimeout(() => {
+                        res.write(`data: ${JSON.stringify({
+                            type: 'complete',
+                            message: '推荐完成（来自缓存）',
+                            cached: true
+                        })}\n\n`);
+                        res.end();
+                    }, cachedResult.recommendations.length * 800 + 500);
+                }
+            }, 1500);
+            
+            return;
         }
 
-        console.log('📥 收到推荐请求:', userInput);
-        console.log(`🤖 使用 ${aiProvider.toUpperCase()} 生成推荐...`);
-        
-        // 使用配置的AI服务
-        const recommendations = await aiService.getCocktailRecommendation(userInput);
-        
-        res.json({
-            success: true,
-            data: recommendations
+        // 使用去重处理流式请求
+        await requestDeduplicator.deduplicateRequest(userInput, async () => {
+            return new Promise((resolve, reject) => {
+                // 启动流式推荐服务
+                streamService.streamRecommendation(
+                    userInput,
+                    // onData - 数据回调
+                    (data) => {
+                        res.write(`data: ${JSON.stringify(data)}\n\n`);
+                    },
+                    // onError - 错误回调
+                    (error) => {
+                        console.error('❌ 流式推荐错误:', error);
+                        
+                        // 检查连接状态再写入
+                        if (!res.headersSent && !res.destroyed) {
+                            try {
+                                res.write(`data: ${JSON.stringify({
+                                    type: 'error',
+                                    message: `Shaker遇到了一些困难: ${error.message}`,
+                                    source: 'ai_service_error'
+                                })}\n\n`);
+                                res.end();
+                            } catch (writeError) {
+                                console.log('⚠️ 响应流已关闭，跳过错误写入');
+                            }
+                        }
+                        reject(error);
+                    },
+                    // onEnd - 结束回调
+                    () => {
+                        const responseTime = Date.now() - startTime;
+                        console.log(`✅ 流式推荐完成 (${responseTime}ms)`);
+                        res.write(`data: ${JSON.stringify({
+                            type: 'done',
+                            responseTime: responseTime
+                        })}\n\n`);
+                        res.end();
+                        resolve();
+                    }
+                );
+            });
         });
         
     } catch (error) {
-        console.error('API错误:', error);
+        console.error('流式API错误:', error);
+        res.write(`data: ${JSON.stringify({
+            type: 'error',
+            message: '服务器内部错误: ' + error.message
+        })}\n\n`);
+        res.end();
+    }
+});
+
+// 优化的推荐API - 添加缓存和去重
+app.post('/api/recommend', async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+        const userInput = req.body;
+        
+        // 不再强制验证字段，允许任意输入
+
+        console.log('📥 收到推荐请求:', userInput);
+        
+        // 1. 检查缓存
+        const cachedResult = cacheManager.get(userInput);
+        if (cachedResult) {
+            const responseTime = Date.now() - startTime;
+            console.log(`⚡ [缓存命中] 响应时间: ${responseTime}ms`);
+            
+            // 记录缓存命中
+            apiMonitor.record('/api/recommend', 'POST', responseTime, true, true, false);
+            
+            return res.json({
+                success: true,
+                data: cachedResult,
+                cached: true,
+                responseTime: responseTime
+            });
+        }
+
+        // 2. 请求去重处理
+        const result = await requestDeduplicator.deduplicateRequest(userInput, async () => {
+            console.log(`🤖 使用 ${aiProvider.toUpperCase()} 生成推荐...`);
+            
+            // 设置更短的超时时间
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('AI服务响应超时')), 25000) // 25秒超时
+            );
+            
+            const aiPromise = aiService.getCocktailRecommendation(userInput);
+            
+            const recommendations = await Promise.race([aiPromise, timeoutPromise]);
+            
+            // 3. 缓存结果
+            cacheManager.set(userInput, recommendations);
+            
+            return recommendations;
+        });
+        
+        const responseTime = Date.now() - startTime;
+        console.log(`✅ [推荐完成] 响应时间: ${responseTime}ms`);
+        
+        // 记录API性能
+        apiMonitor.record('/api/recommend', 'POST', responseTime, true, false, false);
+        
+        res.json({
+            success: true,
+            data: result,
+            cached: false,
+            responseTime: responseTime
+        });
+        
+    } catch (error) {
+        const responseTime = Date.now() - startTime;
+        console.error(`❌ API错误 (${responseTime}ms):`, error.message);
+        
+        // 不再使用降级方案，直接返回真实的AI服务错误
+        
+        // 记录API失败
+        apiMonitor.record('/api/recommend', 'POST', responseTime, false, false, false);
+        
         res.status(500).json({
             success: false,
-            error: '服务器内部错误',
-            message: error.message
+            error: '推荐服务暂时不可用',
+            message: error.message,
+            responseTime: responseTime
         });
     }
 });
@@ -234,6 +281,96 @@ app.get('/api/health', (req, res) => {
         message: 'Shaker API服务正常运行',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV
+    });
+});
+
+// API性能监控
+class APIMonitor {
+    constructor() {
+        this.requests = [];
+        this.maxRecords = 1000; // 保留最近1000条记录
+    }
+
+    record(endpoint, method, responseTime, success, cached = false) {
+        this.requests.push({
+            endpoint,
+            method,
+            responseTime,
+            success,
+            cached,
+            timestamp: new Date().toISOString()
+        });
+
+        // 限制记录数量
+        if (this.requests.length > this.maxRecords) {
+            this.requests = this.requests.slice(-this.maxRecords);
+        }
+    }
+
+    getStats() {
+        const recent = this.requests.slice(-100); // 最近100条
+        const successful = recent.filter(r => r.success);
+        const cached = recent.filter(r => r.cached);
+        
+        const avgResponseTime = recent.length > 0 
+            ? recent.reduce((sum, r) => sum + r.responseTime, 0) / recent.length 
+            : 0;
+
+        return {
+            totalRequests: this.requests.length,
+            recentRequests: recent.length,
+            successRate: recent.length > 0 ? (successful.length / recent.length * 100).toFixed(1) + '%' : '0%',
+            cacheHitRate: recent.length > 0 ? (cached.length / recent.length * 100).toFixed(1) + '%' : '0%',
+            avgResponseTime: Math.round(avgResponseTime) + 'ms',
+            lastUpdated: new Date().toISOString()
+        };
+    }
+}
+
+const apiMonitor = new APIMonitor();
+
+// 系统状态和统计端点
+app.get('/api/stats', (req, res) => {
+    const cacheStats = cacheManager.getStats();
+    const apiStats = apiMonitor.getStats();
+    
+    res.json({
+        success: true,
+        data: {
+            cache: cacheStats,
+            api: apiStats,
+            system: {
+                uptime: process.uptime(),
+                memory: process.memoryUsage(),
+                nodeVersion: process.version,
+                platform: process.platform
+            },
+            ai: {
+                provider: aiProvider.toUpperCase(),
+                connectionPoolReady: true
+            }
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
+// 缓存统计端点
+app.get('/api/cache/stats', (req, res) => {
+    const stats = cacheManager.getStats();
+    res.json({
+        success: true,
+        data: stats,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// 清空缓存端点
+app.post('/api/cache/clear', (req, res) => {
+    cacheManager.clear();
+    res.json({
+        success: true,
+        message: '缓存已清空',
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -274,9 +411,20 @@ app.use((req, res) => {
 });
 
 // 启动服务器
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`🚀 Shaker后端服务启动成功！`);
     console.log(`📡 服务地址: http://localhost:${PORT}`);
-    console.log(`🔧 环境: ${process.env.NODE_ENV}`);
-    console.log(`🤖 Coze Bot ID: ${process.env.COZE_BOT_ID}`);
+    console.log(`🔧 环境: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌋 火山引擎模型: ${process.env.VOLCANO_MODEL_ID || 'default_model'}`);
+    
+    // 初始化连接池
+    try {
+        await connectionPool.initialize();
+        console.log('🔥 连接池预热完成');
+    } catch (error) {
+        console.warn('⚠️ 连接池初始化失败:', error.message);
+    }
+    
+    // 显示缓存统计
+    console.log('💾 缓存管理器已就绪');
 });

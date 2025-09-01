@@ -54,10 +54,10 @@
 
 ### 3. 技术架构升级 ✅
 
-#### AI服务抽象化
-- **多provider支持**: Coze + 火山引擎
+#### AI服务架构
+- **火山引擎集成**: 企业级AI大模型服务
 - **工厂模式**: 统一的服务创建接口
-- **策略模式**: 灵活的服务切换机制
+- **流式推荐**: 支持实时流式AI响应
 - **降级方案**: 完整的fallback推荐系统
 
 #### 代码结构优化
@@ -65,8 +65,8 @@
 backend/services/
 ├── ai-service-factory.js    # 服务工厂
 ├── base-ai-service.js       # 基础抽象类
-├── coze-service.js          # Coze实现
-└── volcano-service.js       # 火山引擎实现
+├── volcano-service.js       # 火山引擎实现
+└── stream-service.js        # 流式推荐服务
 ```
 
 #### 配置灵活化
@@ -93,8 +93,8 @@ backend/services/
 
 ### AI服务集成
 ```javascript
-// 服务切换示例
-const aiProvider = process.env.AI_PROVIDER || 'coze';
+// 火山引擎服务创建
+const aiProvider = process.env.AI_PROVIDER || 'volcano';
 const aiService = AIServiceFactory.createService(aiProvider);
 ```
 
@@ -140,21 +140,23 @@ const aiService = AIServiceFactory.createService(aiProvider);
 
 ## 🔄 AI服务切换指南
 
-### 快速切换
+### 快速配置
 ```bash
-# 切换到火山引擎
+# 配置火山引擎
 echo "AI_PROVIDER=volcano" >> .env
 echo "VOLCANO_API_KEY=your_key" >> .env
+echo "VOLCANO_MODEL_ID=your_model_id" >> .env
 
-# 重启服务
-npm restart
+# 启动服务
+npm start
 ```
 
-### 配置对比
-| 服务商 | 环境变量 | 特点 |
+### 配置说明
+| 配置项 | 环境变量 | 说明 |
 |--------|----------|------|
-| Coze | `AI_PROVIDER=coze` | 专业聊天机器人 |
-| 火山引擎 | `AI_PROVIDER=volcano` | 企业级大模型 |
+| AI服务商 | `AI_PROVIDER=volcano` | 使用火山引擎作为AI服务提供商 |
+| API密钥 | `VOLCANO_API_KEY` | 火山引擎API访问密钥 |
+| 模型ID | `VOLCANO_MODEL_ID` | 指定使用的AI模型 |
 
 ---
 

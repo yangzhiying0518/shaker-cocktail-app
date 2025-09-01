@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaker故事性体验测试</title>
+    <link rel="stylesheet" href="frontend/css/styles.css">
+    <style>
+        body {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-container {
+            background: var(--bg-glass);
+            border: 2px solid var(--border-natural);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .test-button {
+            background: var(--forest-green);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: var(--forest-dark);
+            transform: translateY(-2px);
+        }
+        
+        .analysis-section {
+            min-height: 400px;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div class="test-container">
+        <h1 class="test-title">🧪 Shaker故事性体验测试</h1>
+        
+        <div class="test-controls">
+            <button class="test-button" onclick="testStoryAnalysis()">测试故事性分析</button>
+            <button class="test-button" onclick="testThoughtBubbles()">测试思考气泡</button>
+            <button class="test-button" onclick="testFullExperience()">测试完整体验</button>
+            <button class="test-button" onclick="clearTest()">清空测试</button>
+        </div>
+        
+        <div class="analysis-section" id="testAnalysisSection">
+            <div id="testAnalysisContent">
+                <p style="text-align: center; color: var(--text-muted);">点击上方按钮开始测试</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 模拟用户输入数据
+        const mockUserInput = {
+            scene: '浪漫约会',
+            moods: ['春日愉悦', '夏日激情'],
+            ingredients: {
+                spirits: ['威士忌', '伏特加'],
+                mixers: ['柠檬汁', '蔓越莓汁'],
+                tools: ['调酒器', '量杯']
+            },
+            preferences: {
+                alcohol_level: '中度',
+                sweetness: '微甜',
+                acidity: '适中',
+                style: '清爽'
+            },
+            special_requirements: '希望颜值高一些，适合拍照'
+        };
+
+        // 测试故事性分析
+        window.testStoryAnalysis = async function() {
+            const container = document.getElementById('testAnalysisContent');
+            container.innerHTML = '<p>正在加载故事性分析模块...</p>';
+            
+            try {
+                const { reviewCards } = await import('./frontend/js/review-card-generator.js');
+                
+                container.innerHTML = '';
+                const reviewContainer = document.createElement('div');
+                reviewContainer.className = 'review-cards-container';
+                container.appendChild(reviewContainer);
+                
+                await reviewCards.generateReviewSequence(
+                    mockUserInput,
+                    reviewContainer,
+                    (phase, current, total) => {
+                        console.log(`✅ 阶段 ${current}/${total} 完成: ${phase}`);
+                    }
+                );
+                
+                console.log('✅ 故事性分析测试完成');
+                
+            } catch (error) {
+                console.error('❌ 故事性分析测试失败:', error);
+                container.innerHTML = `<p style="color: red;">测试失败: ${error.message}</p>`;
+            }
+        };
+
+        // 测试思考气泡
+        window.testThoughtBubbles = async function() {
+            const container = document.getElementById('testAnalysisContent');
+            container.innerHTML = '<p>正在加载思考气泡模块...</p>';
+            
+            try {
+                const { thoughtBubbles } = await import('./frontend/js/thought-bubble-generator.js');
+                
+                // 创建Shaker头像容器
+                container.innerHTML = `
+                    <div class="shaker-container">
+                        <div class="shaker-avatar-wrapper">
+                            <div class="shaker-avatar">🧙‍♂️</div>
+                            <div class="thought-bubbles-container"></div>
+                        </div>
+                        <p style="text-align: center; margin-top: 20px;">观察Shaker的思考过程...</p>
+                    </div>
+                `;
+                
+                const bubbleContainer = container.querySelector('.thought-bubbles-container');
+                
+                // 测试不同阶段的思考气泡
+                const phases = ['review', 'analysis', 'anticipation', 'conclusion'];
+                
+                for (let i = 0; i < phases.length; i++) {
+                    const phase = phases[i];
+                    console.log(`🧠 测试 ${phase} 阶段思考气泡`);
+                    
+                    const sequence = thoughtBubbles.generateThoughtSequence(phase, 3000, mockUserInput);
+                    await thoughtBubbles.showThoughtSequence(bubbleContainer, sequence);
+                    
+                    // 阶段间停顿
+                    if (i < phases.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                
+                console.log('✅ 思考气泡测试完成');
+                
+            } catch (error) {
+                console.error('❌ 思考气泡测试失败:', error);
+                container.innerHTML = `<p style="color: red;">测试失败: ${error.message}</p>`;
+            }
+        };
+
+        // 测试完整体验
+        window.testFullExperience = async function() {
+            const container = document.getElementById('testAnalysisContent');
+            container.innerHTML = '<p>正在加载完整体验...</p>';
+            
+            try {
+                const { reviewCards } = await import('./frontend/js/review-card-generator.js');
+                const { thoughtBubbles } = await import('./frontend/js/thought-bubble-generator.js');
+                
+                // 清空容器
+                container.innerHTML = '';
+                
+                // 创建Shaker头像容器
+                const shakerContainer = document.createElement('div');
+                shakerContainer.className = 'shaker-container';
+                shakerContainer.innerHTML = `
+                    <div class="shaker-avatar-wrapper">
+                        <div class="shaker-avatar">🧙‍♂️</div>
+                        <div class="thought-bubbles-container"></div>
+                    </div>
+                `;
+                container.appendChild(shakerContainer);
+                
+                // 创建评论卡片容器
+                const reviewContainer = document.createElement('div');
+                reviewContainer.className = 'review-cards-container';
+                container.appendChild(reviewContainer);
+                
+                // 启动完整体验
+                await reviewCards.generateReviewSequence(
+                    mockUserInput,
+                    reviewContainer,
+                    async (phase, current, total) => {
+                        console.log(`📖 故事阶段 ${current}/${total}: ${phase}`);
+                        
+                        // 同时显示思考气泡
+                        const bubbleContainer = container.querySelector('.thought-bubbles-container');
+                        if (bubbleContainer) {
+                            const sequence = thoughtBubbles.generateThoughtSequence(phase, 2000, mockUserInput);
+                            thoughtBubbles.showThoughtSequence(bubbleContainer, sequence);
+                        }
+                    }
+                );
+                
+                console.log('✅ 完整体验测试完成');
+                
+            } catch (error) {
+                console.error('❌ 完整体验测试失败:', error);
+                container.innerHTML = `<p style="color: red;">测试失败: ${error.message}</p>`;
+            }
+        };
+
+        // 清空测试
+        window.clearTest = function() {
+            const container = document.getElementById('testAnalysisContent');
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">点击上方按钮开始测试</p>';
+        };
+    </script>
+</body>
+</html>

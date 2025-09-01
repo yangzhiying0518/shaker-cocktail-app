@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>流式测试</title>
+</head>
+<body>
+    <h1>Shaker流式推荐测试</h1>
+    <button onclick="testStream()">测试流式连接</button>
+    <div id="output" style="margin-top: 20px; padding: 20px; border: 1px solid #ccc; min-height: 200px; white-space: pre-wrap;"></div>
+
+    <script>
+        async function testStream() {
+            const output = document.getElementById('output');
+            output.innerHTML = '开始测试流式连接...\n';
+            
+            const requestData = {
+                scene: "独处放松",
+                moods: ["疲惫"],
+                ingredients: {
+                    spirits: ["威士忌"],
+                    mixers: ["柠檬汁"],
+                    tools: ["调酒器"]
+                },
+                preferences: {
+                    alcohol_level: "中度",
+                    sweetness: "适中",
+                    style: "温暖"
+                }
+            };
+
+            try {
+                const response = await fetch('http://localhost:3001/api/stream-recommendation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream',
+                        'Cache-Control': 'no-cache'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                output.innerHTML += `连接成功，状态: ${response.status}\n`;
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            output.innerHTML += '\n🏁 流式读取完成\n';
+                            return;
+                        }
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split('\n');
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    output.innerHTML += `📦 ${data.type}: ${JSON.stringify(data, null, 2)}\n\n`;
+                                    
+                                    // 特别处理思考片段
+                                    if (data.type === 'thought_segment') {
+                                        output.innerHTML += `🧠 思考${data.segment}: ${data.content}\n`;
+                                        output.innerHTML += `😊 情感: ${data.emotion}\n\n`;
+                                    }
+                                } catch (error) {
+                                    output.innerHTML += `❌ 解析错误: ${error.message}\n`;
+                                }
+                            }
+                        }
+
+                        readStream();
+                    }).catch(error => {
+                        output.innerHTML += `❌ 读取流失败: ${error.message}\n`;
+                    });
+                }
+
+                readStream();
+
+            } catch (error) {
+                output.innerHTML += `❌ 连接失败: ${error.message}\n`;
+            }
+        }
+    </script>
+</body>
+</html>

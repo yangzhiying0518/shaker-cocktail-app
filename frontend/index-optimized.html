@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaker - 智能鸡尾酒推荐专家</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1.2">
+</head>
+<body>
+    <!-- 森林背景动画 -->
+    <div class="bg-animation"></div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        
+        <!-- 进度指示器 -->
+        <div class="progress-indicator">
+            <div class="progress-fill"></div>
+        </div>
+
+        <!-- 首页 -->
+        <section class="hero-section" id="heroSection">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="forest-gradient-text">Shaker</span>
+                    </h1>
+                    <p class="hero-subtitle">智能鸡尾酒推荐专家</p>
+                    <p class="hero-description">
+                        基于AI的个性化鸡尾酒推荐<br>
+                        为您的每一个场景调制完美的那一杯
+                    </p>
+                </div>
+                <div class="hero-actions">
+                    <button class="cta-button" id="startButton">
+                        <span>开始推荐之旅</span>
+                        <span class="button-icon">🍸</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 场景选择 -->
+        <section class="choice-section" id="sceneSection">
+            <div class="section-header">
+                <h2 class="section-title">选择您的场景</h2>
+                <p class="section-subtitle">告诉我们您现在的情境</p>
+            </div>
+            <div class="scene-grid" id="sceneGrid">
+                <!-- 场景卡片将由JavaScript动态生成 -->
+            </div>
+            <div class="section-actions">
+                <button class="continue-button" id="sceneNextButton" disabled>
+                    继续 <span class="arrow">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 心情选择 -->
+        <section class="choice-section" id="moodSection">
+            <div class="section-header">
+                <h2 class="section-title">描述您的心情</h2>
+                <p class="section-subtitle">可以选择多个心情（最多3个）</p>
+            </div>
+            <div class="mood-grid" id="moodGrid">
+                <!-- 心情卡片将由JavaScript动态生成 -->
+            </div>
+            <div class="section-actions">
+                <button class="continue-button" id="moodNextButton" disabled>
+                    继续 <span class="arrow">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 材料选择 -->
+        <section class="choice-section" id="ingredientSection">
+            <div class="section-header">
+                <h2 class="section-title">选择可用材料</h2>
+                <p class="section-subtitle">告诉我们您手头有什么</p>
+            </div>
+            <div class="ingredients-container">
+                <div class="ingredient-category">
+                    <h3 class="category-title">基酒</h3>
+                    <div class="ingredient-tags" data-category="spirits" id="spiritsContainer">
+                        <!-- 基酒选项将由JavaScript动态生成 -->
+                    </div>
+                </div>
+                <div class="ingredient-category">
+                    <h3 class="category-title">调料</h3>
+                    <div class="ingredient-tags" data-category="mixers" id="mixersContainer">
+                        <!-- 调料选项将由JavaScript动态生成 -->
+                    </div>
+                </div>
+                <div class="ingredient-category">
+                    <h3 class="category-title">工具</h3>
+                    <div class="ingredient-tags" data-category="tools" id="toolsContainer">
+                        <!-- 工具选项将由JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="section-actions">
+                <button class="continue-button" id="ingredientNextButton">
+                    继续 <span class="arrow">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 偏好设置 -->
+        <section class="choice-section" id="preferenceSection">
+            <div class="section-header">
+                <h2 class="section-title">设置口味偏好</h2>
+                <p class="section-subtitle">调节您的个人喜好</p>
+            </div>
+            <div class="preference-container">
+                <div class="preference-item">
+                    <label class="preference-label">
+                        <span class="label-text">酒精度</span>
+                        <span class="label-value" id="alcoholLevelValue">中度</span>
+                    </label>
+                    <input type="range" class="preference-slider" id="alcoholLevelSlider" 
+                           min="0" max="100" value="50" data-preference="alcohol_level">
+                    <div class="slider-labels">
+                        <span>低度</span>
+                        <span>中度</span>
+                        <span>高度</span>
+                    </div>
+                </div>
+                
+                <div class="preference-item">
+                    <label class="preference-label">
+                        <span class="label-text">甜度</span>
+                        <span class="label-value" id="sweetnessValue">微甜</span>
+                    </label>
+                    <input type="range" class="preference-slider" id="sweetnessSlider" 
+                           min="0" max="100" value="50" data-preference="sweetness">
+                    <div class="slider-labels">
+                        <span>不甜</span>
+                        <span>微甜</span>
+                        <span>很甜</span>
+                    </div>
+                </div>
+                
+                <div class="preference-item">
+                    <label class="preference-label">
+                        <span class="label-text">酸度</span>
+                        <span class="label-value" id="acidityValue">适中</span>
+                    </label>
+                    <input type="range" class="preference-slider" id="aciditySlider" 
+                           min="0" max="100" value="50" data-preference="acidity">
+                    <div class="slider-labels">
+                        <span>不酸</span>
+                        <span>适中</span>
+                        <span>很酸</span>
+                    </div>
+                </div>
+
+                <div class="style-selection">
+                    <h3 class="style-title">口感风格</h3>
+                    <div class="style-grid" id="styleGrid">
+                        <!-- 风格选项将由JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="section-actions">
+                <button class="continue-button" id="preferenceNextButton">
+                    继续 <span class="arrow">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 特殊要求 -->
+        <section class="choice-section" id="requirementSection">
+            <div class="section-header">
+                <h2 class="section-title">特殊要求</h2>
+                <p class="section-subtitle">还有什么特别的需求吗？（可选）</p>
+            </div>
+            <div class="requirement-container">
+                <textarea class="requirement-input" id="requirementInput" 
+                          placeholder="例如：希望颜值高一些、适合拍照、想要创新口味..."></textarea>
+            </div>
+            <div class="section-actions">
+                <button class="generate-button" id="generateButton">
+                    <span class="button-text">🧙‍♂️ 开始调制推荐</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Shaker分析区域 -->
+        <section class="shaker-analysis-section" id="shakerAnalysisSection">
+            <div class="analysis-container">
+                <div class="shaker-avatar">🧙‍♂️</div>
+                <h2 class="section-title" id="analysisTitle">Shaker正在理解您的需求...</h2>
+                <div class="analysis-content" id="analysisContent">
+                    <!-- 分析内容将动态显示 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 推荐结果展示区域 -->
+        <section class="recommendation-display-section" id="recommendationDisplaySection">
+            <div class="recommendation-container">
+                <div class="cocktail-cards-grid" id="cocktailCardsGrid">
+                    <!-- 三个鸡尾酒卡片将在这里动态生成 -->
+                </div>
+                <div class="recommendation-actions">
+                    <button class="restart-button" id="restartButton">
+                        重新开始 <span class="icon">🔄</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="cocktailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 详细内容将动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-message" id="loadingMessage">正在处理...</div>
+        </div>
+    </div>
+
+    <!-- JavaScript模块 -->
+    <script type="module">
+        // 导入模块
+        import { APP_CONFIG, OPTIONS_DATA, INGREDIENTS_DATA, UI_TEXT } from './js/app-config.js';
+        import { appState } from './js/app-state.js';
+        import { api } from './js/api-client.js';
+        import { UIComponent, AnimationUtils, Toast, Modal, Loading, UIUtils } from './js/ui-components.js';
+
+        // 全局应用对象
+        class ShakerApp {
+            constructor() {
+                this.currentSection = 0;
+                this.sections = APP_CONFIG.SECTIONS;
+                this.isTransitioning = false;
+                this.init();
+            }
+
+            async init() {
+                console.log('🚀 Shaker应用初始化...');
+                
+                // 初始化组件
+                this.initializeComponents();
+                
+                // 设置事件监听器
+                this.setupEventListeners();
+                
+                // 生成选项
+                this.generateOptions();
+                
+                // 设置状态监听
+                this.setupStateListeners();
+                
+                // 初始化UI
+                this.updateUI();
+                
+                console.log('✅ Shaker应用初始化完成');
+            }
+
+            initializeComponents() {
+                // 初始化模态框
+                this.modal = new Modal('#cocktailModal');
+                
+                // 初始化加载组件
+                this.loading = new Loading('#loadingOverlay');
+                
+                // 初始化进度条
+                this.updateProgressBar();
+            }
+
+            setupEventListeners() {
+                // 开始按钮
+                document.getElementById('startButton')?.addEventListener('click', () => {
+                    this.navigateToSection('sceneSection');
+                });
+
+                // 继续按钮
+                document.getElementById('sceneNextButton')?.addEventListener('click', () => {
+                    this.navigateToSection('moodSection');
+                });
+
+                document.getElementById('moodNextButton')?.addEventListener('click', () => {
+                    this.navigateToSection('ingredientSection');
+                });
+
+                document.getElementById('ingredientNextButton')?.addEventListener('click', () => {
+                    this.navigateToSection('preferenceSection');
+                });
+
+                document.getElementById('preferenceNextButton')?.addEventListener('click', () => {
+                    this.navigateToSection('requirementSection');
+                });
+
+                // 生成推荐按钮
+                document.getElementById('generateButton')?.addEventListener('click', () => {
+                    this.generateRecommendations();
+                });
+
+                // 重新开始按钮
+                document.getElementById('restartButton')?.addEventListener('click', () => {
+                    this.restart();
+                });
+
+                // 滚动事件
+                window.addEventListener('scroll', UIUtils.throttle(() => {
+                    this.updateProgressBar();
+                }, 100));
+
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        this.generateRecommendations();
+                    }
+                });
+            }
+
+            generateOptions() {
+                // 生成场景选项
+                this.generateSceneOptions();
+                
+                // 生成心情选项
+                this.generateMoodOptions();
+                
+                // 生成材料选项
+                this.generateIngredientOptions();
+                
+                // 生成风格选项
+                this.generateStyleOptions();
+            }
+
+            generateSceneOptions() {
+                const container = document.getElementById('sceneGrid');
+                if (!container) return;
+
+                container.innerHTML = OPTIONS_DATA.SCENES.map(scene => `
+                    <div class="scene-card" data-value="${scene.value}">
+                        <div class="card-icon">${scene.icon}</div>
+                        <div class="card-content">
+                            <h3 class="card-title">${scene.label}</h3>
+                            <p class="card-description">${scene.description}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // 添加点击事件
+                container.addEventListener('click', (e) => {
+                    this.handleSceneSelection(e);
+                });
+            }
+
+            generateMoodOptions() {
+                const container = document.getElementById('moodGrid');
+                if (!container) return;
+
+                container.innerHTML = OPTIONS_DATA.MOODS.map(mood => `
+                    <div class="mood-card" data-value="${mood.value}">
+                        <div class="card-icon">${mood.icon}</div>
+                        <div class="card-content">
+                            <h3 class="card-title">${mood.label}</h3>
+                            <p class="card-description">${mood.description}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // 添加点击事件
+                container.addEventListener('click', (e) => {
+                    this.handleMoodSelection(e);
+                });
+            }
+
+            generateIngredientOptions() {
+                // 生成各类材料选项
+                Object.entries(INGREDIENTS_DATA).forEach(([category, items]) => {
+                    const container = document.getElementById(`${category}Container`);
+                    if (!container) return;
+
+                    container.innerHTML = items.map(item => `
+                        <div class="ingredient-tag" data-value="${item}">
+                            <span class="tag-text">${item}</span>
+                        </div>
+                    `).join('');
+
+                    // 添加点击事件
+                    container.addEventListener('click', (e) => {
+                        this.handleIngredientSelection(e, category);
+                    });
+                });
+            }
+
+            generateStyleOptions() {
+                const container = document.getElementById('styleGrid');
+                if (!container) return;
+
+                container.innerHTML = OPTIONS_DATA.STYLES.map(style => `
+                    <div class="style-card" data-value="${style.value}">
+                        <div class="card-icon">${style.icon}</div>
+                        <div class="card-content">
+                            <h3 class="card-title">${style.label}</h3>
+                            <p class="card-description">${style.description}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // 添加点击事件
+                container.addEventListener('click', (e) => {
+                    this.handleStyleSelection(e);
+                });
+
+                // 设置滑块事件
+                this.setupSliderEvents();
+            }
+
+            setupSliderEvents() {
+                const sliders = document.querySelectorAll('.preference-slider');
+                sliders.forEach(slider => {
+                    slider.addEventListener('input', (e) => {
+                        this.handlePreferenceChange(e);
+                    });
+                });
+            }
+
+            setupStateListeners() {
+                // 监听状态变化来更新UI
+                appState.subscribe('userInput.scene', (value) => {
+                    this.updateSceneUI(value);
+                    this.updateNextButton('sceneNextButton', !!value);
+                });
+
+                appState.subscribe('userInput.moods', (value) => {
+                    this.updateMoodUI(value);
+                    this.updateNextButton('moodNextButton', value && value.length > 0);
+                });
+
+                appState.subscribe('userInput.preferences', (value) => {
+                    this.updatePreferenceUI(value);
+                });
+            }
+
+            // 事件处理方法
+            handleSceneSelection(e) {
+                const card = e.target.closest('.scene-card');
+                if (!card) return;
+
+                const scene = card.dataset.value;
+                
+                // 更新状态
+                appState.set('userInput.scene', scene);
+                
+                // 更新UI
+                document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            }
+
+            handleMoodSelection(e) {
+                const card = e.target.closest('.mood-card');
+                if (!card) return;
+
+                const mood = card.dataset.value;
+                const currentMoods = appState.get('userInput.moods') || [];
+                
+                if (card.classList.contains('selected')) {
+                    // 取消选择
+                    appState.removeFromArray('userInput.moods', mood);
+                    card.classList.remove('selected');
+                } else {
+                    // 选择（最多3个）
+                    if (currentMoods.length < APP_CONFIG.MAX_MOODS) {
+                        appState.addToArray('userInput.moods', mood);
+                        card.classList.add('selected');
+                    } else {
+                        Toast.warning(`最多只能选择${APP_CONFIG.MAX_MOODS}个心情`);
+                    }
+                }
+            }
+
+            handleIngredientSelection(e, category) {
+                const tag = e.target.closest('.ingredient-tag');
+                if (!tag) return;
+
+                const ingredient = tag.dataset.value;
+                const path = `userInput.ingredients.${category}`;
+                
+                if (tag.classList.contains('selected')) {
+                    appState.removeFromArray(path, ingredient);
+                    tag.classList.remove('selected');
+                } else {
+                    appState.addToArray(path, ingredient);
+                    tag.classList.add('selected');
+                }
+            }
+
+            handleStyleSelection(e) {
+                const card = e.target.closest('.style-card');
+                if (!card) return;
+
+                const style = card.dataset.value;
+                
+                // 更新状态
+                appState.set('userInput.preferences.style', style);
+                
+                // 更新UI
+                document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            }
+
+            handlePreferenceChange(e) {
+                const slider = e.target;
+                const preference = slider.dataset.preference;
+                const value = parseInt(slider.value);
+                
+                // 更新状态
+                appState.set(`userInput.preferences.${preference}`, value);
+                
+                // 更新显示
+                this.updatePreferenceValue(preference, value);
+            }
+
+            // UI更新方法
+            updateSceneUI(scene) {
+                // 可以在这里添加场景相关的UI更新
+            }
+
+            updateMoodUI(moods) {
+                // 可以在这里添加心情相关的UI更新
+            }
+
+            updatePreferenceUI(preferences) {
+                if (!preferences) return;
+                
+                Object.entries(preferences).forEach(([key, value]) => {
+                    if (typeof value === 'number') {
+                        this.updatePreferenceValue(key, value);
+                    }
+                });
+            }
+
+            updatePreferenceValue(preference, value) {
+                const valueElement = document.getElementById(`${preference}Value`);
+                if (!valueElement) return;
+
+                let text = '';
+                switch (preference) {
+                    case 'alcohol_level':
+                        text = value < 33 ? '低度' : value < 67 ? '中度' : '高度';
+                        break;
+                    case 'sweetness':
+                        text = value < 33 ? '不甜' : value < 67 ? '微甜' : '很甜';
+                        break;
+                    case 'acidity':
+                        text = value < 33 ? '不酸' : value < 67 ? '适中' : '很酸';
+                        break;
+                }
+                
+                valueElement.textContent = text;
+            }
+
+            updateNextButton(buttonId, enabled) {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.disabled = !enabled;
+                    button.classList.toggle('enabled', enabled);
+                }
+            }
+
+            // 导航方法
+            navigateToSection(sectionId) {
+                if (this.isTransitioning) return;
+                
+                this.isTransitioning = true;
+                const targetSection = document.getElementById(sectionId);
+                
+                if (targetSection) {
+                    UIUtils.scrollToElement(targetSection, -100);
+                    this.currentSection = this.sections.indexOf(sectionId);
+                    this.updateProgressBar();
+                }
+                
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                }, 1000);
+            }
+
+            updateProgressBar() {
+                const indicator = document.querySelector('.progress-indicator .progress-fill');
+                if (!indicator) return;
+
+                const progress = (this.currentSection / (this.sections.length - 1)) * 100;
+                indicator.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+            }
+
+            // 推荐生成 - 集成故事性体验
+            async generateRecommendations() {
+                const validation = appState.validateUserInput();
+                if (!validation.isValid) {
+                    Toast.error(`请完成必填项：${validation.missing.join(', ')}`);
+                    return;
+                }
+
+                // 获取特殊要求
+                const requirementInput = document.getElementById('requirementInput');
+                if (requirementInput) {
+                    appState.set('userInput.special_requirements', requirementInput.value.trim());
+                }
+
+                const requestData = appState.getRecommendationData();
+                
+                try {
+                    // 显示分析区域
+                    this.showAnalysisSection();
+                    
+                    // 启动故事性分析体验
+                    await this.startStoryAnalysisExperience(requestData);
+                    
+                    // 然后启动AI推荐
+                    await api.getStreamRecommendation(requestData, {
+                        onData: (data) => this.handleStreamData(data),
+                        onError: (error) => this.handleStreamError(error),
+                        onComplete: () => this.handleStreamComplete()
+                    });
+
+                } catch (error) {
+                    console.error('❌ 推荐生成失败:', error);
+                    Toast.error('推荐服务暂时不可用，请稍后重试');
+                }
+            }
+
+            // 启动故事性分析体验
+            async startStoryAnalysisExperience(userInput) {
+                const analysisContainer = document.getElementById('analysisContent');
+                if (!analysisContainer) return;
+
+                try {
+                    // 动态导入故事性分析模块
+                    const { reviewCards } = await import('./js/review-card-generator.js');
+                    const { thoughtBubbles } = await import('./js/thought-bubble-generator.js');
+                    
+                    // 清空分析容器
+                    analysisContainer.innerHTML = '';
+                    
+                    // 创建Shaker头像容器（用于思考气泡）
+                    const shakerContainer = document.createElement('div');
+                    shakerContainer.className = 'shaker-container';
+                    shakerContainer.innerHTML = `
+                        <div class="shaker-avatar-wrapper">
+                            <div class="shaker-avatar">🧙‍♂️</div>
+                            <div class="thought-bubbles-container"></div>
+                        </div>
+                    `;
+                    analysisContainer.appendChild(shakerContainer);
+                    
+                    // 创建评论卡片容器
+                    const reviewContainer = document.createElement('div');
+                    reviewContainer.className = 'review-cards-container';
+                    analysisContainer.appendChild(reviewContainer);
+                    
+                    // 启动故事性分析序列
+                    await reviewCards.generateReviewSequence(
+                        userInput, 
+                        reviewContainer,
+                        (phase, current, total) => {
+                            // 每个阶段完成时显示思考气泡
+                            this.showThoughtBubblesForPhase(phase, userInput);
+                        }
+                    );
+                    
+                    console.log('✅ 故事性分析体验完成');
+                    
+                } catch (error) {
+                    console.error('❌ 故事性分析失败:', error);
+                    // 降级到原有的简单分析
+                    this.fallbackToSimpleAnalysis(analysisContainer, userInput);
+                }
+            }
+
+            // 为指定阶段显示思考气泡
+            async showThoughtBubblesForPhase(phase, userInput) {
+                const bubbleContainer = document.querySelector('.thought-bubbles-container');
+                if (!bubbleContainer) return;
+
+                try {
+                    const { thoughtBubbles } = await import('./js/thought-bubble-generator.js');
+                    
+                    // 生成该阶段的思考气泡序列
+                    const sequence = thoughtBubbles.generateThoughtSequence(phase, 2000, userInput);
+                    
+                    // 显示思考气泡
+                    await thoughtBubbles.showThoughtSequence(bubbleContainer, sequence);
+                    
+                } catch (error) {
+                    console.warn('⚠️ 思考气泡显示失败:', error);
+                }
+            }
+
+            // 降级到简单分析
+            fallbackToSimpleAnalysis(container, userInput) {
+                container.innerHTML = `
+                    <div class="simple-analysis">
+                        <div class="shaker-avatar">🧙‍♂️</div>
+                        <p class="analysis-text">正在为你分析需求并调制专属鸡尾酒...</p>
+                    </div>
+                `;
+            }
+
+            showAnalysisSection() {
+                const section = document.getElementById('shakerAnalysisSection');
+                if (section) {
+                    section.style.display = 'block';
+                    UIUtils.scrollToElement(section, -50);
+                }
+            }
+
+            handleStreamData(data) {
+                switch (data.type) {
+                    case 'connected':
+                        console.log('🔗 流式连接成功');
+                        break;
+                        
+                    case 'segmented_analysis':
+                        this.handleSegmentedAnalysis(data);
+                        break;
+                        
+                    case 'phase_transition':
+                        this.handlePhaseTransition(data);
+                        break;
+                        
+                    case 'recommendation':
+                        this.handleRecommendation(data);
+                        break;
+                        
+                    case 'complete':
+                        this.handleStreamComplete();
+                        break;
+                        
+                    case 'error':
+                        this.handleStreamError(new Error(data.message));
+                        break;
+                }
+            }
+
+            async handleSegmentedAnalysis(data) {
+                if (!data.segments) return;
+
+                const analysisContent = document.getElementById('analysisContent');
+                const analysisTitle = document.getElementById('analysisTitle');
+
+                for (let i = 0; i < data.segments.length; i++) {
+                    const segment = data.segments[i];
+                    
+                    // 更新标题
+                    if (analysisTitle) {
+                        analysisTitle.textContent = segment.title;
+                    }
+                    
+                    // 打字机效果显示内容
+                    if (analysisContent) {
+                        await AnimationUtils.typeWriter(analysisContent, segment.content);
+                        await new Promise(resolve => setTimeout(resolve, 2000)); // 停顿2秒
+                    }
+                }
+            }
+
+            handlePhaseTransition(data) {
+                // 显示推荐结果区域
+                const recommendationSection = document.getElementById('recommendationDisplaySection');
+                if (recommendationSection) {
+                    recommendationSection.style.display = 'block';
+                    UIUtils.scrollToElement(recommendationSection, -50);
+                }
+            }
+
+            handleRecommendation(data) {
+                console.log('🍸 收到推荐数据:', data);
+                
+                if (data.content && data.content.recommendations) {
+                    const recommendation = data.content.recommendations[0];
+                    const index = data.index || 0;
+                    
+                    // 存储推荐数据，等待展示
+                    if (!this.pendingRecommendations) {
+                        this.pendingRecommendations = [];
+                    }
+                    this.pendingRecommendations[index] = recommendation;
+                    
+                    console.log(`📦 存储第${index + 1}个推荐:`, recommendation.name?.chinese);
+                }
+            }
+
+            // 展示推荐卡片
+            async displayRecommendationCards() {
+                console.log('🎨 开始展示推荐卡片');
+                
+                const cardsGrid = document.getElementById('cocktailCardsGrid');
+                if (!cardsGrid) {
+                    console.error('❌ 找不到卡片容器');
+                    return;
+                }
+                
+                // 清空容器
+                cardsGrid.innerHTML = '';
+                
+                // 逐个创建和展示卡片
+                for (let i = 0; i < Math.min(this.pendingRecommendations.length, 3); i++) {
+                    const recommendation = this.pendingRecommendations[i];
+                    if (recommendation) {
+                        const card = this.createCocktailCard(recommendation, i);
+                        cardsGrid.appendChild(card);
+                        
+                        // 延迟显示每个卡片，营造逐个出现的效果
+                        setTimeout(() => {
+                            this.animateCardAppearance(card, i);
+                        }, i * 300);
+                    }
+                }
+                
+                console.log('✅ 推荐卡片展示完成');
+            }
+            
+            // 创建鸡尾酒卡片
+            createCocktailCard(recommendation, index) {
+                const card = document.createElement('div');
+                card.className = 'cocktail-card';
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                // 解析推荐数据
+                const name = recommendation.name?.chinese || recommendation.chinese || '神秘鸡尾酒';
+                const englishName = recommendation.name?.english || recommendation.english || 'Mystery Cocktail';
+                const reason = recommendation.reason || '为您精心调制';
+                const alcoholContent = recommendation.alcohol_content || '适中(约15%)';
+                const prepTime = recommendation.prep_time || '5分钟';
+                const difficulty = recommendation.recipe?.difficulty || '简单';
+                const tasteProfile = recommendation.taste_profile || '口感平衡，层次丰富';
+                
+                // 处理材料列表
+                const ingredients = recommendation.recipe?.ingredients || recommendation.ingredients || [];
+                const ingredientTags = ingredients.slice(0, 4).map(ing => {
+                    if (typeof ing === 'string') return ing;
+                    return `${ing.name || ing} ${ing.amount || ''}`.trim();
+                }).filter(Boolean);
+                
+                card.innerHTML = `
+                    <div class="alcohol-badge">${alcoholContent}</div>
+                    
+                    <div class="cocktail-title" data-text="${name}"></div>
+                    <div class="cocktail-subtitle" data-text="${englishName}"></div>
+                    
+                    <div class="recommendation-reason">
+                        <span class="reason-icon">✓</span>
+                        <div class="reason-text" data-text="推荐理由：${reason}"></div>
+                    </div>
+                    
+                    <div class="ingredients-section">
+                        <div class="ingredients-header">
+                            <span class="ingredients-icon">✓</span>
+                            <span class="ingredients-label">主要材料：</span>
+                        </div>
+                        <div class="ingredients-tags">
+                            ${ingredientTags.map(ingredient => 
+                                `<span class="ingredient-tag">${ingredient}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="taste-section">
+                        <div class="taste-header">
+                            <span class="taste-icon">🌸</span>
+                            <span class="taste-label">口感特点：</span>
+                        </div>
+                        <div class="taste-description" data-text="${tasteProfile}"></div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">⏱</span>
+                                <span>${prepTime}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">📊</span>
+                                <span>${difficulty}</span>
+                            </div>
+                        </div>
+                        <button class="view-details-btn" data-recommendation='${JSON.stringify(recommendation)}'>
+                            查看详情
+                        </button>
+                    </div>
+                `;
+                
+                // 添加详情按钮事件
+                const detailsBtn = card.querySelector('.view-details-btn');
+                detailsBtn?.addEventListener('click', () => {
+                    this.showCocktailDetails(recommendation);
+                });
+                
+                return card;
+            }
+            
+            // 卡片出现动画
+            async animateCardAppearance(card, index) {
+                // 卡片淡入
+                card.style.transition = 'all 0.6s ease-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+                
+                // 等待卡片动画完成
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                // 开始打字机效果
+                await this.startTypingEffect(card);
+            }
+            
+            // 打字机效果
+            async startTypingEffect(card) {
+                const elementsToType = card.querySelectorAll('[data-text]');
+                
+                for (const element of elementsToType) {
+                    const text = element.getAttribute('data-text');
+                    element.removeAttribute('data-text');
+                    element.textContent = '';
+                    
+                    // 打字机效果
+                    await this.typeText(element, text, 30); // 30ms per character
+                    
+                    // 每个元素之间稍作停顿
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+            }
+            
+            // 打字机文本效果
+            async typeText(element, text, speed = 50) {
+                return new Promise(resolve => {
+                    let i = 0;
+                    const timer = setInterval(() => {
+                        element.textContent = text.slice(0, i + 1);
+                        i++;
+                        
+                        if (i >= text.length) {
+                            clearInterval(timer);
+                            resolve();
+                        }
+                    }, speed);
+                });
+            }
+            
+            // 显示鸡尾酒详情
+            showCocktailDetails(recommendation) {
+                if (!this.modal) return;
+
+                const content = this.generateCocktailDetailsHTML(recommendation);
+                this.modal.setContent(content).open();
+                
+                // 更新模态框标题
+                const title = document.getElementById('modalTitle');
+                if (title) {
+                    title.textContent = recommendation.name?.chinese || '鸡尾酒详情';
+                }
+            }
+
+            generateCocktailDetailsHTML(recommendation) {
+                return `
+                    <div class="cocktail-details">
+                        <div class="cocktail-info">
+                            <h3>${recommendation.name?.chinese || '鸡尾酒'}</h3>
+                            <p class="english-name">${recommendation.name?.english || ''}</p>
+                            <p class="reason">${recommendation.reason || ''}</p>
+                        </div>
+                        
+                        <div class="recipe-section">
+                            <h4>📝 配方</h4>
+                            <ul class="ingredients-list">
+                                ${recommendation.recipe?.ingredients?.map(ing => 
+                                    `<li>${typeof ing === 'string' ? ing : `${ing.name}: ${ing.amount}`}</li>`
+                                ).join('') || ''}
+                            </ul>
+                        </div>
+                        
+                        <div class="instructions-section">
+                            <h4>🧪 制作步骤</h4>
+                            <ol class="instructions-list">
+                                ${recommendation.instructions?.map(step => 
+                                    `<li>${step}</li>`
+                                ).join('') || ''}
+                            </ol>
+                        </div>
+                        
+                        <div class="meta-info">
+                            <div class="meta-item">
+                                <span class="label">制作时间:</span>
+                                <span class="value">${recommendation.prep_time || '未知'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="label">酒精度:</span>
+                                <span class="value">${recommendation.alcohol_content || '未知'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="label">口感:</span>
+                                <span class="value">${recommendation.taste_profile || '未知'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            handleStreamError(error) {
+                console.error('❌ 流式推荐错误:', error);
+                Toast.error('推荐过程中出现错误: ' + error.message);
+            }
+
+            handleStreamComplete() {
+                console.log('✅ 流式推荐完成');
+                
+                // 开始展示推荐卡片
+                if (this.pendingRecommendations && this.pendingRecommendations.length > 0) {
+                    this.displayRecommendationCards();
+                } else {
+                    console.warn('⚠️ 没有推荐数据可展示');
+                    Toast.error('推荐数据获取失败，请重试');
+                }
+            }
+
+            restart() {
+                // 重置状态
+                appState.reset();
+                
+                // 清理推荐数据
+                this.pendingRecommendations = [];
+                
+                // 重置UI
+                this.currentSection = 0;
+                this.updateProgressBar();
+                
+                // 清除选择状态
+                document.querySelectorAll('.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // 重置按钮状态
+                document.querySelectorAll('.continue-button').forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove('enabled');
+                });
+                
+                // 隐藏分析和推荐区域
+                document.getElementById('shakerAnalysisSection').style.display = 'none';
+                document.getElementById('recommendationDisplaySection').style.display = 'none';
+                
+                // 清空内容
+                document.getElementById('requirementInput').value = '';
+                document.getElementById('cocktailCardsGrid').innerHTML = '';
+                
+                // 滚动到顶部
+                UIUtils.scrollToElement(document.getElementById('heroSection'));
+                
+                Toast.info('已重新开始');
+            }
+
+            updateUI() {
+                // 初始化时的UI设置
+                this.updateProgressBar();
+                
+                // 隐藏非初始区域
+                document.getElementById('shakerAnalysisSection').style.display = 'none';
+                document.getElementById('recommendationDisplaySection').style.display = 'none';
+            }
+        }
+
+        // 启动应用
+        const app = new ShakerApp();
+        
+        // 暴露到全局供调试
+        if (typeof window !== 'undefined') {
+            window.shakerApp = app;
+        }
+    </script>
+</body>
+</html>

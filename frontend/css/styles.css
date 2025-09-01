@@ -1,0 +1,1286 @@
+/**
+ * Shaker 优化样式文件
+ * 保持原有设计风格，提升代码组织性
+ */
+
+/* ===== CSS变量定义 ===== */
+:root {
+    /* 森林主题色调 - 绿意清新温暖 */
+    --primary-gradient: linear-gradient(135deg, #2d5016 0%, #4a7c59 50%, #8fbc8f 100%);
+    --forest-dark: #1a2e1a;
+    --forest-green: #228b22;
+    --warm-green: #8fbc8f;
+    --leaf-green: #9acd32;
+    --soft-beige: #f5f5dc;
+    
+    /* 背景色 - 温暖自然 */
+    --bg-primary: #f8f5f0;
+    --bg-secondary: #e8f5e8;
+    --bg-glass: rgba(143, 188, 143, 0.1);
+    --bg-glass-hover: rgba(143, 188, 143, 0.2);
+    --bg-warm: rgba(245, 245, 220, 0.9);
+    
+    /* 文本色 - 自然温暖 */
+    --text-primary: #2d4a2d;
+    --text-secondary: #4a7c59;
+    --text-muted: #6b8e6b;
+    --text-warm: #8b4513;
+    
+    /* 边框和阴影 - 柔和自然 */
+    --border-natural: rgba(143, 188, 143, 0.3);
+    --shadow-soft: 0 4px 20px rgba(34, 139, 34, 0.1);
+    --shadow-warm: 0 8px 32px rgba(139, 69, 19, 0.1);
+    
+    /* 动画时长 */
+    --duration-fast: 200ms;
+    --duration-normal: 500ms;
+    --duration-slow: 1000ms;
+}
+
+/* ===== 基础重置和字体 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+/* ===== 森林背景动画 ===== */
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, #f8f5f0 0%, #e8f5e8 50%, #d0e7d0 100%);
+    overflow: hidden;
+}
+
+.bg-animation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 15% 30%, rgba(34, 139, 34, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 70% 20%, rgba(143, 188, 143, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 85% 70%, rgba(154, 205, 50, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 30% 80%, rgba(34, 139, 34, 0.08) 0%, transparent 60%);
+    animation: forestSway 15s ease-in-out infinite;
+}
+
+.bg-animation::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 25% 60%, rgba(154, 205, 50, 0.2) 2px, transparent 2px),
+        radial-gradient(circle at 75% 40%, rgba(143, 188, 143, 0.15) 1px, transparent 1px),
+        radial-gradient(circle at 50% 20%, rgba(34, 139, 34, 0.1) 1px, transparent 1px);
+    background-size: 120px 120px, 80px 80px, 150px 150px;
+    animation: leafDance 8s ease-in-out infinite alternate;
+}
+
+@keyframes forestSway {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(10px, -5px) scale(1.02); }
+    66% { transform: translate(-8px, 8px) scale(0.98); }
+}
+
+@keyframes leafDance {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(5px, -10px) rotate(1deg); }
+}
+
+/* ===== 主容器和布局 ===== */
+.main-container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+/* ===== 进度指示器 ===== */
+.progress-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(143, 188, 143, 0.2);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--primary-gradient);
+    transition: width 0.5s ease-out;
+    box-shadow: 0 0 10px rgba(34, 139, 34, 0.4);
+}
+
+/* ===== 通用区域样式 ===== */
+.choice-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 600px;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.section-actions {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+/* ===== 首页样式 ===== */
+.hero-section {
+    background: radial-gradient(ellipse at center, rgba(143, 188, 143, 0.1) 0%, transparent 70%);
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 800px;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.forest-gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    line-height: 1.8;
+}
+
+/* ===== 按钮样式 ===== */
+.cta-button, .continue-button, .generate-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--duration-normal) ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-soft);
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(34, 139, 34, 0.3);
+}
+
+.continue-button {
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--border-natural);
+    color: var(--text-primary);
+}
+
+.continue-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.continue-button.enabled {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: transparent;
+}
+
+.generate-button {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #d84a75 100%);
+    color: white;
+    font-size: 1.2rem;
+    padding: 1.25rem 2.5rem;
+}
+
+.restart-button {
+    background: var(--bg-glass);
+    border: 2px solid var(--border-natural);
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all var(--duration-normal) ease;
+}
+
+.restart-button:hover {
+    background: var(--bg-glass-hover);
+}
+
+/* ===== 卡片样式 ===== */
+.scene-card, .mood-card, .style-card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--border-natural);
+    border-radius: 20px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all var(--duration-normal) ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.scene-card:hover, .mood-card:hover, .style-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--forest-green);
+    box-shadow: var(--shadow-soft);
+}
+
+.scene-card.selected, .mood-card.selected, .style-card.selected {
+    background: var(--forest-green);
+    color: white;
+    border-color: var(--forest-green);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-warm);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-description {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* ===== 网格布局 ===== */
+.scene-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    max-width: 800px;
+    width: 100%;
+}
+
+/* ===== 材料选择 ===== */
+.ingredients-container {
+    max-width: 1000px;
+    width: 100%;
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 确保材料选择区域没有背景框 */
+#ingredientSection {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+.ingredient-category {
+    margin-bottom: 2.5rem;
+    background: transparent !important;
+}
+
+.category-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.ingredient-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+}
+
+.ingredient-tag {
+    background: var(--bg-glass);
+    border: 2px solid var(--border-natural);
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all var(--duration-fast) ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.ingredient-tag:hover {
+    border-color: var(--forest-green);
+    transform: translateY(-2px);
+}
+
+.ingredient-tag.selected {
+    background: var(--forest-green);
+    color: white;
+    border-color: var(--forest-green);
+    transform: translateY(-2px);
+}
+
+/* ===== 偏好设置 ===== */
+.preference-container {
+    max-width: 600px;
+    width: 100%;
+}
+
+.preference-item {
+    margin-bottom: 2rem;
+}
+
+.preference-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.label-value {
+    color: var(--forest-green);
+    font-weight: 700;
+}
+
+.preference-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-glass);
+    outline: none;
+    -webkit-appearance: none;
+    margin-bottom: 0.5rem;
+}
+
+.preference-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--forest-green);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(34, 139, 34, 0.3);
+}
+
+.preference-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--forest-green);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(34, 139, 34, 0.3);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ===== 特殊要求 ===== */
+.requirement-container {
+    max-width: 600px;
+    width: 100%;
+}
+
+.requirement-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 2px solid var(--border-natural);
+    border-radius: 15px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    outline: none;
+    transition: border-color var(--duration-fast) ease;
+}
+
+.requirement-input:focus {
+    border-color: var(--forest-green);
+}
+
+.requirement-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ===== Shaker分析区域 ===== */
+.shaker-analysis-section {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.analysis-container {
+    max-width: 800px;
+    width: 100%;
+}
+
+.shaker-avatar {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    animation: gentlePulse 2s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.analysis-content {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    min-height: 100px;
+}
+
+/* ===== 推荐结果展示区域 ===== */
+.recommendation-display-section {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.recommendation-container {
+    max-width: 1200px;
+    width: 100%;
+    text-align: center;
+}
+
+/* ===== 推荐结果卡片样式 ===== */
+.cocktail-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.cocktail-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: all var(--duration-normal) ease;
+    border: 1px solid rgba(34, 139, 34, 0.1);
+}
+
+.cocktail-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* 酒精度标签 */
+.alcohol-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--forest-green);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* 鸡尾酒名称 */
+.cocktail-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0.5rem 0 0.3rem 0;
+    line-height: 1.3;
+}
+
+.cocktail-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+/* 推荐理由 */
+.recommendation-reason {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.reason-icon {
+    color: var(--forest-green);
+    margin-right: 0.5rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.reason-text {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* 主要材料 */
+.ingredients-section {
+    margin-bottom: 1rem;
+}
+
+.ingredients-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.ingredients-icon {
+    color: var(--forest-green);
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.ingredients-label {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.ingredients-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.ingredient-tag {
+    background: rgba(34, 139, 34, 0.1);
+    color: var(--forest-green);
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(34, 139, 34, 0.2);
+}
+
+/* 口感特点 */
+.taste-section {
+    margin-bottom: 1.5rem;
+}
+
+.taste-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.taste-icon {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.taste-label {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.taste-description {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    padding-left: 1.4rem;
+}
+
+/* 底部信息和按钮 */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(34, 139, 34, 0.1);
+}
+
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.meta-icon {
+    font-size: 0.9rem;
+}
+
+.view-details-btn {
+    background: var(--forest-green);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--duration-fast) ease;
+}
+
+.view-details-btn:hover {
+    background: var(--forest-dark);
+    transform: translateY(-1px);
+}
+
+/* 推荐操作区域 */
+.recommendation-actions {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .cocktail-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .cocktail-card {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .cocktail-card {
+        padding: 1.2rem;
+    }
+    
+    .cocktail-title {
+        font-size: 1.2rem;
+    }
+    
+    .card-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .view-details-btn {
+        width: 100%;
+    }
+}
+
+/* ===== 模态框 ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: var(--bg-warm);
+    border-radius: 20px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-natural);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--duration-fast) ease;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* ===== 鸡尾酒详情 ===== */
+.cocktail-details {
+    color: var(--text-primary);
+}
+
+.cocktail-info {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.cocktail-info h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.english-name {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.reason {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.recipe-section, .instructions-section {
+    margin-bottom: 2rem;
+}
+
+.recipe-section h4, .instructions-section h4 {
+    color: var(--forest-green);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ingredients-list, .instructions-list {
+    padding-left: 1.5rem;
+    line-height: 1.8;
+}
+
+.meta-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.meta-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-glass);
+    border-radius: 12px;
+}
+
+.meta-item .label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.meta-item .value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ===== 加载状态 ===== */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-message {
+    font-size: 1.1rem;
+}
+
+/* ===== 打字机效果 ===== */
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background: var(--forest-green);
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .choice-section {
+        padding: 1rem;
+    }
+    
+    .scene-grid, .mood-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    /* 推荐网格样式已删除 */
+    
+    .modal-content {
+        margin: 1rem;
+        max-height: 90vh;
+    }
+    
+    .ingredient-tags {
+        gap: 0.5rem;
+    }
+    
+    .meta-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .scene-card, .mood-card, .style-card {
+        padding: 1rem;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+    }
+    
+    .cta-button, .continue-button, .generate-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* ===== 故事性评论卡片样式 ===== */
+.review-card {
+    background: var(--bg-glass);
+    border: 2px solid var(--border-natural);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    transition: all 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.review-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--forest-green), var(--warm-green));
+    opacity: 0.6;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.phase-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.phase-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex-grow: 1;
+}
+
+.phase-number {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    background: var(--bg-glass);
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-natural);
+}
+
+.card-content {
+    position: relative;
+    min-height: 60px;
+}
+
+.phase-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.typing-cursor {
+    display: inline-block;
+    opacity: 0;
+    color: var(--forest-green);
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* 思考气泡样式 */
+.thought-bubble {
+    position: absolute;
+    background: var(--bg-warm);
+    border: 2px solid var(--border-natural);
+    border-radius: 20px;
+    padding: 8px 12px;
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(5px);
+    z-index: 100;
+    pointer-events: none;
+    transform-origin: center bottom;
+}
+
+.thought-bubble-small {
+    font-size: 0.8rem;
+    max-width: 120px;
+}
+
+.thought-bubble-medium {
+    font-size: 0.9rem;
+    max-width: 150px;
+}
+
+.thought-bubble-large {
+    font-size: 1rem;
+    max-width: 180px;
+}
+
+.bubble-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bubble-emoji {
+    font-size: 1.2em;
+}
+
+.bubble-text {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.bubble-tail {
+    position: absolute;
+    bottom: -8px;
+    left: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--bg-warm);
+}
+
+@keyframes bubbleFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+}
+
+/* 继续提示样式 */
+.continue-hint {
+    text-align: center;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s ease-out;
+}
+
+.hint-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.hint-icon {
+    font-size: 1.5rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.hint-text {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 1rem;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-5px); }
+    60% { transform: translateY(-3px); }
+}
+
+/* Shaker头像和思考气泡容器 */
+.shaker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.shaker-avatar-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.shaker-avatar {
+    font-size: 4rem;
+    background: var(--bg-glass);
+    border: 3px solid var(--border-natural);
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(10px);
+    animation: gentleFloat 3s ease-in-out infinite;
+    position: relative;
+    z-index: 10;
+}
+
+.thought-bubbles-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+/* 评论卡片容器 */
+.review-cards-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* 简单分析降级样式 */
+.simple-analysis {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.simple-analysis .shaker-avatar {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+}
+
+.analysis-text {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin: 0;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .shaker-avatar {
+        font-size: 3rem;
+        width: 80px;
+        height: 80px;
+    }
+    
+    .review-cards-container {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .thought-bubble {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+    
+    .thought-bubble-large {
+        max-width: 120px;
+    }
+}

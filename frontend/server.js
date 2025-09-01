@@ -11,9 +11,19 @@ app.use(cors());
 // 静态文件服务
 app.use(express.static(__dirname));
 
-// 默认路由
+// 路由配置
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index-optimized.html'));
+});
+
+// 备用路由 - 原版本
+app.get('/original', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// 优化版本
+app.get('/optimized', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index-optimized.html'));
 });
 
 app.listen(PORT, () => {
