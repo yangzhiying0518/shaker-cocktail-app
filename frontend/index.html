@@ -5274,7 +5274,7 @@
             console.log('🍸 调用推荐API...');
             
             return new Promise((resolve, reject) => {
-                fetch('http://localhost:3001/api/stream-recommendation', {
+                fetch('https://shaker-cocktail-app-production.up.railway.app/api/stream-recommendation', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -6210,7 +6210,7 @@
             };
             
             return new Promise((resolve, reject) => {
-                fetch('http://localhost:3001/api/stream-recommendation', {
+                fetch('https://shaker-cocktail-app-production.up.railway.app/api/stream-recommendation', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -6687,7 +6687,7 @@
             
             return new Promise((resolve, reject) => {
                 // 使用fetch进行POST请求来建立SSE连接
-                fetch('http://localhost:3001/api/stream-recommendation', {
+                fetch('https://shaker-cocktail-app-production.up.railway.app/api/stream-recommendation', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
