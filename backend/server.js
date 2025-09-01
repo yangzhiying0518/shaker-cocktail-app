@@ -228,9 +228,9 @@ app.post('/api/recommend', async (req, res) => {
         const result = await requestDeduplicator.deduplicateRequest(userInput, async () => {
             console.log(`🤖 使用 ${aiProvider.toUpperCase()} 生成推荐...`);
             
-            // 设置更短的超时时间
+            // 设置合理的超时时间
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('AI服务响应超时')), 25000) // 25秒超时
+                setTimeout(() => reject(new Error('AI服务响应超时')), 50000) // 50秒超时
             );
             
             const aiPromise = aiService.getCocktailRecommendation(userInput);
