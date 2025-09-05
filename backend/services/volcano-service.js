@@ -73,7 +73,7 @@ class VolcanoService extends BaseAIService {
 
 特殊要求：${userInput.special_requirements || '无'}
 
-请返回JSON格式的推荐结果，包含3-5个推荐，每个推荐包含完整的配方信息。`;
+请返回JSON格式的推荐结果，包含恰好3个推荐，每个推荐包含完整的配方信息。`;
     }
 
     getSystemPrompt() {

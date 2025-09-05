@@ -2356,7 +2356,7 @@
             padding: 1.5rem;
             border: 2px solid rgba(143, 188, 143, 0.4);
             backdrop-filter: blur(15px);
-            min-height: 420px;
+            min-height: 460px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2944,18 +2944,57 @@
             font-weight: 500;
         }
         
-        /* 底部信息 - 时间难度左边，按钮右边 */
+        /* 顶部区域布局 - 居中显示 */
+        .cocktail-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .cocktail-header .cocktail-name-cn {
+            margin-bottom: 0.3rem;
+        }
+        
+        .cocktail-header .cocktail-name-en {
+            margin: 0;
+        }
+        
+        /* 酒精度标签样式 */
+        .alcohol-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            color: #16a34a;
+            white-space: nowrap;
+        }
+        
+        .alcohol-tag .bubble-icon {
+            font-size: 1rem;
+        }
+        
+        /* 底部信息 - 单行布局 */
         .bottom-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 0.8rem 0 0.6rem 0;
+            margin: 1.5rem 0 1rem 0;
             padding: 0;
         }
         
+        /* 左侧：时间和难度 */
         .bottom-left {
             display: flex;
-            gap: 1.8rem;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        /* 右侧：详情按钮 */
+        .bottom-right {
+            display: flex;
             align-items: center;
         }
         
@@ -2976,6 +3015,11 @@
         
         .alcohol-info .info-icon {
             color: #22c55e; /* 酒精度用绿色图标 */
+        }
+        
+        .bubble-icon {
+            font-size: 1.1rem;
+            color: #22c55e;
         }
         
         .time-info .info-value,
@@ -6666,8 +6710,9 @@
                     }
                 }, 300);
                 
-                // 初始化三张等待卡片
-                initializeMakingCards();
+                // 初始化等待卡片（根据实际推荐数量）
+                const actualCount = Math.min(recommendations.length, 3);
+                initializeMakingCards(actualCount);
                 
                 // 等待2秒让用户看到初始状态，然后开始展示推荐结果
                 setTimeout(async () => {
@@ -7269,20 +7314,24 @@
             }, 1500); // 给用户更多时间阅读完整分析
         }
 
-        // 初始化调制卡片
-        function initializeMakingCards() {
+        // 初始化调制卡片 - 支持动态数量
+        function initializeMakingCards(recommendationCount = 3) {
             const makingGrid = document.getElementById('makingGrid');
             
             // 总是清空并重新创建，确保状态正确
             makingGrid.innerHTML = '';
             
-            // 创建3个调制卡片
-            for (let i = 0; i < 3; i++) {
+            // 设置动态布局属性
+            makingGrid.setAttribute('data-count', recommendationCount.toString());
+            console.log(`🎯 设置调制网格布局为 ${recommendationCount} 个推荐`);
+            
+            // 创建指定数量的调制卡片
+            for (let i = 0; i < recommendationCount; i++) {
                 const card = createMakingCard(i);
                 makingGrid.appendChild(card);
             }
             
-            console.log('✅ 调制卡片初始化完成 - 3张空白卡片已创建');
+            console.log(`✅ 调制卡片初始化完成 - ${recommendationCount}张空白卡片已创建`);
         }
 
         // 创建简洁卡片 - 严格按照第二个截图
@@ -7308,7 +7357,7 @@
                 <div class="recommendation-content-area" id="recommendationContent${index}" style="display: none;">
                     <!-- 移除右上角酒精度标签 -->
                     
-                    <!-- 鸡尾酒名称 -->
+                    <!-- 鸡尾酒名称 - 居中显示 -->
                     <div class="cocktail-header">
                         <h3 class="cocktail-name-cn" id="nameCn${index}">鸡尾酒名称</h3>
                         <p class="cocktail-name-en" id="nameEn${index}">Cocktail Name</p>
@@ -7341,7 +7390,7 @@
                         <p class="info-content" id="taste${index}">口感独特</p>
                     </div>
                     
-                    <!-- 底部信息 - 时间、难度、酒精度左边，按钮右边 -->
+                    <!-- 底部信息 - 单行布局 -->
                     <div class="bottom-info">
                         <div class="bottom-left">
                             <div class="time-info">
@@ -7351,10 +7400,6 @@
                             <div class="difficulty-info">
                                 <div class="info-icon">📊</div>
                                 <div class="info-value" id="difficulty${index}">简单</div>
-                            </div>
-                            <div class="alcohol-info">
-                                <div class="info-icon">🍺</div>
-                                <div class="info-value" id="alcoholContent${index}">中度</div>
                             </div>
                         </div>
                         <div class="bottom-right">
@@ -7631,7 +7676,6 @@
             const tasteEl = document.getElementById(`taste${index}`);
             const prepTimeEl = document.getElementById(`prepTime${index}`);
             const difficultyEl = document.getElementById(`difficulty${index}`);
-            const alcoholContentEl = document.getElementById(`alcoholContent${index}`);
             const ingredientsEl = document.getElementById(`ingredients${index}`);
             
             console.log(`🔍 DOM元素检查:`, {
@@ -7641,16 +7685,10 @@
                 tasteEl: !!tasteEl,
                 prepTimeEl: !!prepTimeEl,
                 difficultyEl: !!difficultyEl,
-                alcoholContentEl: !!alcoholContentEl,
                 ingredientsEl: !!ingredientsEl
             });
             
-            if (alcoholContentEl) {
-                alcoholContentEl.textContent = alcoholContent;
-                console.log(`✅ 设置酒精度: ${alcoholContent}`);
-            } else {
-                console.error(`❌ 找不到酒精度元素: alcoholContent${index}`);
-            }
+            // 酒精度信息已移除，不再需要设置
             
             if (nameCn) {
                 nameCn.textContent = cocktailNameCn;

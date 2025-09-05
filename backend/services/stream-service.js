@@ -386,17 +386,22 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
                     fullResponse += content;
                     
                     // 更智能的提前检测：减少无效解析尝试
-                    if (fullResponse.length > 1500 && chunkCount % 25 === 0) {
+                    if (fullResponse.length > 800 && chunkCount % 15 === 0) {
                         try {
-                            const testResult = this.parseRecommendation(fullResponse);
-                            if (testResult && testResult.recommendations && testResult.recommendations.length >= 3) {
-                                console.log('✅ [StreamService] 提前检测到完整推荐');
-                                resolve(testResult);
-                                return;
+                            // 快速检查是否包含完整的推荐结构
+                            if (this.hasCompleteRecommendationStructure(fullResponse)) {
+                                const testResult = this.parseRecommendation(fullResponse);
+                                if (testResult && testResult.recommendations && testResult.recommendations.length >= 1) {
+                                    console.log(`✅ [StreamService] 提前检测到推荐 (${testResult.recommendations.length}个)`);
+                                    resolve(testResult);
+                                    return;
+                                }
                             }
                         } catch (e) {
-                            // 智能过滤错误信息
-                            if (!e.message.includes('JSON内容看起来不完整') && !e.message.includes('内容太短')) {
+                            // 只记录非预期的错误
+                            if (!e.message.includes('JSON内容看起来不完整') && 
+                                !e.message.includes('内容太短') && 
+                                !e.message.includes('所有解析策略都失败了')) {
                                 console.log('🔄 [StreamService] 提前检测失败:', e.message.substring(0, 50) + '...');
                             }
                         }
@@ -807,36 +812,78 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
             throw new Error('所有解析策略都失败了');
             
         } catch (error) {
-            console.error('❌ [StreamService] JSON解析失败:', {
+            // 增强的错误日志，帮助诊断线上问题
+            const errorInfo = {
                 error: error.message,
                 contentLength: content.length,
-                contentPreview: content.substring(0, 200) + '...',
-                contentSuffix: content.length > 200 ? '...' + content.substring(content.length - 100) : ''
-            });
+                contentPreview: content.substring(0, 300) + '...',
+                contentSuffix: content.length > 300 ? '...' + content.substring(content.length - 200) : '',
+                hasRecommendations: content.includes('"recommendations"'),
+                priorityCount: (content.match(/"priority":/g) || []).length,
+                nameCount: (content.match(/"name":/g) || []).length,
+                reasonCount: (content.match(/"reason":/g) || []).length,
+                braceBalance: (content.match(/{/g) || []).length - (content.match(/}/g) || []).length,
+                bracketBalance: (content.match(/\[/g) || []).length - (content.match(/\]/g) || []).length,
+                looksComplete: this.looksComplete(content),
+                timestamp: new Date().toISOString()
+            };
+            
+            console.error('❌ [StreamService] JSON解析失败详情:', errorInfo);
             throw error;
         }
     }
 
     /**
-     * 检查JSON内容是否看起来完整
+     * 快速检查是否包含完整的推荐结构
+     */
+    hasCompleteRecommendationStructure(content) {
+        // 检查必要的字段
+        const requiredFields = ['"recommendations"', '"priority"', '"name"', '"reason"'];
+        const hasAllFields = requiredFields.every(field => content.includes(field));
+        
+        if (!hasAllFields) return false;
+        
+        // 检查至少有一个完整的推荐对象结构
+        const priorityCount = (content.match(/"priority":/g) || []).length;
+        const nameCount = (content.match(/"name":/g) || []).length;
+        const reasonCount = (content.match(/"reason":/g) || []).length;
+        
+        // 至少要有一个完整的推荐
+        return priorityCount >= 1 && nameCount >= 1 && reasonCount >= 1;
+    }
+
+    /**
+     * 检查JSON内容是否看起来完整 - 优化版本，更宽松的检查
      */
     looksComplete(content) {
+        // 基本长度检查 - 降低阈值
+        if (content.length < 200) return false;
+        
         // 检查基本结构
         const hasRecommendations = content.includes('"recommendations"');
         if (!hasRecommendations) return false;
         
-        // 检查是否有3个推荐（我们预期的数量）
+        // 更宽松的推荐数量检查 - 至少1个即可尝试解析
         const priorityMatches = content.match(/"priority":/g);
-        if (!priorityMatches || priorityMatches.length < 3) return false;
+        if (!priorityMatches || priorityMatches.length < 1) return false;
         
-        // 检查JSON结构的平衡
+        // 检查是否包含基本的推荐结构
+        const hasName = content.includes('"name"');
+        const hasReason = content.includes('"reason"');
+        if (!hasName || !hasReason) return false;
+        
+        // 更宽松的JSON结构平衡检查
         const openBraces = (content.match(/{/g) || []).length;
         const closeBraces = (content.match(/}/g) || []).length;
         const openBrackets = (content.match(/\[/g) || []).length;
         const closeBrackets = (content.match(/\]/g) || []).length;
         
-        // 允许最多1个未闭合的括号（流式传输的最后一个字符可能被截断）
-        return (openBraces - closeBraces <= 1) && (openBrackets - closeBrackets <= 1);
+        // 允许更多未闭合的括号（流式传输特性）
+        const braceBalance = openBraces - closeBraces;
+        const bracketBalance = openBrackets - closeBrackets;
+        
+        // 如果括号基本平衡或者只是轻微不平衡，就尝试解析
+        return (braceBalance <= 3) && (bracketBalance <= 1) && (braceBalance >= 0) && (bracketBalance >= 0);
     }
 
     /**
@@ -903,29 +950,105 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
     }
 
     /**
-     * 基本JSON修复 - 简化版本
+     * 增强的JSON修复 - 处理流式传输的不完整JSON
      */
     basicJSONRepair(content) {
         let repaired = content;
         
-        // 修复末尾多余逗号
-        repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
+        // 1. 清理常见的流式传输问题
+        repaired = repaired
+            // 移除可能的markdown标记
+            .replace(/```json\s*|\s*```/g, '')
+            // 移除BOM和控制字符
+            .replace(/^\uFEFF/, '')
+            .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+            // 标准化换行符
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .trim();
         
-        // 确保JSON对象完整闭合
+        // 2. 修复常见的JSON语法问题
+        repaired = repaired
+            // 修复末尾多余逗号
+            .replace(/,(\s*[}\]])/g, '$1')
+            // 修复未闭合的字符串（在行尾添加引号）
+            .replace(/:\s*"([^"]*?)$/gm, ': "$1"')
+            // 修复缺失的逗号（在}或]后面，如果下一行是"开头）
+            .replace(/([}\]])\s*\n\s*"/g, '$1,\n"');
+        
+        // 3. 智能闭合未完成的JSON结构
         const openBraces = (repaired.match(/{/g) || []).length;
         const closeBraces = (repaired.match(/}/g) || []).length;
+        const openBrackets = (repaired.match(/\[/g) || []).length;
+        const closeBrackets = (repaired.match(/\]/g) || []).length;
+        
+        // 如果有未闭合的结构，尝试智能闭合
         if (openBraces > closeBraces) {
+            // 检查最后一个字符，如果是逗号，先移除
+            if (repaired.endsWith(',')) {
+                repaired = repaired.slice(0, -1);
+            }
             repaired += '}'.repeat(openBraces - closeBraces);
         }
         
-        // 确保JSON数组完整闭合
-        const openBrackets = (repaired.match(/\[/g) || []).length;
-        const closeBrackets = (repaired.match(/\]/g) || []).length;
         if (openBrackets > closeBrackets) {
             repaired += ']'.repeat(openBrackets - closeBrackets);
         }
         
+        // 4. 特殊处理：如果JSON看起来被截断在字符串中间，尝试修复
+        if (repaired.includes('"') && !this.isStringClosed(repaired)) {
+            repaired = this.fixUnclosedStrings(repaired);
+        }
+        
         return repaired;
+    }
+    
+    /**
+     * 检查字符串是否正确闭合
+     */
+    isStringClosed(content) {
+        let inString = false;
+        let escapeNext = false;
+        
+        for (let i = 0; i < content.length; i++) {
+            const char = content[i];
+            
+            if (escapeNext) {
+                escapeNext = false;
+                continue;
+            }
+            
+            if (char === '\\') {
+                escapeNext = true;
+                continue;
+            }
+            
+            if (char === '"') {
+                inString = !inString;
+            }
+        }
+        
+        return !inString;
+    }
+    
+    /**
+     * 修复未闭合的字符串
+     */
+    fixUnclosedStrings(content) {
+        // 简单策略：如果最后一个引号没有配对，添加闭合引号
+        const quotes = content.match(/"/g) || [];
+        if (quotes.length % 2 === 1) {
+            // 找到最后一个未闭合的字符串位置
+            const lastQuoteIndex = content.lastIndexOf('"');
+            const afterQuote = content.substring(lastQuoteIndex + 1);
+            
+            // 如果引号后面只有空白字符或者看起来像是被截断的内容，添加闭合引号
+            if (/^\s*$/.test(afterQuote) || /^[^"]*$/.test(afterQuote)) {
+                return content + '"';
+            }
+        }
+        
+        return content;
     }
 
     /**

@@ -255,6 +255,6 @@ class AppState {
 export const appState = new AppState();
 
 // 在开发环境下暴露到全局，方便调试
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (typeof window !== 'undefined') {
     window.appState = appState;
 }

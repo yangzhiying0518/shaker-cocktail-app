@@ -557,16 +557,40 @@ body {
     margin-top: 2rem;
     max-width: 1200px;
     width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s ease;
+}
+
+/* 动态布局：根据推荐数量调整网格 */
+.cocktail-cards-grid[data-count="1"] {
+    grid-template-columns: 1fr;
+    max-width: 450px;
+    justify-items: center;
+}
+
+.cocktail-cards-grid[data-count="2"] {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+    gap: 3rem;
+}
+
+.cocktail-cards-grid[data-count="3"] {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
 }
 
 .cocktail-card {
     background: rgba(255, 255, 255, 0.9);
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 2rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     position: relative;
     transition: all var(--duration-normal) ease;
     border: 1px solid rgba(34, 139, 34, 0.1);
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
 }
 
 .cocktail-card:hover {
@@ -692,14 +716,7 @@ body {
     padding-left: 1.4rem;
 }
 
-/* 底部信息和按钮 */
-.card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(34, 139, 34, 0.1);
-}
+/* 底部信息和按钮 - 已更新为两行布局 */
 
 .card-meta {
     display: flex;
@@ -744,14 +761,30 @@ body {
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
-    .cocktail-cards-grid {
+    .cocktail-cards-grid,
+    .cocktail-cards-grid[data-count="1"],
+    .cocktail-cards-grid[data-count="2"],
+    .cocktail-cards-grid[data-count="3"] {
         grid-template-columns: 1fr;
         gap: 1.5rem;
+        max-width: 500px;
     }
     
     .cocktail-card {
         max-width: 500px;
         margin: 0 auto;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+    /* 中等屏幕优化 */
+    .cocktail-cards-grid[data-count="2"] {
+        max-width: 750px;
+        gap: 2.5rem;
+    }
+    
+    .cocktail-cards-grid[data-count="1"] {
+        max-width: 400px;
     }
 }
 
@@ -765,12 +798,16 @@ body {
     }
     
     .card-footer {
-        flex-direction: column;
         gap: 1rem;
-        align-items: stretch;
     }
     
-    .view-details-btn {
+    .card-info-row, .card-action-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .detail-button {
         width: 100%;
     }
 }
@@ -1283,4 +1320,109 @@ body {
     .thought-bubble-large {
         max-width: 120px;
     }
+}
+
+/* ===== 调制网格动态布局样式 ===== */
+.making-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 0;
+    transition: all 0.3s ease;
+}
+
+/* 调制网格动态布局：根据推荐数量调整 */
+.making-grid[data-count="1"] {
+    grid-template-columns: 1fr;
+    max-width: 450px;
+    justify-items: center;
+}
+
+.making-grid[data-count="2"] {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+    gap: 3rem;
+}
+
+.making-grid[data-count="3"] {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+}
+
+/* 调制网格响应式设计 */
+@media (max-width: 1024px) {
+    .making-grid,
+    .making-grid[data-count="1"],
+    .making-grid[data-count="2"],
+    .making-grid[data-count="3"] {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        max-width: 500px;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .making-grid[data-count="2"] {
+        max-width: 750px;
+        gap: 2.5rem;
+    }
+    
+    .making-grid[data-count="1"] {
+        max-width: 400px;
+    }
+}
+
+/* ===== 推荐卡片底部布局优化 ===== */
+.card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-actions {
+    margin-top: auto;
+    padding-top: 1.5rem;
+}
+
+.card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.card-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alcohol-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.detail-button {
+    background: var(--accent-natural);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.detail-button:hover {
+    background: var(--accent-natural-dark, #38a169);
+    transform: translateY(-1px);
 }

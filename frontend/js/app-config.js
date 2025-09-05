@@ -5,7 +5,7 @@
 
 // API配置
 export const API_CONFIG = {
-    BASE_URL: 'https://shaker-cocktail-app-production.up.railway.app',
+    BASE_URL: 'http://localhost:3001',
     ENDPOINTS: {
         RECOMMEND: '/api/recommend',
         STREAM_RECOMMEND: '/api/stream-recommendation',

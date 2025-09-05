@@ -13,7 +13,7 @@ app.use(express.static(__dirname));
 
 // 路由配置
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index-optimized.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // 备用路由 - 原版本
