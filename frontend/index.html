@@ -1293,6 +1293,66 @@
             text-align: center;
         }
 
+        /* 手机端偏好设置优化 */
+        @media (max-width: 768px) {
+            .preference-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin: 1.5rem 0;
+            }
+            
+            .preference-card {
+                padding: 1.25rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .preference-title {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            
+            .slider-container {
+                margin: 1.25rem 0;
+                padding: 0 0.5rem;
+            }
+            
+            .slider {
+                height: 8px;
+                margin: 0.75rem 0;
+            }
+            
+            .slider::-webkit-slider-thumb {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .slider::-moz-range-thumb {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .slider-value {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
+                margin-top: -2px;
+            }
+            
+            .slider-labels {
+                margin-top: 0.75rem;
+                font-size: 0.85rem;
+                gap: 0.5rem;
+            }
+            
+            .slider-label-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+                min-width: 3rem;
+                text-align: center;
+                border-radius: 6px;
+            }
+        }
+
         .slider-container {
             position: relative;
             margin: 1rem 0;
@@ -1334,6 +1394,26 @@
             margin-top: 0.5rem;
             font-size: 0.8rem;
             color: var(--text-muted);
+        }
+
+        .slider-label-btn {
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .slider-label-btn:hover {
+            background: var(--bg-glass-hover);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .slider-label-btn:active {
+            transform: translateY(0);
+            background: var(--warm-green);
+            color: white;
         }
 
         /* 按钮样式 */
@@ -3883,9 +3963,9 @@
                             <input type="range" min="0" max="10" value="5" class="slider" id="sweetnessSlider">
                             <div class="slider-value" id="sweetnessValue">适中</div>
                             <div class="slider-labels">
-                                <span>清淡</span>
-                                <span>适中</span>
-                                <span>浓郁</span>
+                                <span class="slider-label-btn" data-slider="sweetnessSlider" data-direction="left">清淡</span>
+                                <span class="slider-label-btn" data-slider="sweetnessSlider" data-direction="center">适中</span>
+                                <span class="slider-label-btn" data-slider="sweetnessSlider" data-direction="right">浓郁</span>
                     </div>
                     </div>
                     </div>
@@ -3896,9 +3976,9 @@
                             <input type="range" min="0" max="10" value="5" class="slider" id="alcoholSlider">
                             <div class="slider-value" id="alcoholValue">中度</div>
                             <div class="slider-labels">
-                                <span>低度</span>
-                                <span>中度</span>
-                                <span>高度</span>
+                                <span class="slider-label-btn" data-slider="alcoholSlider" data-direction="left">低度</span>
+                                <span class="slider-label-btn" data-slider="alcoholSlider" data-direction="center">中度</span>
+                                <span class="slider-label-btn" data-slider="alcoholSlider" data-direction="right">高度</span>
                     </div>
                     </div>
                     </div>
@@ -3909,10 +3989,10 @@
                             <input type="range" min="0" max="10" value="5" class="slider" id="textureSlider">
                             <div class="slider-value" id="textureValue">平衡</div>
                             <div class="slider-labels">
-                                <span>清爽</span>
-                                <span>平衡</span>
-                                <span>浓厚</span>
-                </div>
+                                <span class="slider-label-btn" data-slider="textureSlider" data-direction="left">清爽</span>
+                                <span class="slider-label-btn" data-slider="textureSlider" data-direction="center">平衡</span>
+                                <span class="slider-label-btn" data-slider="textureSlider" data-direction="right">浓厚</span>
+                    </div>
             </div>
         </div>
     </div>
@@ -4669,17 +4749,17 @@
                 { 
                     id: 'sweetnessSlider', 
                     valueId: 'sweetnessValue',
-                    labels: ['清淡', '微甜', '轻甜', '适中', '偏甜', '中甜', '浓甜', '很甜', '超甜', '极甜', '浓郁']
+                    labels: ['清淡', '淡雅', '清香', '微淡', '清甜', '适中', '微甜', '香甜', '甘甜', '醇甜', '浓郁']
                 },
                 { 
                     id: 'alcoholSlider', 
                     valueId: 'alcoholValue',
-                    labels: ['无酒精', '微量', '轻度', '低度', '偏低', '中度', '偏中', '偏高', '高度', '很高', '极高']
+                    labels: ['低度', '轻柔', '温和', '柔顺', '微醇', '中度', '醇厚', '浓烈', '高度', '强劲', '烈性']
                 },
                 { 
                     id: 'textureSlider', 
                     valueId: 'textureValue',
-                    labels: ['清爽', '轻盈', '顺滑', '平衡', '醇厚', '丰富', '浓郁', '厚重', '浓厚', '粘稠', '浓重']
+                    labels: ['清爽', '轻盈', '顺滑', '柔润', '清润', '平衡', '丰富', '醇厚', '浓郁', '厚重', '浓厚']
                 }
             ];
 
@@ -4720,6 +4800,56 @@
                         valueDisplay.style.transform = 'translateX(-50%)';
                     });
                 }
+            });
+
+            // 设置底部按钮点击功能
+            setupSliderButtons();
+        }
+
+        // 设置滑块按钮点击功能
+        function setupSliderButtons() {
+            const sliderButtons = document.querySelectorAll('.slider-label-btn');
+            
+            sliderButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const sliderId = this.getAttribute('data-slider');
+                    const direction = this.getAttribute('data-direction');
+                    const slider = document.getElementById(sliderId);
+                    
+                    if (slider) {
+                        const currentValue = parseInt(slider.value);
+                        const maxValue = parseInt(slider.max);
+                        let newValue;
+                        
+                        switch(direction) {
+                            case 'left':
+                                // 向左移动一个档位
+                                newValue = Math.max(0, currentValue - 1);
+                                break;
+                            case 'right':
+                                // 向右移动一个档位
+                                newValue = Math.min(maxValue, currentValue + 1);
+                                break;
+                            case 'center':
+                                // 回到中间位置
+                                newValue = Math.floor(maxValue / 2);
+                                break;
+                        }
+                        
+                        // 更新滑块值并触发相同的效果
+                        slider.value = newValue;
+                        
+                        // 触发input事件，使用现有的动画和反馈逻辑
+                        const event = new Event('input', { bubbles: true });
+                        slider.dispatchEvent(event);
+                        
+                        // 添加点击反馈动画
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    }
+                });
             });
         }
 
