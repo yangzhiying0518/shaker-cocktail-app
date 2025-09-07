@@ -769,66 +769,56 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
      */
     parseRecommendation(content) {
         try {
-
-            // 深度清理内容
+            // 基础清理内容
             let cleanContent = content.trim()
-                // 移除markdown代码块
                 .replace(/```json\s*|\s*```/g, '')
                 .replace(/```\s*|\s*```/g, '')
-                // 标准化换行符
                 .replace(/\r\n/g, '\n')
                 .replace(/\r/g, '\n')
-                // 移除BOM和控制字符（保留换行符）
                 .replace(/^\uFEFF/, '')
                 .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '');
             
-            // 如果内容太短，直接尝试解析
-            if (cleanContent.length < 50) {
-                throw new Error('内容太短，无法解析');
+            // 快速预检查 - 避免无效解析
+            if (cleanContent.length < 100 || !cleanContent.includes('"recommendations"')) {
+                throw new Error('Content too short or missing recommendations');
             }
             
-            // 优化：只在内容看起来完整时才解析
-            if (!this.looksComplete(cleanContent)) {
-                throw new Error('JSON内容看起来不完整，跳过解析');
-            }
+            // 主要策略：查找JSON边界
+            const start = cleanContent.indexOf('{');
+            const end = cleanContent.lastIndexOf('}');
             
-            // 尝试多种JSON提取策略
-            const extractionResults = this.tryMultipleExtractionStrategies(cleanContent);
-            
-            for (let i = 0; i < extractionResults.length; i++) {
-                const jsonStr = extractionResults[i];
+            if (start !== -1 && end !== -1 && start < end) {
+                const jsonStr = cleanContent.substring(start, end + 1);
                 try {
-                    const parsed = this.attemptJSONParse(jsonStr);
-                    if (parsed && parsed.recommendations && Array.isArray(parsed.recommendations)) {
+                    const parsed = JSON.parse(jsonStr);
+                    if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
                         console.log(`✅ [StreamService] JSON解析成功，推荐数量: ${parsed.recommendations.length}`);
                         return parsed;
                     }
                 } catch (parseError) {
-                    console.warn(`⚠️ [StreamService] 策略${i+1}解析失败:`, parseError.message);
-                    // 继续尝试下一个策略
+                    // 继续尝试修复策略
                 }
             }
             
-            throw new Error('所有解析策略都失败了');
+            // 备用策略：基础修复后再试
+            const repaired = this.basicJSONRepair(cleanContent);
+            const parsed = JSON.parse(repaired);
+            
+            if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
+                console.log(`✅ [StreamService] 修复后JSON解析成功`);
+                return parsed;
+            }
+            
+            throw new Error('No valid recommendations found');
             
         } catch (error) {
-            // 增强的错误日志，帮助诊断线上问题
-            const errorInfo = {
+            // 简化错误日志，只记录关键信息
+            console.error('❌ [StreamService] JSON解析失败:', {
                 error: error.message,
                 contentLength: content.length,
-                contentPreview: content.substring(0, 300) + '...',
-                contentSuffix: content.length > 300 ? '...' + content.substring(content.length - 200) : '',
                 hasRecommendations: content.includes('"recommendations"'),
-                priorityCount: (content.match(/"priority":/g) || []).length,
-                nameCount: (content.match(/"name":/g) || []).length,
-                reasonCount: (content.match(/"reason":/g) || []).length,
-                braceBalance: (content.match(/{/g) || []).length - (content.match(/}/g) || []).length,
-                bracketBalance: (content.match(/\[/g) || []).length - (content.match(/\]/g) || []).length,
-                looksComplete: this.looksComplete(content),
                 timestamp: new Date().toISOString()
-            };
-            
-            console.error('❌ [StreamService] JSON解析失败详情:', errorInfo);
+            });
             throw error;
         }
     }
@@ -1130,3 +1120,4 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
 }
 
 module.exports = StreamService;
+

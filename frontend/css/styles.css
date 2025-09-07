@@ -277,6 +277,123 @@ body {
     background: var(--bg-glass-hover);
 }
 
+/* ===== 再来一杯浮动按钮样式 - 右下角固定 ===== */
+.another-drink-float-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.8);
+    animation: floatBtnFadeIn 0.6s ease-out 0.3s forwards;
+}
+
+.float-btn-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--forest-green);
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(34, 139, 34, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 120px;
+    justify-content: center;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+.float-btn-inner:hover {
+    background: #1e7e1e;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(34, 139, 34, 0.4);
+}
+
+.float-btn-inner:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s ease;
+}
+
+.float-btn-icon {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.float-btn-inner:hover .float-btn-icon {
+    transform: rotate(15deg) scale(1.1);
+}
+
+.float-btn-text {
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+}
+
+/* 浮动按钮动画 */
+@keyframes floatBtnFadeIn {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .another-drink-float-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+    
+    .float-btn-inner {
+        padding: 0.8rem 1.2rem;
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+    
+    .float-btn-text {
+        font-size: 0.85rem;
+    }
+    
+    .float-btn-icon {
+        font-size: 1rem;
+    }
+}
+
+/* 移动端触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+    .float-btn-inner {
+        min-height: 44px; /* iOS推荐最小触摸目标 */
+        padding: 12px 20px;
+    }
+    
+    .float-btn-inner:active {
+        transform: translateZ(0) scale(0.95);
+        transition: transform 0.1s ease-out;
+    }
+}
+
+/* 淡入上升动画 - 硬件加速优化 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 /* ===== 卡片样式 ===== */
 .scene-card, .mood-card, .style-card {
     background: var(--bg-glass);
@@ -289,12 +406,31 @@ body {
     text-align: center;
     position: relative;
     overflow: hidden;
+    /* 添加硬件加速 */
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
-.scene-card:hover, .mood-card:hover, .style-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--forest-green);
-    box-shadow: var(--shadow-soft);
+/* 桌面端悬停效果 */
+@media (hover: hover) {
+    .scene-card:hover, .mood-card:hover, .style-card:hover {
+        transform: translate3d(0, -5px, 0);
+        border-color: var(--forest-green);
+        box-shadow: var(--shadow-soft);
+    }
+}
+
+/* 移动端触摸效果 */
+@media (hover: none) and (pointer: coarse) {
+    .scene-card, .mood-card, .style-card {
+        min-height: 44px; /* 确保触摸目标足够大 */
+    }
+    
+    .scene-card:active, .mood-card:active, .style-card:active {
+        transform: translate3d(0, -2px, 0) scale(0.98);
+        transition: transform 0.1s ease-out;
+    }
 }
 
 .scene-card.selected, .mood-card.selected, .style-card.selected {
@@ -591,11 +727,26 @@ body {
     min-height: 420px;
     display: flex;
     flex-direction: column;
+    /* 添加硬件加速 */
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
-.cocktail-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+/* 桌面端鸡尾酒卡片悬停效果 */
+@media (hover: hover) {
+    .cocktail-card:hover {
+        transform: translate3d(0, -4px, 0);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* 移动端鸡尾酒卡片触摸效果 */
+@media (hover: none) and (pointer: coarse) {
+    .cocktail-card:active {
+        transform: translate3d(0, -2px, 0) scale(0.98);
+        transition: transform 0.1s ease-out;
+    }
 }
 
 /* 酒精度标签 */
@@ -1426,3 +1577,4 @@ body {
     background: var(--accent-natural-dark, #38a169);
     transform: translateY(-1px);
 }
+/* 强制刷新 - Sun Sep  7 21:00:11 CST 2025 */

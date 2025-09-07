@@ -3785,6 +3785,150 @@
         .hidden {
             display: none !important;
         }
+
+        /* ===== 重新探索卡片样式 - 温暖悬浮卡片 ===== */
+        .another-drink-float-btn {
+            position: fixed;
+            bottom: 2.5rem;
+            right: 2.5rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translate3d(0, 20px, 0) scale(0.7);
+            animation: warmCardFadeIn 0.8s ease-out 0.5s forwards;
+        }
+
+        .float-btn-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            background: linear-gradient(145deg, #f5f5dc 0%, #faf0e6 100%);
+            color: var(--text-primary);
+            border: 2px solid #d4af37;
+            border-radius: 16px;
+            padding: 1.5rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 
+                0 8px 32px rgba(212, 175, 55, 0.15),
+                0 4px 16px rgba(139, 69, 19, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 100px;
+            min-height: 120px;
+            /* 硬件加速 */
+            transform: translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+            /* 温暖呼吸动画 */
+            animation: gentleBreathing 3s ease-in-out infinite;
+        }
+
+        .float-btn-inner:hover {
+            background: linear-gradient(145deg, #faf0e6 0%, #fff8dc 100%);
+            border-color: #daa520;
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(212, 175, 55, 0.25),
+                0 6px 20px rgba(139, 69, 19, 0.15);
+            animation: none; /* 悬停时停止呼吸动画 */
+        }
+
+        .float-btn-inner:active {
+            transform: translateY(-2px) scale(1.02);
+            transition: all 0.15s ease;
+        }
+
+        .float-btn-icon {
+            font-size: 1.8rem;
+            transition: all 0.4s ease;
+            filter: drop-shadow(0 2px 4px rgba(139, 69, 19, 0.2));
+        }
+
+        .float-btn-inner:hover .float-btn-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 4px 8px rgba(139, 69, 19, 0.3));
+        }
+
+        .float-btn-text {
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-align: center;
+            line-height: 1.2;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* 温暖卡片动画 */
+        @keyframes warmCardFadeIn {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 30px, 0) scale(0.7) rotate(-2deg);
+            }
+            60% {
+                opacity: 0.8;
+                transform: translate3d(0, -5px, 0) scale(1.05) rotate(1deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+            }
+        }
+
+        /* 温柔呼吸动画 */
+        @keyframes gentleBreathing {
+            0%, 100% {
+                transform: translateZ(0) scale(1);
+                box-shadow: 
+                    0 8px 32px rgba(212, 175, 55, 0.15),
+                    0 4px 16px rgba(139, 69, 19, 0.1);
+            }
+            50% {
+                transform: translateZ(0) scale(1.02);
+                box-shadow: 
+                    0 10px 36px rgba(212, 175, 55, 0.2),
+                    0 6px 20px rgba(139, 69, 19, 0.15);
+            }
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .another-drink-float-btn {
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+            
+            .float-btn-inner {
+                padding: 1.2rem 1rem;
+                font-size: 0.8rem;
+                min-width: 85px;
+                min-height: 100px;
+                gap: 0.6rem;
+            }
+            
+            .float-btn-text {
+                font-size: 0.8rem;
+            }
+            
+            .float-btn-icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* 移动端触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .float-btn-inner {
+                min-height: 100px; /* 确保触摸目标足够大 */
+                animation: gentleBreathing 4s ease-in-out infinite; /* 移动端呼吸稍慢 */
+            }
+            
+            .float-btn-inner:active {
+                transform: translateY(-2px) scale(0.95);
+                transition: transform 0.15s ease-out;
+                animation: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -5530,18 +5674,41 @@
                 makingTitle.textContent = '为你推荐的鸡尾酒';
             }
             
-                        // 依次展示每张卡片
-            for (let i = 0; i < Math.min(recommendations.length, 3); i++) {
+            // 依次展示每张卡片 - 使用Promise.all确保所有卡片都展示完成
+            const cardPromises = [];
+            const cardCount = Math.min(recommendations.length, 3);
+            
+            for (let i = 0; i < cardCount; i++) {
                 const recommendation = recommendations[i];
                 console.log(`🍸 开始展示第${i + 1}张卡片:`, recommendation.name?.chinese || recommendation.chinese || recommendation.name);
                 
-                // 每张卡片延迟展示，营造逐个揭晓的效果
-                setTimeout(async () => {
-                await showSimpleRecommendation(recommendation, i);
-                }, i * 2000); // 每张卡片间隔2秒
+                // 创建Promise来等待每张卡片展示完成
+                const cardPromise = new Promise((resolve) => {
+                    setTimeout(async () => {
+                        await showSimpleRecommendation(recommendation, i);
+                        console.log(`✅ 第${i + 1}张卡片展示完成`);
+                        resolve();
+                    }, i * 2000); // 每张卡片间隔2秒
+                });
+                
+                cardPromises.push(cardPromise);
             }
             
+            // 等待所有卡片展示完成
+            await Promise.all(cardPromises);
+            
             console.log('✅ 所有卡片翻开完成');
+            
+            // 计算最后一张卡片完成的时间，然后延迟显示"再来一杯"按钮
+            // 最后一张卡片需要额外的时间来完成动画和内容填充
+            const lastCardDelay = (cardCount - 1) * 2000; // 最后一张卡片的开始时间
+            const cardCompletionTime = 2000; // 每张卡片完成需要的时间
+            const extraDelay = 2000; // 额外等待时间让用户欣赏结果
+            
+            setTimeout(() => {
+                console.log('🍸 开始显示再来一杯按钮');
+                showAnotherDrinkButton();
+            }, extraDelay);
         }
 
         // 简单展示推荐（无复杂动画）
@@ -8327,6 +8494,176 @@
             
             // 不切换section，保持推荐卡片可见
             console.log('✅ 推荐流程完成，保持当前显示状态');
+            
+            // 延迟显示"再来一杯"按钮
+            setTimeout(() => {
+                showAnotherDrinkButton();
+            }, 2000); // 2秒后显示，让用户先欣赏推荐结果
+        }
+
+        // 显示"再来一杯"按钮
+        function showAnotherDrinkButton() {
+            console.log('🍸 显示再来一杯浮动按钮');
+            
+            // 检查是否已经存在按钮，避免重复添加
+            if (document.querySelector('.another-drink-float-btn')) {
+                console.log('⚠️ 再来一杯按钮已存在，跳过添加');
+                return;
+            }
+            
+            const floatButton = document.createElement('div');
+            floatButton.className = 'another-drink-float-btn';
+            floatButton.innerHTML = `
+                <button class="float-btn-inner" onclick="startAnotherDrink()" title="重新开始推荐，探索更多美妙鸡尾酒">
+                    <span class="float-btn-icon">🌿</span>
+                    <span class="float-btn-text">重新探索</span>
+                </button>
+            `;
+            
+            // 插入到body末尾，使用固定定位
+            document.body.appendChild(floatButton);
+            console.log('✅ 再来一杯浮动按钮已添加到右下角');
+        }
+
+        // 重新开始推荐流程
+        function startAnotherDrink() {
+            console.log('🔄 用户点击再来一杯，重启流程');
+            
+            try {
+                // 1. 重置应用状态（如果存在）
+                if (typeof userInput !== 'undefined') {
+                    resetUserInput();
+                }
+                
+                // 2. 重置UI状态
+                resetUIState();
+                
+                // 3. 先显示首页，再滚动
+                showSection('heroSection');
+                
+                // 4. 确保滚动到页面最顶部
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    console.log('✅ 已重启到首页');
+                }, 100);
+                
+            } catch (error) {
+                console.error('❌ 重启流程失败:', error);
+                // 降级方案：直接刷新页面
+                window.location.reload();
+            }
+        }
+
+        // 重置用户输入数据
+        function resetUserInput() {
+            if (typeof userInput !== 'undefined') {
+                userInput.scene = null;
+                userInput.moods = [];
+                userInput.ingredients = {
+                    spirits: [],
+                    mixers: [],
+                    tools: []
+                };
+                userInput.preferences = {
+                    alcohol_level: 50,
+                    sweetness: 50,
+                    acidity: 50,
+                    style: null
+                };
+                userInput.special_requirements = '';
+            }
+            console.log('✅ 用户输入数据已重置');
+        }
+
+        // 重置UI状态
+        function resetUIState() {
+            // 清理推荐结果
+            const makingGrid = document.getElementById('makingGrid');
+            if (makingGrid) {
+                makingGrid.innerHTML = '';
+            }
+            
+            // 隐藏所有推荐流程相关的section
+            const recommendationSections = [
+                'shakerAnalysisSection',
+                'cocktailMakingSection', 
+                'resultsSection',
+                'loadingSection'
+            ];
+            
+            recommendationSections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.style.display = 'none';
+                    console.log(`🔒 已隐藏section: ${sectionId}`);
+                }
+            });
+            
+            // 重置所有选择状态
+            document.querySelectorAll('.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 重置滑块到默认值
+            resetSliders();
+            
+            // 清空特殊要求输入框
+            const specialRequirement = document.getElementById('specialRequirement');
+            if (specialRequirement) {
+                specialRequirement.value = '';
+            }
+            
+            // 重置流式状态
+            if (typeof streamState !== 'undefined') {
+                streamState.analysisText = '';
+                streamState.currentRecommendationIndex = 0;
+                streamState.recommendations = [];
+                if (streamState.eventSource) {
+                    streamState.eventSource.close();
+                    streamState.eventSource = null;
+                }
+            }
+            
+            // 清理分析内容区域
+            const analysisContent = document.querySelector('.analysis-content');
+            if (analysisContent) {
+                analysisContent.innerHTML = '';
+            }
+            
+            // 清理评论卡片容器
+            const reviewContainer = document.querySelector('.review-cards-container');
+            if (reviewContainer) {
+                reviewContainer.innerHTML = '';
+            }
+            
+            // 清理浮动按钮
+            const floatButton = document.querySelector('.another-drink-float-btn');
+            if (floatButton) {
+                floatButton.remove();
+                console.log('🗑️ 已清理浮动按钮');
+            }
+            
+            console.log('✅ UI状态已完全重置');
+        }
+
+        // 重置滑块到默认值
+        function resetSliders() {
+            const sliders = [
+                { id: 'alcoholLevel', value: 50 },
+                { id: 'sweetness', value: 50 },
+                { id: 'acidity', value: 50 }
+            ];
+            
+            sliders.forEach(({ id, value }) => {
+                const slider = document.getElementById(id);
+                const display = document.getElementById(id + 'Value');
+                if (slider) {
+                    slider.value = value;
+                    if (display) {
+                        display.textContent = value;
+                    }
+                }
+            });
         }
 
         // 显示推荐结果
