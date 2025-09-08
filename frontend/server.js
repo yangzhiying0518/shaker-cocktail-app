@@ -3,13 +3,26 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // 启用CORS
 app.use(cors());
 
-// 静态文件服务
-app.use(express.static(__dirname));
+// 配置静态文件服务 - 修复MIME类型问题
+app.use(express.static(__dirname, {
+    setHeaders: (res, path) => {
+        // 确保CSS文件正确的MIME类型
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+        // 确保JS文件正确的MIME类型
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+        // 设置缓存头
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+    }
+}));
 
 // 路由配置
 app.get('/', (req, res) => {
