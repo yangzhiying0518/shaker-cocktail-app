@@ -8,19 +8,29 @@ const PORT = process.env.PORT || 3000;
 // 启用CORS
 app.use(cors());
 
-// 配置静态文件服务 - 修复MIME类型问题
-app.use(express.static(__dirname, {
-    setHeaders: (res, path) => {
-        // 确保CSS文件正确的MIME类型
-        if (path.endsWith('.css')) {
-            res.setHeader('Content-Type', 'text/css');
-        }
-        // 确保JS文件正确的MIME类型
-        if (path.endsWith('.js')) {
-            res.setHeader('Content-Type', 'application/javascript');
-        }
-        // 设置缓存头
+// 配置静态文件服务 - 强健的生产环境配置
+app.use('/css', express.static(path.join(__dirname, 'css'), {
+    setHeaders: (res, filePath) => {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=31536000');
+        console.log(`✅ 服务CSS文件: ${filePath}`);
+    }
+}));
+
+app.use('/js', express.static(path.join(__dirname, 'js'), {
+    setHeaders: (res, filePath) => {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        console.log(`✅ 服务JS文件: ${filePath}`);
+    }
+}));
+
+// 其他静态文件（图片、字体等）
+app.use(express.static(__dirname, {
+    setHeaders: (res, filePath) => {
+        // 设置通用缓存
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        console.log(`📁 服务静态文件: ${filePath}`);
     }
 }));
 

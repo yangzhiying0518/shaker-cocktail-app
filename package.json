@@ -1,4 +1,16 @@
 {
+  "name": "shaker-app",
+  "version": "1.0.0",
+  "description": "Shaker智能鸡尾酒推荐系统",
+  "scripts": {
+    "start": "cd frontend && npm install && npm start",
+    "build": "cd frontend && npm install",
+    "dev": "cd frontend && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "axios": "^1.11.0"
   }
