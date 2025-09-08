@@ -2803,6 +2803,10 @@
                 return;
             }
             
+            // 显示分析区域前，确保内容为空
+            analysisContent.innerHTML = '';
+            analysisContent.textContent = '';
+            
             // 显示分析区域
             analysisSection.style.display = 'block';
             analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
