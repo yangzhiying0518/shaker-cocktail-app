@@ -10,19 +10,72 @@ class VolcanoService extends BaseAIService {
         super();
         this.apiKey = process.env.VOLCANO_API_KEY;
         this.endpoint = process.env.VOLCANO_ENDPOINT || 'https://ark.cn-beijing.volces.com/api/v3';
-        this.modelId = process.env.VOLCANO_MODEL_ID || 'ep-20241201122047-9vlmr'; // 默认模型ID
+        this.modelId = process.env.VOLCANO_MODEL_ID || 'doubao-1-5-pro-32k-250115'; // 默认使用Pro模型
+        
+        // 智能模型选择：根据任务复杂度选择合适的模型
+        this.models = {
+            pro: 'doubao-1-5-pro-32k-250115',      // 高质量，适合复杂JSON生成
+            lite: 'doubao-1-5-lite-32k-250115'     // 高速度，适合简单任务
+        };
+        
+        // 性能监控：记录不同模型的表现
+        this.performanceStats = {
+            pro: { successRate: 0, avgResponseTime: 0, totalRequests: 0 },
+            lite: { successRate: 0, avgResponseTime: 0, totalRequests: 0 }
+        };
+    }
+
+    /**
+     * 智能选择最佳模型
+     * @param {string} taskType - 任务类型 ('recommendation', 'analysis')
+     * @param {boolean} prioritizeSpeed - 是否优先考虑速度
+     * @returns {string} 选择的模型ID
+     */
+    selectOptimalModel(taskType = 'recommendation', prioritizeSpeed = false) {
+        // 对于推荐任务，默认使用Pro模型确保JSON质量
+        if (taskType === 'recommendation') {
+            if (prioritizeSpeed && this.performanceStats.lite.successRate > 0.8) {
+                console.log('🚀 [火山引擎] 选择Lite模型（优先速度）');
+                return this.models.lite;
+            } else {
+                console.log('💎 [火山引擎] 选择Pro模型（优先质量）');
+                return this.models.pro;
+            }
+        }
+        
+        // 对于其他任务，可以使用Lite模型
+        return this.models.lite;
+    }
+
+    /**
+     * 更新性能统计
+     */
+    updatePerformanceStats(modelType, success, responseTime) {
+        const stats = this.performanceStats[modelType];
+        if (stats) {
+            stats.totalRequests++;
+            stats.avgResponseTime = (stats.avgResponseTime * (stats.totalRequests - 1) + responseTime) / stats.totalRequests;
+            stats.successRate = success ? 
+                (stats.successRate * (stats.totalRequests - 1) + 1) / stats.totalRequests :
+                (stats.successRate * (stats.totalRequests - 1)) / stats.totalRequests;
+        }
     }
 
     async getCocktailRecommendation(userInput) {
+        const startTime = Date.now();
+        let selectedModel = this.selectOptimalModel('recommendation');
+        let modelType = selectedModel === this.models.pro ? 'pro' : 'lite';
+        
         try {
             console.log('🌋 [火山引擎] 调用API，用户输入:', JSON.stringify(userInput, null, 2));
+            console.log(`🎯 [火山引擎] 使用模型: ${selectedModel}`);
             
             const prompt = this.buildPrompt(userInput);
             
             const response = await axios.post(
                 `${this.endpoint}/chat/completions`,
                 {
-                    model: this.modelId,
+                    model: selectedModel,
                     messages: [
                         {
                             role: "system",
@@ -48,8 +101,19 @@ class VolcanoService extends BaseAIService {
 
             console.log('✅ [火山引擎] API响应状态:', response.status);
             
-            return this.parseVolcanoResponse(response.data, userInput);
+            const result = this.parseVolcanoResponse(response.data, userInput);
+            
+            // 更新性能统计
+            const responseTime = Date.now() - startTime;
+            this.updatePerformanceStats(modelType, true, responseTime);
+            console.log(`📊 [火山引擎] 响应时间: ${responseTime}ms, 模型: ${modelType}`);
+            
+            return result;
         } catch (error) {
+            // 更新失败统计
+            const responseTime = Date.now() - startTime;
+            this.updatePerformanceStats(modelType, false, responseTime);
+            
             console.error('❌ [火山引擎] API调用失败:', error.response?.data || error.message);
             throw error; // 直接抛出错误，不使用降级方案
         }

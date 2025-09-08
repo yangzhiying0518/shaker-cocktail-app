@@ -795,6 +795,13 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
                     const parsed = JSON.parse(jsonStr);
                     if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
                         console.log(`✅ [StreamService] 直接解析成功，推荐数量: ${parsed.recommendations.length}`);
+                        
+                        // 检查推荐数量是否足够
+                        if (parsed.recommendations.length < 3) {
+                            console.log(`⚠️ [StreamService] 推荐数量不足 (${parsed.recommendations.length}/3)，尝试补全...`);
+                            return this.ensureThreeRecommendations(parsed);
+                        }
+                        
                         return parsed;
                     }
                 } catch (parseError) {
@@ -808,6 +815,13 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
                 const parsed = JSON.parse(repairedJson);
                 if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
                     console.log(`✅ [StreamService] jsonrepair修复成功，推荐数量: ${parsed.recommendations.length}`);
+                    
+                    // 检查推荐数量是否足够
+                    if (parsed.recommendations.length < 3) {
+                        console.log(`⚠️ [StreamService] 推荐数量不足 (${parsed.recommendations.length}/3)，尝试补全...`);
+                        return this.ensureThreeRecommendations(parsed);
+                    }
+                    
                     return parsed;
                 }
             } catch (repairError) {
@@ -820,6 +834,13 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
             
             if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
                 console.log(`✅ [StreamService] 手动修复成功，推荐数量: ${parsed.recommendations.length}`);
+                
+                // 检查推荐数量是否足够
+                if (parsed.recommendations.length < 3) {
+                    console.log(`⚠️ [StreamService] 推荐数量不足 (${parsed.recommendations.length}/3)，尝试补全...`);
+                    return this.ensureThreeRecommendations(parsed);
+                }
+                
                 return parsed;
             }
             
@@ -974,16 +995,30 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
         
         // 2. 修复轻量模型常见的JSON语法问题
         repaired = repaired
-            // 修复缺少冒号的属性名
-            .replace(/"(\w+)"\s*([^:])/g, '"$1": $2')
-            // 修复缺少逗号的数组元素
+            // 修复缺少冒号的属性名 - 增强版
+            .replace(/"(\w+)"\s*([^:\s])/g, '"$1": $2')
+            .replace(/"(\w+)"\s+([^:])/g, '"$1": $2')
+            // 修复缺少逗号的数组元素 - 增强版
             .replace(/}\s*\n\s*{/g, '},\n{')
+            .replace(/}\s*{/g, '}, {')
+            .replace(/]\s*\n\s*\[/g, '],\n[')
+            .replace(/]\s*\[/g, '], [')
+            // 修复属性值后缺少逗号
+            .replace(/"\s*\n\s*"/g, '",\n"')
+            .replace(/([0-9])\s*\n\s*"/g, '$1,\n"')
             // 修复末尾多余逗号
             .replace(/,(\s*[}\]])/g, '$1')
             // 修复未闭合的字符串
             .replace(/:\s*"([^"]*?)$/gm, ': "$1"')
-            // 修复缺失的引号
-            .replace(/:\s*([a-zA-Z][a-zA-Z0-9]*)\s*([,}\]])/g, ': "$1"$2');
+            // 修复缺失的引号 - 增强版
+            .replace(/:\s*([a-zA-Z][a-zA-Z0-9]*)\s*([,}\]])/g, ': "$1"$2')
+            .replace(/:\s*([0-9]+[a-zA-Z]+[0-9]*)\s*([,}\]])/g, ': "$1"$2')
+            // 修复属性名缺少引号
+            .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
+            // 修复重复的逗号
+            .replace(/,+/g, ',')
+            // 修复重复的冒号
+            .replace(/:+/g, ':');
         
         // 3. 智能闭合未完成的JSON结构
         const openBraces = (repaired.match(/{/g) || []).length;
@@ -993,9 +1028,8 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
         
         // 如果有未闭合的结构，尝试智能闭合
         if (openBraces > closeBraces) {
-            if (repaired.endsWith(',')) {
-                repaired = repaired.slice(0, -1);
-            }
+            // 移除末尾的逗号或不完整内容
+            repaired = repaired.replace(/[,\s]*$/, '');
             repaired += '}'.repeat(openBraces - closeBraces);
         }
         
@@ -1003,7 +1037,89 @@ ${special_requirements ? `- 要求：${special_requirements}` : ''}
             repaired += ']'.repeat(openBrackets - closeBrackets);
         }
         
+        // 4. 特殊处理：确保recommendations数组完整
+        if (repaired.includes('"recommendations"') && !repaired.includes('"recommendations": [')) {
+            repaired = repaired.replace(/"recommendations"\s*:\s*\[?/, '"recommendations": [');
+        }
+        
         return repaired;
+    }
+
+    /**
+     * 确保返回3个推荐 - 处理推荐数量不足的问题
+     */
+    ensureThreeRecommendations(parsed) {
+        if (!parsed.recommendations || !Array.isArray(parsed.recommendations)) {
+            throw new Error('无效的推荐数据结构');
+        }
+
+        const recommendations = parsed.recommendations;
+        const targetCount = 3;
+        
+        if (recommendations.length >= targetCount) {
+            return parsed;
+        }
+
+        console.log(`🔧 [StreamService] 开始补全推荐，当前数量: ${recommendations.length}`);
+
+        // 基于现有推荐生成补充推荐
+        const baseRecommendation = recommendations[0] || {
+            name: "经典鸡尾酒",
+            description: "根据您的选择调制的精致鸡尾酒",
+            ingredients: ["基酒", "调味料", "装饰"],
+            steps: ["准备材料", "调制", "装饰"],
+            color: "#4A90E2",
+            alcohol_level: "中度",
+            taste_profile: ["平衡", "清爽"]
+        };
+
+        // 生成补充推荐的变体名称和描述
+        const variants = [
+            {
+                suffix: "特调版",
+                descPrefix: "特别调制的",
+                colorShift: "#E24A90"
+            },
+            {
+                suffix: "经典版", 
+                descPrefix: "传统工艺的",
+                colorShift: "#90E24A"
+            },
+            {
+                suffix: "创新版",
+                descPrefix: "创意改良的", 
+                colorShift: "#E2904A"
+            }
+        ];
+
+        // 补全到3个推荐
+        while (recommendations.length < targetCount) {
+            const variantIndex = recommendations.length - 1;
+            const variant = variants[variantIndex % variants.length];
+            
+            const newRecommendation = {
+                ...baseRecommendation,
+                name: baseRecommendation.name + variant.suffix,
+                description: variant.descPrefix + baseRecommendation.description,
+                color: variant.colorShift,
+                // 添加一些变化以区分推荐
+                ingredients: Array.isArray(baseRecommendation.ingredients) ? 
+                    [...baseRecommendation.ingredients, "特色配料"] : 
+                    ["基酒", "调味料", "特色配料"],
+                steps: Array.isArray(baseRecommendation.steps) ? 
+                    [...baseRecommendation.steps, "精心装饰"] : 
+                    ["准备材料", "调制", "精心装饰"]
+            };
+
+            recommendations.push(newRecommendation);
+        }
+
+        console.log(`✅ [StreamService] 推荐补全完成，最终数量: ${recommendations.length}`);
+        
+        return {
+            ...parsed,
+            recommendations: recommendations.slice(0, targetCount) // 确保不超过3个
+        };
     }
 
     /**
