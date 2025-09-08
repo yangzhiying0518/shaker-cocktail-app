@@ -4220,6 +4220,21 @@
                 analysisContent.innerHTML = '';
             }
             
+            // 清理Shaker分析文本区域
+            const shakerAnalysisText = document.getElementById('shakerAnalysisText');
+            if (shakerAnalysisText) {
+                shakerAnalysisText.innerHTML = '';
+                shakerAnalysisText.textContent = '';
+                console.log('🧹 已清理Shaker分析文本');
+            }
+            
+            // 隐藏Shaker分析区域
+            const shakerAnalysisSection = document.getElementById('shakerAnalysisSection');
+            if (shakerAnalysisSection) {
+                shakerAnalysisSection.style.display = 'none';
+                console.log('🙈 已隐藏Shaker分析区域');
+            }
+            
             // 清理评论卡片容器
             const reviewContainer = document.querySelector('.review-cards-container');
             if (reviewContainer) {
