@@ -4315,3 +4315,4 @@
         // 暴露全局函数供HTML调用
         window.getRecommendation = getRecommendation;
         window.closeCocktailDetails = closeCocktailDetails;
+        window.startAnotherDrink = startAnotherDrink;
