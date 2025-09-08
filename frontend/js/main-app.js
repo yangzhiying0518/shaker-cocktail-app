@@ -1072,6 +1072,7 @@
         
         // 🍸 鸡尾酒故事库 - 精选有趣温暖的调酒小故事
         function generateConnectedStory(requestData) {
+            console.log('🎯 [DEBUG] 使用新的故事库生成故事 - v20240908');
             // 故事库：科普、传说、技巧、哲理等多种类型
             const storyLibrary = {
                 // 经典传说类
@@ -1126,7 +1127,9 @@
             }
             
             const stories = storyLibrary[selectedCategory];
-            return stories[Math.floor(Math.random() * stories.length)];
+            const selectedStory = stories[Math.floor(Math.random() * stories.length)];
+            console.log('📖 [DEBUG] 选择的故事类型:', selectedCategory, '内容:', selectedStory.substring(0, 20) + '...');
+            return selectedStory;
         }
         
         // 🎭 调酒师的温暖感悟 - 多样化的过渡语
