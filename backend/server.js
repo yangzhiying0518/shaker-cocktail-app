@@ -432,12 +432,13 @@ app.listen(PORT, async () => {
     // 显示缓存统计
     console.log('💾 缓存管理器已就绪');
     
-    // 缓存预热（在低峰时段进行，避免影响启动速度）
-    setTimeout(async () => {
-        try {
-            await cacheManager.preWarmCache(aiService);
-        } catch (error) {
-            console.warn('⚠️ 缓存预热失败:', error.message);
-        }
-    }, 5000); // 5秒后开始预热
+    // 缓存预热（临时禁用用于测试）
+    // setTimeout(async () => {
+    //     try {
+    //         await cacheManager.preWarmCache(aiService);
+    //     } catch (error) {
+    //         console.warn('⚠️ 缓存预热失败:', error.message);
+    //     }
+    // }, 5000); // 5秒后开始预热
+    console.log('🔧 [测试模式] 缓存预热已禁用');
 });
