@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaker - 智能鸡尾酒推荐专家</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles-inline.css">
+    <!-- 生产环境备用：内联CSS -->
+    <style id="inline-styles" style="display: none;">
+        /* CSS内容将通过JavaScript动态加载 */
+    </style>
+</head>
+<body>
+    <!-- 背景动效 -->
+    <div class="bg-animation"></div>
+
+    <!-- 头部导航 - 移除黑色背景 -->
+    <header class="header">
+        <div class="container">
+            <a href="#" class="logo">
+                <span class="logo-icon">🍸</span>
+                <span>Shaker</span>
+            </a>
+                </div>
+    </header>
+
+        <!-- 主内容 -->
+    <main class="main-content">
+        <!-- 英雄区域 -->
+        <section class="hero-section" id="heroSection">
+            <div class="container">
+                <h1 class="hero-title">
+                    <span class="title-leaf">🌿</span><span class="gradient-text">Shaker</span> 你的调酒师
+                </h1>
+                <p class="hero-subtitle">
+                    在我的小脑袋瓜里，有你最完美的那一杯，它懂你，让我来告诉你。
+                </p>
+                <a href="#sceneSection" class="hero-cta">
+                    <span>🍸</span>
+                    开始寻找之旅
+                </a>
+                </div>
+        </section>
+
+        <!-- 右侧进度指示器 -->
+        <div class="progress-sidebar">
+            <div class="progress-line-main">
+                <div class="progress-indicator"></div>
+                </div>
+                </div>
+
+        <!-- 场景选择区域 -->
+        <section class="choice-section" id="sceneSection">
+        <div class="container">
+                                <h2 class="section-title">✨ 选择你的时光</h2>
+                <p class="section-subtitle">每一个时刻，都值得用一杯特别的酒来纪念</p>
+                <div class="scene-grid" id="sceneOptions">
+                    <div class="scene-card" data-value="聚会派对">
+                        <span class="scene-icon">🎉</span>
+                        <h4 class="scene-title">聚会派对</h4>
+                        <p class="scene-desc">朋友聚会、生日庆祝、社交活动</p>
+            </div>
+                    <div class="scene-card" data-value="浪漫约会">
+                        <span class="scene-icon">💕</span>
+                        <h4 class="scene-title">浪漫约会</h4>
+                        <p class="scene-desc">情侣约会、纪念日、浪漫晚餐</p>
+                    </div>
+                    <div class="scene-card" data-value="独处放松">
+                        <span class="scene-icon">🧘</span>
+                        <h4 class="scene-title">独处放松</h4>
+                        <p class="scene-desc">下班后、阅读时光、放松心情</p>
+                    </div>
+                    <div class="scene-card" data-value="商务会面">
+                        <span class="scene-icon">🤝</span>
+                        <h4 class="scene-title">商务会面</h4>
+                        <p class="scene-desc">商务聚餐、工作庆祝、客户招待</p>
+                    </div>
+                    <div class="scene-card" data-value="夜晚时光">
+                        <span class="scene-icon">🌙</span>
+                        <h4 class="scene-title">夜晚时光</h4>
+                        <p class="scene-desc">夜店聚会、深夜聊天、不眠夜</p>
+                    </div>
+                    <div class="scene-card" data-value="午后惬意">
+                        <span class="scene-icon">☀️</span>
+                        <h4 class="scene-title">午后惬意</h4>
+                        <p class="scene-desc">下午茶时光、悠闲午后、享受生活</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 心情选择区域 -->
+        <section class="choice-section" id="moodSection">
+            <div class="container">
+                <h2 class="section-title">💫 描述你的心情</h2>
+                <p class="section-subtitle">选择1-3个最符合你当前状态的心情</p>
+                                <div class="mood-grid" id="moodOptions">
+                    <div class="mood-card" data-value="春日愉悦">
+                        <span class="mood-icon">🌻</span>
+                        <h4 class="mood-title">春日愉悦</h4>
+                        <p class="mood-desc">心情如春花般绽放，充满活力</p>
+        </div>
+                    <div class="mood-card" data-value="雨后忧郁">
+                        <span class="mood-icon">🌧️</span>
+                        <h4 class="mood-title">雨后忧郁</h4>
+                        <p class="mood-desc">如雨后森林般沉静，需要抚慰</p>
+    </div>
+                    <div class="mood-card" data-value="夏日激情">
+                        <span class="mood-icon">☀️</span>
+                        <h4 class="mood-title">夏日激情</h4>
+                        <p class="mood-desc">如火焰般热烈，充满期待</p>
+                    </div>
+                    <div class="mood-card" data-value="秋叶宁静">
+                        <span class="mood-icon">🍂</span>
+                        <h4 class="mood-title">秋叶宁静</h4>
+                        <p class="mood-desc">如秋日般平和，寻求内心平衡</p>
+                    </div>
+                    <div class="mood-card" data-value="山峰自信">
+                        <span class="mood-icon">⛰️</span>
+                        <h4 class="mood-title">山峰自信</h4>
+                        <p class="mood-desc">如高山般坚定，充满力量</p>
+                    </div>
+                    <div class="mood-card" data-value="深林沉思">
+                        <span class="mood-icon">🌳</span>
+                        <h4 class="mood-title">深林沉思</h4>
+                        <p class="mood-desc">如古树般深邃，专注思考</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 材料选择区域 -->
+        <section class="choice-section" id="ingredientSection">
+        <div class="container">
+                <h2 class="section-title">🍹 选择材料</h2>
+                <p class="section-subtitle">选择你拥有或喜欢的调酒材料</p>
+                <div class="ingredients-section">
+                    <div class="ingredient-category glass-card" data-theme="spirits">
+                        <h4 class="category-title">🥃 基酒</h4>
+                        <div class="ingredient-list" data-category="spirits">
+                            <span class="ingredient-tag" data-value="威士忌">威士忌</span>
+                            <span class="ingredient-tag" data-value="伏特加">伏特加</span>
+                            <span class="ingredient-tag" data-value="金酒">金酒</span>
+                            <span class="ingredient-tag" data-value="龙舌兰">龙舌兰</span>
+                            <span class="ingredient-tag" data-value="朗姆酒">朗姆酒</span>
+                            <span class="ingredient-tag" data-value="白兰地">白兰地</span>
+                    </div>
+                    </div>
+                    <div class="ingredient-category glass-card" data-theme="mixers">
+                        <h4 class="category-title">🍋 调味料</h4>
+                        <div class="ingredient-list" data-category="mixers">
+                            <span class="ingredient-tag" data-value="柠檬汁">柠檬汁</span>
+                            <span class="ingredient-tag" data-value="青柠汁">青柠汁</span>
+                            <span class="ingredient-tag" data-value="橙汁">橙汁</span>
+                            <span class="ingredient-tag" data-value="苏打水">苏打水</span>
+                            <span class="ingredient-tag" data-value="汤力水">汤力水</span>
+                            <span class="ingredient-tag" data-value="薄荷">薄荷</span>
+                            <span class="ingredient-tag" data-value="蜂蜜">蜂蜜</span>
+                            <span class="ingredient-tag" data-value="糖浆">糖浆</span>
+                    </div>
+                    </div>
+                    <div class="ingredient-category glass-card" data-theme="tools">
+                        <h4 class="category-title">🧊 工具</h4>
+                        <div class="ingredient-list" data-category="tools">
+                            <span class="ingredient-tag" data-value="调酒器">调酒器</span>
+                            <span class="ingredient-tag" data-value="量杯">量杯</span>
+                            <span class="ingredient-tag" data-value="搅拌棒">搅拌棒</span>
+                            <span class="ingredient-tag" data-value="过滤器">过滤器</span>
+                            <span class="ingredient-tag" data-value="冰块">冰块</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 偏好设置区域 -->
+        <section class="choice-section" id="preferenceSection">
+        <div class="container">
+                <h2 class="section-title">✨ 偏好设置</h2>
+                <p class="section-subtitle">调整你的口味偏好，让每一杯都更合你心意</p>
+                
+                <div class="preference-grid">
+                    <div class="preference-card glass-card">
+                        <h4 class="preference-title">甜度</h4>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="5" class="slider" id="sweetnessSlider">
+                            <div class="slider-value" id="sweetnessValue">适中</div>
+                            <div class="slider-labels">
+                                <span class="slider-label-btn" data-slider="sweetnessSlider" data-direction="left">清淡</span>
+                                <span class="slider-label-btn" data-slider="sweetnessSlider" data-direction="center">适中</span>
+                                <span class="slider-label-btn" data-slider="sweetnessSlider" data-direction="right">浓郁</span>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="preference-card glass-card">
+                        <h4 class="preference-title">酒精度</h4>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="5" class="slider" id="alcoholSlider">
+                            <div class="slider-value" id="alcoholValue">中度</div>
+                            <div class="slider-labels">
+                                <span class="slider-label-btn" data-slider="alcoholSlider" data-direction="left">低度</span>
+                                <span class="slider-label-btn" data-slider="alcoholSlider" data-direction="center">中度</span>
+                                <span class="slider-label-btn" data-slider="alcoholSlider" data-direction="right">高度</span>
+                    </div>
+                    </div>
+                    </div>
+                    
+                    <div class="preference-card glass-card">
+                        <h4 class="preference-title">口感</h4>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="5" class="slider" id="textureSlider">
+                            <div class="slider-value" id="textureValue">平衡</div>
+                            <div class="slider-labels">
+                                <span class="slider-label-btn" data-slider="textureSlider" data-direction="left">清爽</span>
+                                <span class="slider-label-btn" data-slider="textureSlider" data-direction="center">平衡</span>
+                                <span class="slider-label-btn" data-slider="textureSlider" data-direction="right">浓厚</span>
+                    </div>
+            </div>
+        </div>
+    </div>
+            </div>
+        </section>
+
+        <!-- 特殊要求区域 -->
+        <section class="choice-section" id="requirementSection">
+        <div class="container">
+                <h2 class="section-title">💭 特殊要求</h2>
+                <p class="section-subtitle">告诉我们你的特别需求，让调酒更贴心</p>
+                
+                <div class="requirement-container">
+                    <textarea 
+                        id="specialRequirement" 
+                        class="requirement-input" 
+                        placeholder="比如：我希望有薄荷的清香，或者想要一杯能让人放松的酒..."
+                        rows="4"
+                    ></textarea>
+                    
+                    <div class="requirement-tags">
+                        <h5>快速选择：</h5>
+                        <div class="tag-list">
+                            <span class="requirement-tag" data-value="不含咖啡因">不含咖啡因</span>
+                            <span class="requirement-tag" data-value="低糖">低糖</span>
+                            <span class="requirement-tag" data-value="颜值要高">颜值要高</span>
+                            <span class="requirement-tag" data-value="制作简单">制作简单</span>
+                            <span class="requirement-tag" data-value="有层次感">有层次感</span>
+                            <span class="requirement-tag" data-value="适合拍照">适合拍照</span>
+        </div>
+    </div>
+    </div>
+            </div>
+        </section>
+
+        <!-- 获取推荐区域 -->
+        <section class="choice-section" id="recommendSection">
+        <div class="container">
+                <h2 class="section-title">🎭 答案即将揭晓</h2>
+                <p class="section-subtitle">寻找之旅即将结束，让我在小脑袋瓜里找到属于你的那一杯</p>
+                <div style="text-align: center; margin: 3rem 0;">
+                    <button class="hero-cta" onclick="getRecommendation()">
+                        <span>✨</span>
+                        揭晓答案
+                    </button>
+            </div>
+            </div>
+        </section>
+                    <div class="step-content" id="step3">
+                        <h3 class="step-title">选择可用材料</h3>
+                        <p class="step-description">选择你目前拥有或容易获得的材料</p>
+                        <div class="ingredients-section">
+                            <div class="ingredient-category glass-card" data-theme="spirits">
+                                <h4 class="category-title">🥃 基酒</h4>
+                                <div class="ingredient-list" data-category="spirits">
+                                    <span class="ingredient-tag" data-value="威士忌">威士忌</span>
+                                    <span class="ingredient-tag" data-value="伏特加">伏特加</span>
+                                    <span class="ingredient-tag" data-value="金酒">金酒</span>
+                                    <span class="ingredient-tag" data-value="朗姆酒">朗姆酒</span>
+                                    <span class="ingredient-tag" data-value="龙舌兰">龙舌兰</span>
+                                    <span class="ingredient-tag" data-value="白兰地">白兰地</span>
+                                </div>
+                            </div>
+                            <div class="ingredient-category glass-card" data-theme="mixers">
+                                <h4 class="category-title">🍋 调料</h4>
+                                <div class="ingredient-list" data-category="mixers">
+                                    <span class="ingredient-tag" data-value="柠檬汁">柠檬汁</span>
+                                    <span class="ingredient-tag" data-value="青柠汁">青柠汁</span>
+                                    <span class="ingredient-tag" data-value="橙汁">橙汁</span>
+                                    <span class="ingredient-tag" data-value="苏打水">苏打水</span>
+                                    <span class="ingredient-tag" data-value="汤力水">汤力水</span>
+                                    <span class="ingredient-tag" data-value="薄荷叶">薄荷叶</span>
+                                    <span class="ingredient-tag" data-value="糖浆">糖浆</span>
+                                    <span class="ingredient-tag" data-value="蜂蜜">蜂蜜</span>
+                                </div>
+                            </div>
+                            <div class="ingredient-category glass-card" data-theme="tools">
+                                <h4 class="category-title">🛠️ 工具</h4>
+                                <div class="ingredient-list" data-category="tools">
+                                    <span class="ingredient-tag" data-value="调酒器">调酒器</span>
+                                    <span class="ingredient-tag" data-value="量杯">量杯</span>
+                                    <span class="ingredient-tag" data-value="搅拌棒">搅拌棒</span>
+                                    <span class="ingredient-tag" data-value="滤网">滤网</span>
+                                    <span class="ingredient-tag" data-value="冰块">冰块</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+        </div>
+    </div>
+
+                    <!-- 步骤4: 偏好设置 -->
+                    <div class="step-content" id="step4">
+                        <h3 class="step-title">设置口味偏好</h3>
+                        <p class="step-description">调整滑块来设置你的口味偏好</p>
+                        <div class="preferences-grid">
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">酒精度</div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="100" value="50" class="slider" id="alcoholLevel">
+                                    <div class="slider-labels">
+                                        <span>无酒精</span>
+                                        <span>中度</span>
+                                        <span>高度</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">甜度</div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="100" value="50" class="slider" id="sweetness">
+                                    <div class="slider-labels">
+                                        <span>不甜</span>
+                                        <span>微甜</span>
+                                        <span>很甜</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">酸度</div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="100" value="50" class="slider" id="acidity">
+                                    <div class="slider-labels">
+                                        <span>不酸</span>
+                                        <span>适中</span>
+                                        <span>很酸</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preference-item glass-card">
+                                <div class="preference-label">口感风格</div>
+                                <div class="options-grid" style="grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 1rem;">
+                                    <div class="option-card" data-value="清爽" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">清爽</h4>
+                                    </div>
+                                    <div class="option-card" data-value="浓郁" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">浓郁</h4>
+                                    </div>
+                                    <div class="option-card" data-value="顺滑" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">顺滑</h4>
+                                    </div>
+                                    <div class="option-card" data-value="刺激" style="padding: 0.8rem;">
+                                        <h4 class="option-title" style="margin: 0; font-size: 0.9rem;">刺激</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 材料选择后自动推进 -->
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary" onclick="nextStep()">继续设置偏好 →</button>
+                        </div>
+                    </div>
+
+                    <!-- 步骤5: 特殊要求 -->
+                    <div class="step-content" id="step5">
+                        <h3 class="step-title">特殊要求 (可选)</h3>
+                        <p class="step-description">有什么特别的要求或想法吗？</p>
+                        <div class="glass-card" style="padding: 2rem; margin: 2rem 0;">
+                            <textarea 
+                                id="specialRequirements" 
+                                placeholder="例如：希望颜值高一些、适合拍照、口感清淡、无需复杂工具等..."
+                                style="width: 100%; height: 120px; background: var(--bg-secondary); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1rem; color: var(--text-primary); font-family: inherit; font-size: 1rem; resize: vertical;"
+                            ></textarea>
+                        </div>
+                        <div class="step-navigation">
+                            <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                            <button class="btn btn-primary" onclick="getRecommendation()">🎯 获取推荐</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    <!-- 加载状态 -->
+        <section class="loading-section" id="loadingSection">
+        <div class="container">
+                <div class="loading-animation"></div>
+                <h2 class="loading-title">AI 正在为你推荐...</h2>
+                <p class="loading-subtitle">基于你的偏好分析最适合的鸡尾酒配方</p>
+            </div>
+        </section>
+
+
+
+        <!-- Shaker分析区域 -->
+        <section class="shaker-analysis-section" id="shakerAnalysisSection">
+            <div class="container">
+                <div class="shaker-analysis-container">
+                    <!-- Shaker思考区域 -->
+                    <div class="shaker-thinking-area">
+                        <div class="shaker-avatar-large">🧙‍♂️</div>
+                        
+                        <!-- 思考泡泡容器 -->
+                        <div class="thought-bubbles-container" id="thoughtBubblesContainer">
+                            <!-- 思考泡泡将在这里动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <h2 class="section-title" id="analysisTitle">让我想想你刚才说了什么...</h2>
+                    
+                    <!-- 分段分析展示区域 -->
+                    <div class="analysis-segments" id="analysisSegments">
+                        <!-- 分段内容将在这里动态生成 -->
+                    </div>
+                    
+                    <!-- 传统分析文本区域（保持兼容性） -->
+                    <div class="shaker-analysis-text" id="shakerAnalysisText" style="display: none;">
+                        <span class="typing-cursor" id="typingCursor"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 调制动画区域 -->
+        <section class="cocktail-making-section" id="cocktailMakingSection">
+            <div class="container">
+                <h2 class="section-title">正在为你调制鸡尾酒...</h2>
+                <div class="making-grid" id="makingGrid">
+                    <!-- 调制卡片将在这里动态生成 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 推荐结果 -->
+        <section class="results-section" id="resultsSection">
+        <div class="container">
+                <h2 class="section-title">为你推荐的鸡尾酒</h2>
+                <div class="results-grid" id="resultsGrid">
+                    <!-- 结果将在这里动态填充 -->
+        </div>
+                <div style="text-align: center; margin-top: 3rem;">
+                    <button class="btn btn-secondary" onclick="startRecommendation()">🔄 重新推荐</button>
+    </div>
+    </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/main-app.js"></script>
+</html>
+</html>

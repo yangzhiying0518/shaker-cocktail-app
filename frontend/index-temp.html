@@ -5451,100 +5451,83 @@
         }
         
         // 生成串联故事 - 将用户选择串联成温暖的小故事（控制在两行内）
-                function generateConnectedStory(requestData) {
-            // 故事库：科普、传说、技巧、哲理等多种类型
-            const storyLibrary = {
-                // 经典传说类
-                legends: [
-                    "传说中，马提尼的完美比例是调酒师用心跳来计算的。每一滴金酒，都承载着对完美的执着。",
-                    "Mojito诞生于古巴的炎热午后，薄荷叶的清香是海明威笔下最浪漫的夏日记忆。",
-                    "据说第一杯玛格丽特是为了纪念一位美丽的女子，柠檬的酸涩正如爱情的甜蜜与眷恋。",
-                    "血腥玛丽的名字听起来可怕，但它其实是治愈宿醉的温柔良药，就像生活中的苦涩总会转为甘甜。",
-                    "威士忌酸的诞生源于一位船长对家乡的思念，每一口都是对远方的深情告白。"
-                ],
-                
-                // 调酒哲学类
-                philosophy: [
-                    "好的鸡尾酒就像人生，需要恰到好处的平衡。太甜会腻，太苦会涩，刚刚好才是艺术。",
-                    "每一次摇晃调酒器，都是在为酒液注入灵魂。节奏快了急躁，慢了寡淡，恰好的韵律才能调出心意。",
-                    "冰块在酒中慢慢融化，就像时间在生活中悄然流淌。最美的时刻，往往就在这融化的瞬间。",
-                    "调酒师的手艺不在于复杂的技巧，而在于理解每一位客人心中的那份期待。",
-                    "一杯好酒的秘密不在于昂贵的原料，而在于调制时那份真诚的心意。"
-                ],
-                
-                // 温暖小贴士类
-                tips: [
-                    "你知道吗？柠檬皮轻轻一拧，释放的精油能让整杯酒的香气瞬间升华。小细节，大不同。",
-                    "真正的调酒师会先品尝每一种原料，因为只有理解了每个元素，才能创造出和谐的整体。",
-                    "冰块的大小决定了酒的温度和稀释度，就像生活中的每个选择都会影响最终的结果。",
-                    "最好的鸡尾酒往往不是最复杂的，而是最能触动人心的那一杯。简单，但不简陋。",
-                    "调酒的黄金法则：先用眼睛品尝，再用鼻子感受，最后才是舌尖的享受。"
-                ],
-                
-                // 情感共鸣类
-                emotional: [
-                    "每个人的味蕾都有独特的记忆，有人偏爱甜蜜，有人钟情苦涩。我的工作就是找到属于你的那个味道。",
-                    "深夜的酒吧里，我见过太多故事。有人为了庆祝，有人为了忘却，但每一杯酒都承载着真实的情感。",
-                    "调酒不只是混合液体，更是在调和情绪。一杯好酒能让疲惫的心灵找到片刻的安宁。",
-                    "有时候，一杯酒就是一个拥抱，温暖而不多言。让我用这杯酒来陪伴你此刻的心情。",
-                    "最好的调酒师不是技艺最精湛的，而是最懂得倾听的那一个。"
-                ]
-            };
+        function generateConnectedStory(requestData) {
+            const scene = requestData.scene;
+            const moods = requestData.moods && requestData.moods.length > 0 ? requestData.moods.join('、') : null;
+            const special = requestData.special_requirements;
             
-            // 根据用户选择进行轻度个性化
-            let selectedCategory;
-            if (requestData.scene === '浪漫约会') {
-                selectedCategory = Math.random() < 0.6 ? 'legends' : 'emotional';
-            } else if (requestData.scene === '独处放松') {
-                selectedCategory = Math.random() < 0.6 ? 'philosophy' : 'emotional';
-            } else if (requestData.scene === '聚会派对') {
-                selectedCategory = Math.random() < 0.6 ? 'tips' : 'legends';
-            } else {
-                // 随机选择类型
-                const categories = Object.keys(storyLibrary);
-                selectedCategory = categories[Math.floor(Math.random() * categories.length)];
+            // 根据不同组合生成串联故事
+            if (scene && moods) {
+                const stories = {
+                    '浪漫晚餐': [
+                        `在这个浪漫的夜晚，你想要${moods}的感觉...我能想象烛光下你们温柔的笑容`,
+                        `浪漫晚餐配上${moods}的心境，这样的夜晚值得用最美的酒来纪念`
+                    ],
+                    '朋友聚会': [
+                        `和朋友聚会时想要${moods}的感觉，这份真挚的友情让人感动`,
+                        `朋友间的${moods}时光总是珍贵，让我为这份友谊调制特别的酒`
+                    ],
+                    '独自放松': [
+                        `独处时想要${moods}的感觉，这样安静的时光很珍贵`,
+                        `一个人的${moods}时光也很美好，让我陪你度过这个夜晚`
+                    ]
+                };
+                
+                const sceneStories = stories[scene] || [`在${scene}时想要${moods}的感觉，我完全理解你的心境`];
+                return sceneStories[Math.floor(Math.random() * sceneStories.length)];
             }
             
-            const stories = storyLibrary[selectedCategory];
-            return stories[Math.floor(Math.random() * stories.length)];
+            if (scene) {
+                const sceneStories = {
+                    '浪漫晚餐': '浪漫的晚餐时光，每一个细节都值得用心对待',
+                    '朋友聚会': '和朋友在一起的时光总是那么温暖珍贵',
+                    '独自放松': '独处的时光同样美好，这是与自己对话的时刻'
+                };
+                return sceneStories[scene] || `${scene}的时光很特别，我想为你调制合适的酒`;
+            }
+            
+            if (moods) {
+                return `想要${moods}的感觉...我能感受到你此刻的心境`;
+            }
+            
+            if (special) {
+                return `你的特别要求"${special}"让我印象深刻，我会用心满足你的需求`;
+            }
+            
+            return '虽然你没说太多，但我能感受到你内心的期待';
         }
         
         // 生成共鸣理解 - 调酒师的温暖理解（控制在两行内）
-                function generateEmpathy(requestData) {
-            const warmInsights = [
-                "现在，让我为你调制一杯特别的酒。",
-                "每一杯酒都有它的故事，就像每个人都有自己的心情。",
-                "我为你准备了三个选择，相信其中一杯会打动你。",
-                "让我用这三杯酒来回应你的期待。",
-                "调酒的魅力就在于每一次都是独特的创作。",
-                "好的，让我把这些理解融入到酒杯中。",
-                "接下来，是我最喜欢的调制时刻。",
-                "我已经在心中勾勒出了几种可能。",
-                "让我用专业的直觉为你选择。",
-                "这就是调酒师存在的意义。"
+        function generateEmpathy(requestData) {
+            const empathyTexts = [
+                '每个人都有属于自己的故事，我想用一杯好酒来回应你的心情',
+                '调酒不只是技艺，更是一种理解和陪伴的艺术',
+                '好的鸡尾酒就像温暖的拥抱，能够抚慰人心',
+                '我相信每一杯用心调制的酒，都能传递温暖和理解'
             ];
             
-            return warmInsights[Math.floor(Math.random() * warmInsights.length)];
+            // 根据场景添加个性化理解
+            if (requestData.scene === '浪漫晚餐') {
+                empathyTexts.push('爱情需要仪式感，让我为你们的浪漫时光增添甜蜜');
+            } else if (requestData.scene === '朋友聚会') {
+                empathyTexts.push('真正的友谊值得庆祝，让我为你们的友情干杯');
+            } else if (requestData.scene === '独自放松') {
+                empathyTexts.push('独处是一种智慧，我很欣赏你懂得享受这样的时光');
+            }
+            
+            return empathyTexts[Math.floor(Math.random() * empathyTexts.length)];
         }
         
         // 生成最终期待 - 简洁的揭晓前奏（控制在两行内）
-                function generateFinalAnticipation(requestData) {
-            const finalWords = [
-                "我为你调好了三杯鸡尾酒。",
-                "三杯特别的酒，等你来品尝。",
-                "让我们一起看看这三杯酒吧。",
-                "完成了，三杯承载着心意的作品。",
-                "好了，我的推荐已经准备就绪。",
-                "三种不同的可能，都在这里了。",
-                "这就是我为你精心挑选的。",
-                "我的答案，就在这三杯酒中。",
-                "准备好迎接惊喜了吗？",
-                "让这三杯酒来诉说我的理解。",
-                "调制完毕，请欣赏我的作品。",
-                "三杯酒，三种心情，三份用心。"
+        function generateFinalAnticipation(requestData) {
+            const anticipationTexts = [
+                '现在，让我为你揭晓今晚的惊喜...三杯特别的鸡尾酒',
+                '准备好了吗？我为你精心挑选了三款不同风格的酒',
+                '基于我对你的理解，这三杯酒一定有一款会打动你',
+                '让我为你呈现三杯承载着温暖和理解的鸡尾酒'
             ];
             
-            return finalWords[Math.floor(Math.random() * finalWords.length)];
+            return anticipationTexts[Math.floor(Math.random() * anticipationTexts.length)];
         }
         
         // 生成阶段2文本 - 思考分析
@@ -6130,7 +6113,7 @@
                 setTimeout(async () => {
                     const contentElement = bubbleElement.querySelector('.thought-bubble-content');
                     const originalText = contentElement.getAttribute('data-text');
-                    await typewriterEffect(contentElement, originalText, 120); // 适中的打字速度
+                    await typewriterEffect(contentElement, originalText, 100); // 适中的打字速度
                 }, i * 800 + 1500);
                 
                 // 等待当前泡泡完成（延长停留时间让用户看完）
@@ -7006,13 +6989,13 @@
                 const apiPromise = getRecommendationsOnly(requestData);
                 const storyPromise = showCompleteStoryExperience(requestData);
                 
-                // 等待Shaker说完话就立即滚动，不等API
-                console.log('⏳ 等待Shaker故事体验完成...');
-                await storyPromise;
+                // 等待两者都完成
+                console.log('⏳ 等待API和故事体验完成...');
+                const [recommendations, _] = await Promise.all([apiPromise, storyPromise]);
                 
-                console.log('✅ Shaker说话完成，立即滚动到推荐区域');
+                console.log('✅ 并行处理完成，API返回:', recommendations.length, '个推荐');
                 
-                // 立即滚动到推荐区域，显示加载状态
+                // 滚动到推荐区域
                 showSection('cocktailMakingSection');
                 setTimeout(() => {
                     const makingSection = document.getElementById('cocktailMakingSection');
@@ -7028,17 +7011,10 @@
                 const actualCount = Math.min(recommendations.length, 3);
                 initializeMakingCards(actualCount);
                 
-                // 先显示3个加载中的卡片
-                initializeMakingCards(3);
-                
-                // API在后台完成后更新卡片
-                apiPromise.then(async (recommendations) => {
-                    console.log('✅ API返回完成，开始展示推荐:', recommendations.length, '个推荐');
-                    await showRecommendationsSequentially(recommendations);
-                }).catch(error => {
-                    console.error('❌ API调用失败:', error);
-                    // 这里可以显示错误状态
-                });
+                // 等待2秒让用户看到初始状态，然后开始展示推荐结果
+                setTimeout(async () => {
+                await showRecommendationsSequentially(recommendations);
+                }, 2000);
                 
             } catch (error) {
                 console.error('❌ 推荐流程失败:', error);
