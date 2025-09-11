@@ -322,7 +322,7 @@ class VolcanoService extends BaseAIService {
             
             console.log('🔍 [火山引擎] 提取的JSON长度:', jsonMatch[0].length, '字符');
             
-            const recommendations = JSON.parse(jsonMatch[0]);
+            const recommendations = this.safeJsonParse(jsonMatch[0]);
             console.log('✅ [火山引擎] JSON解析成功');
             
             if (!recommendations?.recommendations || !Array.isArray(recommendations.recommendations)) {
@@ -342,6 +342,57 @@ class VolcanoService extends BaseAIService {
             console.error('❌ [火山引擎] JSON解析失败:', error.message);
             console.error('🔍 [火山引擎] 原始响应内容:', data?.choices?.[0]?.message?.content);
             throw new Error(`AI响应解析失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * 安全解析JSON，带容错处理
+     * @param {string} jsonStr - JSON字符串
+     * @returns {Object} - 解析后的对象
+     */
+    safeJsonParse(jsonStr) {
+        console.log('🔧 [JSON解析] 开始安全解析JSON...');
+        
+        // 尝试直接解析
+        try {
+            const result = JSON.parse(jsonStr);
+            console.log('✅ [JSON解析] 直接解析成功');
+            return result;
+        } catch (error) {
+            console.log('⚠️ [JSON解析] 直接解析失败，尝试修复:', error.message);
+        }
+        
+        // 尝试修复常见的JSON格式问题
+        try {
+            console.log('🔄 [JSON解析] 尝试修复JSON格式问题...');
+            let fixed = jsonStr;
+            
+            // 1. 修复数组和对象末尾的多余逗号
+            fixed = fixed.replace(/,(\s*[\]}])/g, '$1');
+            
+            // 2. 修复ingredients数组中的多余逗号（针对当前具体错误）
+            fixed = fixed.replace(/("amount":\s*"[^"]*"),(\s*\])/g, '$1$2');
+            
+            // 3. 移除可能的注释
+            fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
+            fixed = fixed.replace(/\/\/.*$/gm, '');
+            
+            const result = JSON.parse(fixed);
+            console.log('✅ [JSON解析] 修复后解析成功');
+            return result;
+        } catch (error) {
+            console.error('❌ [JSON解析] 修复后解析仍失败:', error.message);
+            
+            // 显示错误位置的上下文
+            const errorMatch = error.message.match(/position (\d+)/);
+            if (errorMatch) {
+                const pos = parseInt(errorMatch[1]);
+                const start = Math.max(0, pos - 50);
+                const end = Math.min(jsonStr.length, pos + 50);
+                console.error('🔍 [JSON解析] 错误位置上下文:', jsonStr.substring(start, end));
+            }
+            
+            throw new Error(`JSON解析失败，已尝试修复: ${error.message}`);
         }
     }
 
