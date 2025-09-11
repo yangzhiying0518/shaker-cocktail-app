@@ -277,9 +277,9 @@
                 tools: []
             },
             preferences: {
-                alcohol_level: 50,
-                sweetness: 50,
-                acidity: 50,
+                alcohol_level: "中度",
+                sweetness: "微甜",
+                acidity: "适中",
                 style: ''
             },
             special_requirements: ''
@@ -476,7 +476,16 @@
         function handlePreferenceChange(e) {
             const slider = e.target;
             const value = parseInt(slider.value);
+            // 根据滑块ID转换为对应的文本值
+        if (slider.id === "alcohol_level") {
+            userInput.preferences[slider.id] = getAlcoholLevelText(value);
+        } else if (slider.id === "sweetness") {
+            userInput.preferences[slider.id] = getSweetnessText(value);
+        } else if (slider.id === "acidity") {
+            userInput.preferences[slider.id] = getAcidityText(value);
+        } else {
             userInput.preferences[slider.id] = value;
+        }
         }
 
         // 处理特殊要求便捷输入
@@ -724,7 +733,7 @@
                 scene: '',
                 moods: [],
                 ingredients: { spirits: [], mixers: [], tools: [] },
-                preferences: { alcohol_level: 50, sweetness: 50, acidity: 50, style: '' },
+                preferences: { alcohol_level: "中度", sweetness: "微甜", acidity: "适中", style: '' },
                 special_requirements: ''
             };
             
@@ -2360,9 +2369,9 @@
                 moods: userInput.moods,
                 ingredients: userInput.ingredients,
                     preferences: {
-                    alcohol_level: getAlcoholLevelText(userInput.preferences.alcohol_level),
-                    sweetness: getSweetnessText(userInput.preferences.sweetness),
-                    acidity: getAcidityText(userInput.preferences.acidity),
+                    alcohol_level: userInput.preferences.alcohol_level,
+                    sweetness: userInput.preferences.sweetness,
+                    acidity: userInput.preferences.acidity,
                     style: userInput.preferences.style || '清爽'
                 },
                 special_requirements: userInput.special_requirements
@@ -3519,9 +3528,9 @@
                     tools: []
                 };
                 userInput.preferences = {
-                    alcohol_level: 50,
-                    sweetness: 50,
-                    acidity: 50,
+                    alcohol_level: "中度",
+                    sweetness: "微甜",
+                    acidity: "适中",
                     style: null
                 };
                 userInput.special_requirements = '';
