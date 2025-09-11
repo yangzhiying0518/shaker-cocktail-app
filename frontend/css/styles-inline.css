@@ -2401,7 +2401,7 @@
             /* 移除垂直居中，让内容自然流动 */
             flex-direction: column;
         }
-        
+
         .cocktail-making-section.visible {
             display: flex;
         }
@@ -2417,6 +2417,7 @@
             max-width: 1200px;
             margin-left: auto;
             margin-right: auto;
+            align-items: start;
             /* 移除高度限制，让内容自然显示 */
             height: auto;
         }
@@ -2604,9 +2605,8 @@
             border-radius: 16px;
             padding: 20px;
             border: 1px solid #e5e7eb;
-            /* 增加最小高度，确保内容完整显示 */
-            min-height: 450px;
-            max-height: calc((100vh - 200px) / 1.1);
+            /* 移除固定高度限制，让卡片自适应内容 */
+            min-height: 400px;
             height: auto;
             display: flex;
             flex-direction: column;
@@ -2614,8 +2614,6 @@
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
-            /* 允许内容滚动而不是截断 */
-            overflow: visible;
         }
         
         .simple-cocktail-card:hover {
@@ -2936,8 +2934,7 @@
             gap: 0.6rem;
             overflow: visible;
             position: relative;
-            /* 确保内容完整显示 */
-            min-height: 350px;
+            /* 确保内容完整显示，移除固定高度限制 */
             height: auto;
             box-sizing: border-box;
             background: linear-gradient(135deg, rgba(245, 245, 220, 0.3), rgba(143, 188, 143, 0.1));
@@ -3048,13 +3045,14 @@
             font-size: 1rem;
         }
         
-        /* 底部信息 - 单行布局 */
+        /* 底部信息 - 单行布局，固定在卡片底部 */
         .bottom-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 1.5rem 0 1rem 0;
-            padding: 0;
+            margin-top: auto; /* 自动推到底部 */
+            margin-bottom: 0;
+            padding: 1rem 0 0 0; /* 顶部留出间距 */
         }
         
         /* 左侧：时间和难度 */
@@ -3651,7 +3649,7 @@
             }
             
             .simple-cocktail-card {
-                min-height: 400px;
+                min-height: 350px;
                 max-height: none;
             }
         }

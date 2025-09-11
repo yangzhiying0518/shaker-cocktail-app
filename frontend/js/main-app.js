@@ -1257,11 +1257,13 @@
                 return;
             }
             
-            // 更新标题
+            // 更新标题并添加推荐状态样式
             const makingTitle = document.querySelector('#cocktailMakingSection .section-title');
+            const makingSection = document.getElementById('cocktailMakingSection');
             if (makingTitle) {
                 makingTitle.textContent = '为你推荐的鸡尾酒';
             }
+
             
             // 依次展示每张卡片 - 使用Promise.all确保所有卡片都展示完成
             const cardPromises = [];
@@ -1580,11 +1582,13 @@
                 return;
             }
             
-            // 更新标题
+            // 更新标题并添加推荐状态样式
             const makingTitle = document.querySelector('#cocktailMakingSection .section-title');
+            const makingSection = document.getElementById('cocktailMakingSection');
             if (makingTitle) {
                 makingTitle.textContent = '为你推荐的鸡尾酒';
             }
+
             
             // 逐个显示推荐结果
             for (let i = 0; i < Math.min(recommendations.length, 3); i++) {
@@ -2406,10 +2410,10 @@
                     if (makingSection) {
                         makingSection.scrollIntoView({
                             behavior: 'smooth',
-                            block: 'center'
+                            block: 'start'
                         });
                     }
-                }, 300);
+                }, 500);
                 
                 // 先显示3个加载中的卡片
                 initializeMakingCards(3);
@@ -3701,10 +3705,46 @@
                 container.appendChild(card);
             });
             
-            // 滚动到结果区域
-            document.getElementById('resultsSection').scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            // 精确滚动：确保所有推荐卡片完全可见（电脑端全屏优化）
+            // 使用 requestAnimationFrame 确保DOM完全渲染
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const resultsSection = document.getElementById('resultsSection');
+                    const resultsGrid = document.getElementById('resultsGrid');
+                    
+                    if (resultsSection && resultsGrid) {
+                        // 获取结果区域的准确位置和尺寸
+                        const sectionRect = resultsSection.getBoundingClientRect();
+                        const gridRect = resultsGrid.getBoundingClientRect();
+                        const viewportHeight = window.innerHeight;
+                        
+                        console.log('📊 滚动调试信息:', {
+                            sectionTop: sectionRect.top,
+                            sectionHeight: sectionRect.height,
+                            gridHeight: gridRect.height,
+                            viewportHeight: viewportHeight
+                        });
+                        
+                        // 计算最佳滚动位置：确保卡片区域底部可见
+                        const sectionTop = resultsSection.offsetTop;
+                        const sectionHeight = resultsSection.offsetHeight;
+                        const scrollTarget = sectionTop + sectionHeight - viewportHeight + 50; // 50px底部边距
+                        
+                        // 如果内容高度超过视口，滚动到底部；否则居中显示
+                        if (sectionHeight > viewportHeight * 0.9) {
+                            window.scrollTo({
+                                top: Math.max(scrollTarget, sectionTop - 100), // 确保不会滚动过头
+                                behavior: 'smooth'
+                            });
+                        } else {
+                            // 内容适中时，使用居中对齐
+                            resultsSection.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                        }
+                    }
+                });
             });
         }
 
