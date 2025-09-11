@@ -332,8 +332,8 @@ class VolcanoService extends BaseAIService {
             
             console.log(`📊 [火山引擎] 解析到 ${recommendations.recommendations.length} 个推荐`);
             
-            // 验证推荐多样性
-            const validatedRecommendations = this.validateRecommendationDiversity(recommendations);
+            // 验证推荐多样性，传入用户输入以进行智能验证
+            const validatedRecommendations = this.validateRecommendationDiversity(recommendations, userInput);
             console.log('✅ [火山引擎] 推荐解析和验证完成');
             
             return validatedRecommendations;
@@ -373,6 +373,9 @@ class VolcanoService extends BaseAIService {
             // 2. 修复ingredients数组中的多余逗号（针对当前具体错误）
             fixed = fixed.replace(/("amount":\s*"[^"]*"),(\s*\])/g, '$1$2');
             
+            // 3. 修复缺少key的值（如 "薄荷叶", "适量" -> "薄荷叶", "amount": "适量"）
+            fixed = fixed.replace(/("name":\s*"[^"]*"),\s*"([^"]*)"(\s*\})/g, '$1, "amount": "$2"$3');
+            
             // 3. 移除可能的注释
             fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
             fixed = fixed.replace(/\/\/.*$/gm, '');
@@ -398,10 +401,21 @@ class VolcanoService extends BaseAIService {
 
     /**
      * 验证推荐的多样性，采用更灵活的验证策略
+     * @param {Object} recommendations - 推荐结果
+     * @param {Object} userInput - 用户输入，用于智能验证
      */
-    validateRecommendationDiversity(recommendations) {
+    validateRecommendationDiversity(recommendations, userInput = {}) {
         console.log('🔍 [多样性验证] 开始验证推荐多样性');
         const recs = recommendations.recommendations;
+        
+        // 检查用户是否指定了特定的基酒
+        const userSpirits = userInput.ingredients?.spirits || [];
+        const hasSpecificSpirits = userSpirits.length > 0;
+        console.log(`🎯 [多样性验证] 用户指定基酒: ${hasSpecificSpirits ? userSpirits.join(', ') : '无'}`);
+        
+        // 如果用户只指定了一种基酒，放宽多样性要求
+        const shouldRelaxSpiritDiversity = hasSpecificSpirits && userSpirits.length === 1;
+        console.log(`🔧 [多样性验证] 放宽基酒多样性要求: ${shouldRelaxSpiritDiversity}`);
         
         // 检查基酒分布
         const spirits = recs.map((rec, index) => {
@@ -439,11 +453,15 @@ class VolcanoService extends BaseAIService {
         console.log(`📊 [多样性分析] 基酒分布: ${spirits.join(', ')}`);
         console.log(`📊 [多样性分析] 不同基酒数量: ${uniqueSpirits.length}/${validSpiritsCount}`);
         
-        // 如果3个推荐都是同一种基酒，则认为多样性不足
-        if (validSpiritsCount >= 3 && uniqueSpirits.length === 1) {
+        // 智能基酒多样性验证
+        if (shouldRelaxSpiritDiversity) {
+            // 用户指定了单一基酒，允许所有推荐使用相同基酒
+            console.log(`✅ [多样性验证] 用户指定单一基酒，允许基酒重复 (${uniqueSpirits.length}种基酒)`);
+        } else if (validSpiritsCount >= 3 && uniqueSpirits.length === 1) {
+            // 用户没有指定特定基酒，但所有推荐都使用相同基酒
             console.error('❌ [多样性检查] 所有推荐使用相同基酒:', uniqueSpirits[0]);
             throw new Error(`推荐多样性验证失败：所有推荐都使用${uniqueSpirits[0]}，缺乏多样性`);
-        } else if (uniqueSpirits.length >= 2 || validSpiritsCount < 3) {
+        } else {
             console.log(`✅ [多样性验证] 基酒多样性合理 (${uniqueSpirits.length}种不同基酒)`);
         }
         
