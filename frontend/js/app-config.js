@@ -5,7 +5,9 @@
 
 // API配置
 export const API_CONFIG = {
-    BASE_URL: 'http://localhost:3001', // 本地开发使用本地API
+    BASE_URL: window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001' 
+        : 'https://shaker-cocktail-app-production.up.railway.app', // 自动检测环境
     ENDPOINTS: {
         RECOMMEND: '/api/recommend',
         INGREDIENTS: '/api/ingredients',

@@ -1210,7 +1210,7 @@
             console.log('🍸 调用推荐API...');
             
             try {
-                const response = await fetch('http://localhost:3001/api/recommend', {
+                const response = await fetch((window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://shaker-cocktail-app-production.up.railway.app') + '/api/recommend', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
