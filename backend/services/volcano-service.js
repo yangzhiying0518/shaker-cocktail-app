@@ -346,19 +346,21 @@ class VolcanoService extends BaseAIService {
     }
 
     /**
-     * 验证推荐的多样性，确保没有重复
+     * 验证推荐的多样性，采用更灵活的验证策略
      */
     validateRecommendationDiversity(recommendations) {
         console.log('🔍 [多样性验证] 开始验证推荐多样性');
         const recs = recommendations.recommendations;
         
-        // 检查基酒是否重复
+        // 检查基酒分布
         const spirits = recs.map((rec, index) => {
             const ingredients = rec.recipe?.ingredients || [];
             const spirit = ingredients.find(ing => 
                 ing.name.includes('威士忌') || ing.name.includes('金酒') || 
                 ing.name.includes('朗姆') || ing.name.includes('龙舌兰') || 
-                ing.name.includes('伏特加') || ing.name.includes('白兰地')
+                ing.name.includes('伏特加') || ing.name.includes('白兰地') ||
+                ing.name.includes('白酒') || ing.name.includes('清酒') || 
+                ing.name.includes('利口酒') || ing.name.includes('香槟')
             );
             const spiritName = spirit?.name || '未知';
             console.log(`🍸 [多样性验证] 推荐${index + 1} 基酒: ${spiritName}`);
@@ -379,35 +381,41 @@ class VolcanoService extends BaseAIService {
             return priority;
         });
         
-        // 验证基酒多样性
-        const spiritDuplicates = spirits.filter((spirit, index) => spirits.indexOf(spirit) !== index);
-        if (spiritDuplicates.length > 0) {
-            console.error('❌ [多样性检查] 发现基酒重复:', spiritDuplicates);
-            throw new Error(`推荐多样性验证失败：基酒重复 - ${spiritDuplicates.join(', ')}`);
-        } else {
-            console.log('✅ [多样性验证] 基酒类型完全不同');
+        // 🔧 改进的基酒多样性验证 - 允许适度重复，但不能全部相同
+        const uniqueSpirits = [...new Set(spirits.filter(s => s !== '未知'))];
+        const validSpiritsCount = spirits.filter(s => s !== '未知').length;
+        
+        console.log(`📊 [多样性分析] 基酒分布: ${spirits.join(', ')}`);
+        console.log(`📊 [多样性分析] 不同基酒数量: ${uniqueSpirits.length}/${validSpiritsCount}`);
+        
+        // 如果3个推荐都是同一种基酒，则认为多样性不足
+        if (validSpiritsCount >= 3 && uniqueSpirits.length === 1) {
+            console.error('❌ [多样性检查] 所有推荐使用相同基酒:', uniqueSpirits[0]);
+            throw new Error(`推荐多样性验证失败：所有推荐都使用${uniqueSpirits[0]}，缺乏多样性`);
+        } else if (uniqueSpirits.length >= 2 || validSpiritsCount < 3) {
+            console.log(`✅ [多样性验证] 基酒多样性合理 (${uniqueSpirits.length}种不同基酒)`);
         }
         
-        // 验证优先级多样性
-        const priorityDuplicates = priorities.filter((priority, index) => priorities.indexOf(priority) !== index);                                                                                                  
-        if (priorityDuplicates.length > 0) {
-            console.error('❌ [多样性检查] 发现优先级重复:', priorityDuplicates);
-            throw new Error(`推荐多样性验证失败：优先级重复 - ${priorityDuplicates.join(', ')}`);
+        // 验证优先级多样性 - 允许部分重复
+        const uniquePriorities = [...new Set(priorities.filter(p => p))];
+        if (priorities.length >= 3 && uniquePriorities.length === 1) {
+            console.warn('⚠️ [多样性检查] 所有推荐使用相同优先级:', uniquePriorities[0]);
+            // 优先级重复不再作为致命错误，只记录警告
         } else {
-            console.log('✅ [多样性验证] 优先级标识完全不同');
+            console.log(`✅ [多样性验证] 优先级标识合理 (${uniquePriorities.length}种不同优先级)`);
         }
         
-        // 检查推荐理由相似度
+        // 🔧 改进的推荐理由相似度检查 - 提高阈值，降低严格程度
         const reasonSimilarity = this.checkReasonSimilarity(reasons);
         console.log(`📊 [多样性验证] 推荐理由相似度: ${(reasonSimilarity * 100).toFixed(1)}%`);
-        if (reasonSimilarity > 0.7) {
+        if (reasonSimilarity > 0.85) { // 从0.7提高到0.85
             console.error('❌ [多样性检查] 推荐理由相似度过高:', reasonSimilarity);
             throw new Error(`推荐多样性验证失败：推荐理由相似度过高 ${(reasonSimilarity * 100).toFixed(1)}%`);
         } else {
             console.log('✅ [多样性验证] 推荐理由差异化良好');
         }
         
-        // 检查鸡尾酒名称是否重复
+        // 检查鸡尾酒名称是否重复 - 这个保持严格
         const names = recs.map((rec, index) => {
             const nameCn = rec.name?.chinese || '';
             const nameEn = rec.name?.english || '';
@@ -415,7 +423,7 @@ class VolcanoService extends BaseAIService {
             return nameCn;
         });
         
-        const nameDuplicates = names.filter((name, index) => names.indexOf(name) !== index);
+        const nameDuplicates = names.filter((name, index) => names.indexOf(name) !== index && name);
         if (nameDuplicates.length > 0) {
             console.error('❌ [多样性检查] 发现鸡尾酒名称重复:', nameDuplicates);
             throw new Error(`推荐多样性验证失败：鸡尾酒名称重复 - ${nameDuplicates.join(', ')}`);
@@ -423,7 +431,16 @@ class VolcanoService extends BaseAIService {
             console.log('✅ [多样性验证] 鸡尾酒名称完全不同');
         }
         
-        console.log('✅ [多样性验证] 验证完成');
+        // 🔧 新增：检查制作复杂度多样性
+        const difficulties = recs.map(rec => rec.recipe?.difficulty || '未知');
+        const uniqueDifficulties = [...new Set(difficulties.filter(d => d !== '未知'))];
+        console.log(`📊 [多样性分析] 制作复杂度分布: ${difficulties.join(', ')}`);
+        console.log(`✅ [多样性验证] 复杂度多样性: ${uniqueDifficulties.length}种不同难度`);
+        
+        // 🔧 新增：生成多样性验证报告
+        this.generateDiversityReport(recs, spirits, priorities, reasons, difficulties);
+        
+        console.log('✅ [多样性验证] 验证完成 - 采用灵活策略');
         return recommendations;
     }
 
@@ -448,16 +465,164 @@ class VolcanoService extends BaseAIService {
     }
 
     /**
-     * 计算两个文本的相似度（简单的词汇重叠度）
+     * 计算两个文本的相似度（改进的语义相似度算法）
      */
     calculateTextSimilarity(text1, text2) {
-        const words1 = text1.replace(/[^\u4e00-\u9fa5\w]/g, '').split('');
-        const words2 = text2.replace(/[^\u4e00-\u9fa5\w]/g, '').split('');
+        if (!text1 || !text2) return 0;
+        if (text1 === text2) return 1;
         
+        // 🔧 改进1: 按词汇分割而不是字符分割
+        const words1 = this.extractKeywords(text1);
+        const words2 = this.extractKeywords(text2);
+        
+        if (words1.length === 0 || words2.length === 0) return 0;
+        
+        // 🔧 改进2: 使用Jaccard相似度，但加入权重
         const intersection = words1.filter(word => words2.includes(word));
         const union = [...new Set([...words1, ...words2])];
         
-        return union.length > 0 ? intersection.length / union.length : 0;
+        const jaccardSimilarity = union.length > 0 ? intersection.length / union.length : 0;
+        
+        // 🔧 改进3: 长度差异惩罚 - 长度差异大的文本相似度降低
+        const lengthDiff = Math.abs(text1.length - text2.length);
+        const maxLength = Math.max(text1.length, text2.length);
+        const lengthPenalty = lengthDiff / maxLength;
+        
+        // 🔧 改进4: 综合相似度计算
+        const finalSimilarity = jaccardSimilarity * (1 - lengthPenalty * 0.3);
+        
+        return Math.max(0, finalSimilarity);
+    }
+    
+    /**
+     * 提取文本关键词（改进的分词逻辑）
+     */
+    extractKeywords(text) {
+        // 移除标点符号，保留中文、英文、数字
+        const cleanText = text.replace(/[^\u4e00-\u9fa5\w\s]/g, ' ');
+        
+        // 按空格和常见分隔符分割
+        const words = cleanText.split(/\s+/).filter(word => word.length > 0);
+        
+        // 对中文进行简单的双字分割
+        const chineseWords = [];
+        for (const word of words) {
+            if (/[\u4e00-\u9fa5]/.test(word)) {
+                // 中文按双字分割
+                for (let i = 0; i < word.length - 1; i++) {
+                    chineseWords.push(word.substr(i, 2));
+                }
+                // 也保留完整词汇
+                if (word.length >= 2) {
+                    chineseWords.push(word);
+                }
+            } else {
+                // 英文单词直接使用
+                chineseWords.push(word.toLowerCase());
+            }
+        }
+        
+        // 去重并过滤停用词
+        const stopWords = ['的', '了', '在', '是', '和', '与', '或', '但', '而', '这', '那', '一个', 'the', 'a', 'an', 'and', 'or', 'but'];
+        return [...new Set(chineseWords)].filter(word => 
+            word.length > 1 && !stopWords.includes(word)
+        );
+    }
+    
+    /**
+     * 生成详细的多样性验证报告
+     */
+    generateDiversityReport(recommendations, spirits, priorities, reasons, difficulties) {
+        console.log('\n📋 [多样性报告] ==========================================');
+        
+        // 基酒分析
+        const uniqueSpirits = [...new Set(spirits.filter(s => s !== '未知'))];
+        const spiritStats = {};
+        spirits.forEach(spirit => {
+            spiritStats[spirit] = (spiritStats[spirit] || 0) + 1;
+        });
+        
+        console.log('🍸 基酒分析:');
+        Object.entries(spiritStats).forEach(([spirit, count]) => {
+            const status = count > 1 ? '⚠️ 重复' : '✅ 唯一';
+            console.log(`   ${spirit}: ${count}次 ${status}`);
+        });
+        console.log(`   多样性评分: ${uniqueSpirits.length}/${spirits.length} (${(uniqueSpirits.length/spirits.length*100).toFixed(1)}%)`);
+        
+        // 优先级分析
+        const uniquePriorities = [...new Set(priorities.filter(p => p))];
+        const priorityStats = {};
+        priorities.forEach(priority => {
+            if (priority) priorityStats[priority] = (priorityStats[priority] || 0) + 1;
+        });
+        
+        console.log('\n⭐ 优先级分析:');
+        Object.entries(priorityStats).forEach(([priority, count]) => {
+            const status = count > 1 ? '⚠️ 重复' : '✅ 唯一';
+            console.log(`   ${priority}: ${count}次 ${status}`);
+        });
+        
+        // 理由相似度分析
+        console.log('\n💭 推荐理由相似度矩阵:');
+        for (let i = 0; i < reasons.length; i++) {
+            for (let j = i + 1; j < reasons.length; j++) {
+                const similarity = this.calculateTextSimilarity(reasons[i], reasons[j]);
+                const status = similarity > 0.85 ? '❌ 过高' : similarity > 0.6 ? '⚠️ 中等' : '✅ 良好';
+                console.log(`   推荐${i+1} vs 推荐${j+1}: ${(similarity*100).toFixed(1)}% ${status}`);
+            }
+        }
+        
+        // 复杂度分析
+        const uniqueDifficulties = [...new Set(difficulties.filter(d => d !== '未知'))];
+        console.log('\n🛠️ 制作复杂度分析:');
+        console.log(`   分布: ${difficulties.join(' | ')}`);
+        console.log(`   多样性: ${uniqueDifficulties.length}种不同难度`);
+        
+        // 鸡尾酒名称分析
+        const names = recommendations.map(rec => rec.name?.chinese || '未知');
+        const uniqueNames = [...new Set(names.filter(n => n !== '未知'))];
+        console.log('\n🏷️ 鸡尾酒名称分析:');
+        console.log(`   名称: ${names.join(' | ')}`);
+        console.log(`   唯一性: ${uniqueNames.length}/${names.length} ${uniqueNames.length === names.length ? '✅ 完全不同' : '❌ 存在重复'}`);
+        
+        // 综合评分
+        const diversityScore = this.calculateDiversityScore(spirits, priorities, reasons, difficulties, names);
+        console.log(`\n🎯 综合多样性评分: ${diversityScore.toFixed(1)}/100`);
+        console.log('========================================== [报告结束]\n');
+    }
+    
+    /**
+     * 计算综合多样性评分
+     */
+    calculateDiversityScore(spirits, priorities, reasons, difficulties, names) {
+        let score = 0;
+        
+        // 基酒多样性 (30分)
+        const uniqueSpirits = [...new Set(spirits.filter(s => s !== '未知'))];
+        const spiritScore = (uniqueSpirits.length / Math.max(spirits.length, 1)) * 30;
+        score += spiritScore;
+        
+        // 优先级多样性 (20分)
+        const uniquePriorities = [...new Set(priorities.filter(p => p))];
+        const priorityScore = (uniquePriorities.length / Math.max(priorities.length, 1)) * 20;
+        score += priorityScore;
+        
+        // 理由相似度 (25分) - 相似度越低分数越高
+        const avgSimilarity = this.checkReasonSimilarity(reasons);
+        const reasonScore = Math.max(0, (1 - avgSimilarity)) * 25;
+        score += reasonScore;
+        
+        // 复杂度多样性 (15分)
+        const uniqueDifficulties = [...new Set(difficulties.filter(d => d !== '未知'))];
+        const difficultyScore = (uniqueDifficulties.length / Math.max(difficulties.length, 1)) * 15;
+        score += difficultyScore;
+        
+        // 名称唯一性 (10分)
+        const uniqueNames = [...new Set(names.filter(n => n !== '未知'))];
+        const nameScore = (uniqueNames.length === names.length ? 1 : 0) * 10;
+        score += nameScore;
+        
+        return Math.min(100, Math.max(0, score));
     }
 }
 
