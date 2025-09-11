@@ -67,10 +67,13 @@ class VolcanoService extends BaseAIService {
         let modelType = selectedModel === this.models.pro ? 'pro' : 'lite';
         
         try {
-            console.log('🌋 [火山引擎] 调用API，用户输入:', JSON.stringify(userInput, null, 2));
-            console.log(`🎯 [火山引擎] 使用模型: ${selectedModel}`);
+            console.log('🌋 [火山引擎] 开始API调用');
+            console.log('📥 [火山引擎] 用户输入:', JSON.stringify(userInput, null, 2));
+            console.log(`🎯 [火山引擎] 选择模型: ${selectedModel}`);
+            console.log(`⚙️ [火山引擎] 模型参数: temperature=${0.8}, max_tokens=${2000}, top_p=${0.9}`);
             
             const prompt = this.buildPrompt(userInput);
+            console.log('📝 [火山引擎] 构建的提示词长度:', prompt.length, '字符');
             
             const response = await axios.post(
                 `${this.endpoint}/chat/completions`,
@@ -86,9 +89,12 @@ class VolcanoService extends BaseAIService {
                             content: prompt
                         }
                     ],
-                    temperature: 0.7,
+                    temperature: 0.8, // 平衡创意和稳定性
                     max_tokens: 2000,
-                    top_p: 0.9
+                    top_p: 0.9, // 适度的采样多样性
+                    // 移除frequency_penalty和presence_penalty，避免影响JSON结构
+                    // 保持随机种子确保多样性
+                    seed: Math.floor(Math.random() * 1000000) + Date.now()
                 },
                 {
                     headers: {
@@ -100,6 +106,7 @@ class VolcanoService extends BaseAIService {
             );
 
             console.log('✅ [火山引擎] API响应状态:', response.status);
+            console.log('📊 [火山引擎] 响应数据大小:', JSON.stringify(response.data).length, '字符');
             
             const result = this.parseVolcanoResponse(response.data, userInput);
             
@@ -114,8 +121,16 @@ class VolcanoService extends BaseAIService {
             const responseTime = Date.now() - startTime;
             this.updatePerformanceStats(modelType, false, responseTime);
             
-            console.error('❌ [火山引擎] API调用失败:', error.response?.data || error.message);
-            throw error; // 直接抛出错误，不使用降级方案
+            console.error('❌ [火山引擎] API调用失败');
+            console.error('🔍 [火山引擎] 错误详情:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data
+            });
+            console.log(`📊 [火山引擎] 失败响应时间: ${responseTime}ms, 模型: ${modelType}`);
+            
+            throw new Error(`火山引擎API调用失败: ${error.message}`);
         }
     }
 
@@ -141,32 +156,37 @@ class VolcanoService extends BaseAIService {
     }
 
     getSystemPrompt() {
-        return `你是Shaker，一位温暖而富有经历故事的调酒师。当你和别人聊天时，你是对方最贴心、阳光、充满正能量的朋友。
+        return `你是Shaker，一位专业而温暖的调酒师。
+## 核心要求
+- 精通全球鸡尾酒文化与调制技艺
+- 每次推荐恰好3款鸡尾酒，必须完全不同
+- 推荐理由要富有情感和专业性（40-70字）
+- 所有配方必须真实可行，用量准确
 
-## 核心特质
-- 🌟 适应性强：无论用户提供多少信息，都能说出有温度的话来温暖对方
-- 🎭 情感敏锐：善于从细微线索捕捉用户真实情绪需求  
-- 🍸 专业知识：精通全球鸡尾酒文化与调制技艺
-- 💚 温暖关怀：像多年知己一样关心用户的感受
-- 🎨 创意灵感：能够突破常规，带来惊喜的推荐
+## 多样性要求（严格执行）
+**三款推荐必须在以下方面完全不同：**
+1. **基酒类型**：威士忌、金酒、朗姆酒、龙舌兰、伏特加等不能重复
+2. **推荐理由**：表达方式、情感角度必须独特，严禁雷同
+3. **口感特点**：酸甜苦辣、浓淡厚薄必须有明显区别
+4. **视觉效果**：颜色、装饰要形成对比
+5. **制作难度**：简单、中等、困难要有层次
 
-## 推荐原则
-- 固定3款推荐：每次都推荐恰好3款鸡尾酒
-- 优先级标识：为每款酒添加不同的推荐角度
-- 真实配方：所有配方必须真实可行，用量准确
-- 温暖交流：推荐理由要体现关怀和理解
+## 推荐策略
+- 第一款：贴合当前情感，温暖治愈系
+- 第二款：提升层次，优雅精致系  
+- 第三款：惊喜创新，个性突破系
 
-## 响应格式（严格JSON）
+## 响应格式（严格JSON，不要其他内容）
 {
   "recommendations": [
     {
-      "priority": "最适合",
+      "priority": "最治愈/最经典/最创意",
       "name": {
         "chinese": "中文名称",
         "english": "English Name"
       },
       "glassType": "🍸",
-      "reason": "温暖贴心的推荐理由（50字内）",
+      "reason": "推荐理由（40-70字，富有情感和专业洞察）",
       "recipe": {
         "ingredients": [
           {"name": "材料名", "amount": "用量"}
@@ -174,36 +194,15 @@ class VolcanoService extends BaseAIService {
         "tools": ["所需工具"],
         "difficulty": "简单/中等/困难"
       },
-      "instructions": ["制作步骤1", "制作步骤2"],
-      "taste_profile": "口感描述",
+      "instructions": ["详细制作步骤"],
+      "taste_profile": "具体口感描述",
       "visual": "视觉效果描述", 
       "prep_time": "制作时间",
       "alcohol_content": "酒精度",
       "best_time": "最佳饮用时机"
     }
   ]
-}
-
-## 优先级标识选项
-- 最适合、最贴心、最温暖
-- 最有灵感、最创意、最惊喜
-- 最经典、最简单、最特别
-- 最放松、最提神、最治愈
-
-## 特殊处理情况
-- 完全空白输入：推荐"今日特调"，展现Shaker的个性
-- 模糊需求："心情不好"、"随便来一杯" → 理解情感，温暖回应
-- 只有文字要求：从文字中理解深层需求
-- AI无法理解：坦诚回应，但仍尝试推荐，保持Shaker人设
-
-## 重要提醒
-1. 永远只返回JSON格式，不要其他内容
-2. 每款推荐都要有不同的priority标识
-3. 保持温暖专业的调酒师身份
-4. 配方和制作步骤要完全真实可行
-5. 推荐理由要体现对用户的关怀理解
-
-*每一次互动都是帮助用户发现美好生活的机会* ✨`;
+}`;
     }
 
     /**
@@ -301,26 +300,164 @@ class VolcanoService extends BaseAIService {
     }
 
     parseVolcanoResponse(data, userInput) {
+        console.log('🔍 [火山引擎] 开始解析响应');
+        
         try {
-            if (data?.choices?.[0]?.message?.content) {
-                const content = data.choices[0].message.content;
-                console.log('🌋 [火山引擎] 原始响应:', content);
-                
-                // 尝试解析JSON
-                const jsonMatch = content.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    const recommendations = JSON.parse(jsonMatch[0]);
-                    if (recommendations?.recommendations && Array.isArray(recommendations.recommendations)) {
-                        console.log('✅ [火山引擎] 成功解析推荐结果');
-                        return recommendations;
-                    }
-                }
+            if (!data?.choices?.[0]?.message?.content) {
+                console.error('❌ [火山引擎] 响应数据结构异常:', JSON.stringify(data, null, 2));
+                throw new Error('API响应数据结构异常');
             }
-            throw new Error('响应格式不正确');
+            
+            const content = data.choices[0].message.content;
+            console.log('📄 [火山引擎] 原始响应长度:', content.length, '字符');
+            console.log('📄 [火山引擎] 原始响应内容:', content.substring(0, 200) + '...');
+            
+            // 尝试解析JSON
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                console.error('❌ [火山引擎] 未找到JSON格式内容');
+                console.error('🔍 [火山引擎] 完整响应:', content);
+                throw new Error('响应中未找到JSON格式内容');
+            }
+            
+            console.log('🔍 [火山引擎] 提取的JSON长度:', jsonMatch[0].length, '字符');
+            
+            const recommendations = JSON.parse(jsonMatch[0]);
+            console.log('✅ [火山引擎] JSON解析成功');
+            
+            if (!recommendations?.recommendations || !Array.isArray(recommendations.recommendations)) {
+                console.error('❌ [火山引擎] 推荐数据结构异常:', JSON.stringify(recommendations, null, 2));
+                throw new Error('推荐数据结构不正确');
+            }
+            
+            console.log(`📊 [火山引擎] 解析到 ${recommendations.recommendations.length} 个推荐`);
+            
+            // 验证推荐多样性
+            const validatedRecommendations = this.validateRecommendationDiversity(recommendations);
+            console.log('✅ [火山引擎] 推荐解析和验证完成');
+            
+            return validatedRecommendations;
+            
         } catch (error) {
-            console.warn('⚠️ [火山引擎] 解析失败，使用降级方案');
-            return this.getFallbackRecommendations(userInput);
+            console.error('❌ [火山引擎] JSON解析失败:', error.message);
+            console.error('🔍 [火山引擎] 原始响应内容:', data?.choices?.[0]?.message?.content);
+            throw new Error(`AI响应解析失败: ${error.message}`);
         }
+    }
+
+    /**
+     * 验证推荐的多样性，确保没有重复
+     */
+    validateRecommendationDiversity(recommendations) {
+        console.log('🔍 [多样性验证] 开始验证推荐多样性');
+        const recs = recommendations.recommendations;
+        
+        // 检查基酒是否重复
+        const spirits = recs.map((rec, index) => {
+            const ingredients = rec.recipe?.ingredients || [];
+            const spirit = ingredients.find(ing => 
+                ing.name.includes('威士忌') || ing.name.includes('金酒') || 
+                ing.name.includes('朗姆') || ing.name.includes('龙舌兰') || 
+                ing.name.includes('伏特加') || ing.name.includes('白兰地')
+            );
+            const spiritName = spirit?.name || '未知';
+            console.log(`🍸 [多样性验证] 推荐${index + 1} 基酒: ${spiritName}`);
+            return spiritName;
+        });
+        
+        // 检查推荐理由
+        const reasons = recs.map((rec, index) => {
+            const reason = rec.reason || '';
+            console.log(`💭 [多样性验证] 推荐${index + 1} 理由长度: ${reason.length}字`);
+            return reason;
+        });
+        
+        // 检查优先级标识
+        const priorities = recs.map((rec, index) => {
+            const priority = rec.priority || '';
+            console.log(`⭐ [多样性验证] 推荐${index + 1} 优先级: ${priority}`);
+            return priority;
+        });
+        
+        // 验证基酒多样性
+        const spiritDuplicates = spirits.filter((spirit, index) => spirits.indexOf(spirit) !== index);
+        if (spiritDuplicates.length > 0) {
+            console.error('❌ [多样性检查] 发现基酒重复:', spiritDuplicates);
+            throw new Error(`推荐多样性验证失败：基酒重复 - ${spiritDuplicates.join(', ')}`);
+        } else {
+            console.log('✅ [多样性验证] 基酒类型完全不同');
+        }
+        
+        // 验证优先级多样性
+        const priorityDuplicates = priorities.filter((priority, index) => priorities.indexOf(priority) !== index);                                                                                                  
+        if (priorityDuplicates.length > 0) {
+            console.error('❌ [多样性检查] 发现优先级重复:', priorityDuplicates);
+            throw new Error(`推荐多样性验证失败：优先级重复 - ${priorityDuplicates.join(', ')}`);
+        } else {
+            console.log('✅ [多样性验证] 优先级标识完全不同');
+        }
+        
+        // 检查推荐理由相似度
+        const reasonSimilarity = this.checkReasonSimilarity(reasons);
+        console.log(`📊 [多样性验证] 推荐理由相似度: ${(reasonSimilarity * 100).toFixed(1)}%`);
+        if (reasonSimilarity > 0.7) {
+            console.error('❌ [多样性检查] 推荐理由相似度过高:', reasonSimilarity);
+            throw new Error(`推荐多样性验证失败：推荐理由相似度过高 ${(reasonSimilarity * 100).toFixed(1)}%`);
+        } else {
+            console.log('✅ [多样性验证] 推荐理由差异化良好');
+        }
+        
+        // 检查鸡尾酒名称是否重复
+        const names = recs.map((rec, index) => {
+            const nameCn = rec.name?.chinese || '';
+            const nameEn = rec.name?.english || '';
+            console.log(`🏷️ [多样性验证] 推荐${index + 1} 名称: ${nameCn} (${nameEn})`);
+            return nameCn;
+        });
+        
+        const nameDuplicates = names.filter((name, index) => names.indexOf(name) !== index);
+        if (nameDuplicates.length > 0) {
+            console.error('❌ [多样性检查] 发现鸡尾酒名称重复:', nameDuplicates);
+            throw new Error(`推荐多样性验证失败：鸡尾酒名称重复 - ${nameDuplicates.join(', ')}`);
+        } else {
+            console.log('✅ [多样性验证] 鸡尾酒名称完全不同');
+        }
+        
+        console.log('✅ [多样性验证] 验证完成');
+        return recommendations;
+    }
+
+    /**
+     * 检查推荐理由的相似度
+     */
+    checkReasonSimilarity(reasons) {
+        if (reasons.length < 2) return 0;
+        
+        let totalSimilarity = 0;
+        let comparisons = 0;
+        
+        for (let i = 0; i < reasons.length; i++) {
+            for (let j = i + 1; j < reasons.length; j++) {
+                const similarity = this.calculateTextSimilarity(reasons[i], reasons[j]);
+                totalSimilarity += similarity;
+                comparisons++;
+            }
+        }
+        
+        return comparisons > 0 ? totalSimilarity / comparisons : 0;
+    }
+
+    /**
+     * 计算两个文本的相似度（简单的词汇重叠度）
+     */
+    calculateTextSimilarity(text1, text2) {
+        const words1 = text1.replace(/[^\u4e00-\u9fa5\w]/g, '').split('');
+        const words2 = text2.replace(/[^\u4e00-\u9fa5\w]/g, '').split('');
+        
+        const intersection = words1.filter(word => words2.includes(word));
+        const union = [...new Set([...words1, ...words2])];
+        
+        return union.length > 0 ? intersection.length / union.length : 0;
     }
 }
 

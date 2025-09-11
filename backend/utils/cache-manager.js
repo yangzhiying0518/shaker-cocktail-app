@@ -36,13 +36,21 @@ class CacheManager {
      */
     normalizeUserInput(userInput) {
         return {
+            // 新版前端字段
+            selections: userInput.selections?.map(s => s.toLowerCase().trim()).sort(),
+            customInput: userInput.customInput?.toLowerCase().trim(),
+            
+            // 旧版字段（向后兼容）
             scene: userInput.scene?.toLowerCase().trim(),
             moods: userInput.moods?.map(mood => mood.toLowerCase().trim()).sort(),
             spirits: userInput.ingredients?.spirits?.map(s => s.toLowerCase().trim()).sort(),
             mixers: userInput.ingredients?.mixers?.map(m => m.toLowerCase().trim()).sort(),
             alcohol_level: userInput.preferences?.alcohol_level?.toLowerCase().trim(),
             sweetness: userInput.preferences?.sweetness?.toLowerCase().trim(),
-            style: userInput.preferences?.style?.toLowerCase().trim()
+            style: userInput.preferences?.style?.toLowerCase().trim(),
+            
+            // 🎲 随机种子（用于空白输入多样性）
+            _randomSeed: userInput._randomSeed
         };
     }
 
@@ -56,6 +64,27 @@ class CacheManager {
         let score = 0;
         let totalFields = 0;
 
+        // 新版字段匹配
+        // 选择匹配 (权重: 35%)
+        if (norm1.selections && norm2.selections) {
+            totalFields += 3.5;
+            const intersection = norm1.selections.filter(sel => norm2.selections.includes(sel));
+            score += (intersection.length / Math.max(norm1.selections.length, norm2.selections.length)) * 3.5;
+        }
+
+        // 自定义输入匹配 (权重: 30%)
+        if (norm1.customInput && norm2.customInput) {
+            totalFields += 3;
+            if (norm1.customInput === norm2.customInput) {
+                score += 3;
+            } else {
+                // 简单的文本相似度检查
+                const similarity = this.calculateTextSimilarity(norm1.customInput, norm2.customInput);
+                score += similarity * 3;
+            }
+        }
+
+        // 旧版字段匹配（向后兼容）
         // 场景匹配 (权重: 30%)
         if (norm1.scene && norm2.scene) {
             totalFields += 3;
@@ -89,6 +118,21 @@ class CacheManager {
     }
 
     /**
+     * 计算两个文本的相似度（简单的词汇重叠度）
+     */
+    calculateTextSimilarity(text1, text2) {
+        if (!text1 || !text2) return 0;
+        
+        const words1 = text1.replace(/[^\u4e00-\u9fa5\w]/g, '').split('');
+        const words2 = text2.replace(/[^\u4e00-\u9fa5\w]/g, '').split('');
+        
+        const intersection = words1.filter(word => words2.includes(word));
+        const union = [...new Set([...words1, ...words2])];
+        
+        return union.length > 0 ? intersection.length / union.length : 0;
+    }
+
+    /**
      * 查找相似的缓存条目
      */
     findSimilarCache(userInput, threshold = 0.8) {
@@ -115,26 +159,28 @@ class CacheManager {
     get(userInput) {
         // 首先尝试精确匹配
         const exactKey = this.generateCacheKey(userInput);
-        const exactMatch = this.cache.get(exactKey);
+        const exactEntry = this.cache.get(exactKey);
         
-        if (exactMatch && !this.isExpired(exactMatch)) {
+        if (exactEntry && !this.isExpired(exactEntry)) {
+            exactEntry.lastAccessed = Date.now();
+            exactEntry.accessCount++;
             this.hitCount++;
-            exactMatch.lastAccessed = Date.now();
-            console.log('🎯 [缓存] 精确匹配命中:', exactKey.substring(0, 16) + '...');
-            return exactMatch.data;
+            console.log('✅ [缓存] 精确命中:', exactKey.substring(0, 16) + '...');
+            return exactEntry.data;
         }
 
         // 尝试相似度匹配
-        const similarMatch = this.findSimilarCache(userInput, 0.85);
-        
+        const similarMatch = this.findSimilarCache(userInput);
         if (similarMatch) {
+            const { entry, similarity } = similarMatch;
+            entry.lastAccessed = Date.now();
+            entry.accessCount++;
             this.hitCount++;
-            similarMatch.entry.lastAccessed = Date.now();
-            console.log(`🎯 [缓存] 相似匹配命中 (相似度: ${(similarMatch.similarity * 100).toFixed(1)}%):`, 
-                       similarMatch.key.substring(0, 16) + '...');
-            return similarMatch.entry.data;
+            console.log(`✅ [缓存] 相似匹配 (${(similarity * 100).toFixed(1)}%):`, similarMatch.key.substring(0, 16) + '...');
+            return entry.data;
         }
 
+        // 缓存未命中
         this.missCount++;
         console.log('❌ [缓存] 未命中');
         return null;
@@ -146,6 +192,12 @@ class CacheManager {
     set(userInput, data) {
         const key = this.generateCacheKey(userInput);
         
+        // 🎲 空白输入检测和特殊处理
+        const isEmpty = !userInput.scene && (!userInput.moods || userInput.moods.length === 0) && 
+                       (!userInput.ingredients || Object.keys(userInput.ingredients).length === 0) && 
+                       (!userInput.preferences || Object.keys(userInput.preferences).length === 0) && 
+                       !userInput.special_requirements;
+        
         // 如果缓存已满，删除最旧的条目
         if (this.cache.size >= this.maxSize) {
             this.evictOldest();
@@ -156,8 +208,14 @@ class CacheManager {
             data,
             createdAt: Date.now(),
             lastAccessed: Date.now(),
-            accessCount: 1
+            accessCount: 1,
+            // 空白输入使用较短的TTL (5分钟 vs 默认30分钟)
+            ttl: isEmpty ? 5 * 60 * 1000 : 30 * 60 * 1000
         };
+        
+        if (isEmpty) {
+            console.log('🎲 [缓存] 空白输入使用短期缓存: 5分钟');
+        }
 
         this.cache.set(key, entry);
         console.log('💾 [缓存] 已缓存:', key.substring(0, 16) + '...');
@@ -167,7 +225,9 @@ class CacheManager {
      * 检查缓存是否过期
      */
     isExpired(entry) {
-        return Date.now() - entry.createdAt > this.ttl;
+        // 使用条目自己的TTL，而不是全局TTL
+        const entryTTL = entry.ttl || this.ttl;
+        return Date.now() - entry.createdAt > entryTTL;
     }
 
     /**

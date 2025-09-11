@@ -12,7 +12,9 @@ app.use(cors());
 app.use('/css', express.static(path.join(__dirname, 'css'), {
     setHeaders: (res, filePath) => {
         res.setHeader('Content-Type', 'text/css; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         console.log(`✅ 服务CSS文件: ${filePath}`);
     }
 }));
@@ -20,7 +22,9 @@ app.use('/css', express.static(path.join(__dirname, 'css'), {
 app.use('/js', express.static(path.join(__dirname, 'js'), {
     setHeaders: (res, filePath) => {
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         console.log(`✅ 服务JS文件: ${filePath}`);
     }
 }));
@@ -28,8 +32,10 @@ app.use('/js', express.static(path.join(__dirname, 'js'), {
 // 其他静态文件（图片、字体等）
 app.use(express.static(__dirname, {
     setHeaders: (res, filePath) => {
-        // 设置通用缓存
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        // 禁用缓存，确保总是获取最新文件
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         console.log(`📁 服务静态文件: ${filePath}`);
     }
 }));

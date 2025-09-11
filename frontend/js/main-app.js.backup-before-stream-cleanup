@@ -2105,6 +2105,146 @@
             console.log('✅ 本地预分析显示完成');
         }
 
+        // 异步API调用（存储结果）
+        async function startStreamRecommendationAsync(requestData) {
+            console.log('🔄 启动异步API调用');
+            
+            const storedResult = {
+                analysisSegments: [],
+                recommendations: [],
+                completed: false
+            };
+            
+            return new Promise((resolve, reject) => {
+                fetch('http://localhost:3001/api/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream',
+                        'Cache-Control': 'no-cache'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`API调用失败: ${response.status}`);
+                    }
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    
+                    const readStream = async () => {
+                        try {
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                
+                                if (done) {
+                                    console.log('✅ API流式读取完成');
+                                    storedResult.completed = true;
+                                    resolve(storedResult);
+                                    break;
+                                }
+                                
+                                buffer += decoder.decode(value, { stream: true });
+                                const lines = buffer.split('\n');
+                                buffer = lines.pop() || '';
+                                
+                                for (const line of lines) {
+                                    if (line.trim() && line.startsWith('data: ')) {
+                                        try {
+                                            const data = JSON.parse(line.slice(6));
+                                            
+                                            // 存储不同类型的数据
+                                            if (data.type === 'segmented_analysis') {
+                                                storedResult.analysisSegments = data.segments;
+                                                console.log('📦 存储分析数据:', data.segments.length, '段');
+                                            } else if (data.type === 'recommendation') {
+                                                storedResult.recommendations.push(data);
+                                                console.log('📦 存储推荐数据:', storedResult.recommendations.length);
+                                            }
+                                            
+                                        } catch (parseError) {
+                                            console.warn('⚠️ 解析API数据失败:', parseError);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error('❌ 读取API流失败:', error);
+                            reject(error);
+                        }
+                    };
+                    
+                    readStream();
+                })
+                .catch(error => {
+                    console.error('❌ API调用失败:', error);
+                    reject(error);
+                });
+            });
+        }
+
+        // 展示存储的分析结果
+        async function displayStoredAnalysisResult(apiResult) {
+            console.log('📊 展示存储的API结果:', apiResult);
+            
+            // 更新标题
+            const analysisTitle = document.getElementById('analysisTitle');
+            if (analysisTitle) {
+                analysisTitle.textContent = 'Shaker的深度分析';
+            }
+            
+            // 展示分析段落
+            if (apiResult.analysisSegments && apiResult.analysisSegments.length > 0) {
+                await showAnalysisSegments(apiResult.analysisSegments);
+            }
+            
+            // 等待一下，然后展示推荐
+            setTimeout(() => {
+                if (apiResult.recommendations && apiResult.recommendations.length > 0) {
+                    showSection('cocktailMakingSection');
+                    displayRecommendations(apiResult.recommendations);
+                }
+            }, 1500);
+        }
+
+        // 展示分析段落
+        async function showAnalysisSegments(segments) {
+            const segmentsContainer = document.getElementById('analysisSegments');
+            if (!segmentsContainer) return;
+            
+            segmentsContainer.innerHTML = '';
+            
+            // 添加AI分析标识
+            const aiBadge = document.createElement('div');
+            aiBadge.className = 'local-analysis-badge';
+            aiBadge.style.background = 'var(--accent-gold)';
+            aiBadge.innerHTML = '🤖 AI深度分析';
+            segmentsContainer.appendChild(aiBadge);
+            
+            // 逐个显示分段
+            for (let i = 0; i < segments.length; i++) {
+                const segment = segments[i];
+                const segmentElement = document.createElement('div');
+                segmentElement.className = 'analysis-segment';
+                segmentElement.innerHTML = `
+                    <div class="segment-header">
+                        <span class="segment-icon">${getSegmentIcon(segment.focus)}</span>
+                        <h3 class="segment-title">${segment.title}</h3>
+                    </div>
+                    <p class="segment-content">${segment.content}</p>
+                `;
+                
+                segmentsContainer.appendChild(segmentElement);
+                
+                // 延迟显示动画
+                setTimeout(() => {
+                    segmentElement.classList.add('show');
+                }, i * 300);
+            }
+        }
+
 
         // 显示指定区域
         function showSection(sectionId) {
@@ -2350,9 +2490,8 @@
 
                 // 获取推荐 - 优化后的并行处理流程
         async function getRecommendation() {
-            // 收集特殊要求 - 兼容两种ID
-            const specialRequirementElement = document.getElementById('specialRequirement') || document.getElementById('specialRequirements');
-            userInput.special_requirements = specialRequirementElement ? specialRequirementElement.value : '';
+            // 收集特殊要求
+            userInput.special_requirements = document.getElementById('specialRequirement').value;
             
             // 准备请求数据
             const requestData = {
@@ -2419,6 +2558,244 @@
                 alert('获取推荐失败，请检查后端服务是否启动');
                 showSection('recommendSection');
             }
+        }
+
+        // 启动流式推荐 - 使用POST请求而不是GET参数
+        async function startStreamRecommendation(requestData) {
+            console.log('🚀 启动流式推荐连接...');
+            
+            return new Promise((resolve, reject) => {
+                // 使用fetch进行POST请求来建立SSE连接
+                fetch('http://localhost:3001/api/recommend', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream',
+                        'Cache-Control': 'no-cache'
+                        },
+                    body: JSON.stringify(requestData)
+                }).then(response => {
+                    console.log('📡 收到响应:', response.status, response.statusText);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    function readStream() {
+                        reader.read().then(({ done, value }) => {
+                            if (done) {
+                                console.log('🏁 流式读取完成');
+                                resolve();
+                                return;
+                            }
+                            
+                            const chunk = decoder.decode(value, { stream: true });
+                            console.log('📥 收到数据块:', chunk.substring(0, 100) + '...');
+                            
+                            const lines = chunk.split('\n');
+                            
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    try {
+                                        const jsonStr = line.slice(6).trim();
+                                        if (jsonStr) {
+                                            const data = JSON.parse(jsonStr);
+                                            console.log('✅ 解析成功:', data.type, data);
+                                            handleStreamData(data);
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ 解析SSE数据失败:', error, 'Line:', line);
+                                    }
+                                }
+                            }
+                            
+                            readStream();
+                        }).catch(error => {
+                            console.error('❌ 读取流失败:', error);
+                            reject(error);
+                        });
+                    }
+                    
+                    readStream();
+                }).catch(error => {
+                    console.error('❌ 建立流式连接失败:', error);
+                    reject(error);
+                });
+                
+                // 设置超时
+                setTimeout(() => {
+                    console.warn('⏰ 流式连接超时');
+                    reject(new Error('连接超时'));
+                }, 120000); // 120秒超时
+            });
+        }
+
+        // 处理流式数据
+        function handleStreamData(data) {
+            console.log('📦 收到流式数据:', data.type, data);
+            
+            switch (data.type) {
+                case 'connected':
+                    console.log('🔗 连接成功:', data.message);
+                    break;
+                    
+                case 'segmented_analysis':
+                    console.log('🎯 开始处理分段分析数据');
+                    handleSegmentedAnalysis(data);
+                    break;
+                    
+                case 'thought_segment':
+                    handleOptimizedThoughtSegment(data);
+                    break;
+                    
+                case 'analysis':
+                    handleAnalysisData(data);
+                    break;
+                    
+                case 'phase_transition':
+                    handleOptimizedPhaseTransition(data);
+                    break;
+                    
+                case 'recommendation':
+                    handleSequentialRecommendationData(data);
+                    break;
+                    
+                case 'complete':
+                    handleStreamComplete();
+                    break;
+                    
+                case 'done':
+                    console.log('✅ 流式推荐完成');
+                    break;
+                    
+                case 'error':
+                    console.error('❌ 服务器错误:', data.message);
+                    alert('推荐服务出现错误: ' + data.message);
+                    break;
+                    
+                default:
+                    console.warn('🤔 未知数据类型:', data.type, data);
+                    break;
+            }
+        }
+
+        // 处理分段分析（完整版本 - 符合原始需求）
+        function handleSegmentedAnalysis(data) {
+            console.log('🧠 收到AI分段分析数据:', data);
+            
+            if (!data.segments || !Array.isArray(data.segments)) {
+                console.error('❌ 分段数据格式错误:', data);
+                return;
+            }
+            
+            // 更新标题为AI分析
+            const analysisTitle = document.getElementById('analysisTitle');
+            if (analysisTitle) {
+                analysisTitle.textContent = 'Shaker的深度分析';
+            }
+            
+            // 获取分段容器
+            const segmentsContainer = document.getElementById('analysisSegments');
+            if (!segmentsContainer) {
+                console.error('❌ 找不到分段容器');
+                return;
+            }
+            
+            // 移除本地分析标识
+            const localBadge = segmentsContainer.querySelector('.local-analysis-badge');
+            if (localBadge) {
+                localBadge.remove();
+            }
+            
+            // 添加AI分析标识
+            const aiBadge = document.createElement('div');
+            aiBadge.className = 'local-analysis-badge';
+            aiBadge.style.background = 'var(--accent-gold)';
+            aiBadge.innerHTML = '<span>🤖</span>AI深度分析';
+            segmentsContainer.insertBefore(aiBadge, segmentsContainer.firstChild);
+            
+            // 清空现有分段（保留标识）
+            const existingSegments = segmentsContainer.querySelectorAll('.analysis-segment');
+            existingSegments.forEach(segment => segment.remove());
+            
+            // 显示AI分段
+            data.segments.forEach((segment, index) => {
+                const segmentElement = document.createElement('div');
+                segmentElement.className = 'analysis-segment';
+                segmentElement.innerHTML = `
+                    <div class="segment-header">
+                        <span class="segment-icon">${getSegmentIcon(segment.focus)}</span>
+                        <h3 class="segment-title">${segment.title}</h3>
+                    </div>
+                    <p class="segment-content">${segment.content}</p>
+                `;
+                
+                segmentsContainer.appendChild(segmentElement);
+                
+                // 延迟显示动画
+                setTimeout(() => {
+                    segmentElement.classList.add('show');
+                }, index * 200);
+            });
+            
+            // 强制显示分析区域
+            const analysisSection = document.getElementById('shakerAnalysisSection');
+            const analysisContent = document.getElementById('shakerAnalysisText');
+            
+            if (!analysisSection || !analysisContent || !analysisTitle) {
+                console.error('❌ DOM元素缺失');
+                return;
+            }
+            
+            // 显示分析区域前，确保内容为空
+            analysisContent.innerHTML = '';
+            analysisContent.textContent = '';
+            
+            // 显示分析区域
+            analysisSection.style.display = 'block';
+            analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            console.log('✅ 开始逐段显示', data.segments.length, '个分段');
+            
+            // 逐段显示（按照原始需求：4段，每段4秒间隔，250ms打字速度）
+            data.segments.forEach((segment, index) => {
+                setTimeout(() => {
+                    console.log(`🎬 开始显示第${index + 1}段:`, segment.title, segment.content);
+                    
+                    // 1. 标题切换特效（淡入淡出）
+                    analysisTitle.style.transition = 'opacity 0.3s ease';
+                    analysisTitle.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        analysisTitle.textContent = segment.title || '分析中...';
+                        analysisTitle.style.opacity = '1';
+                        console.log('📝 标题已更新:', segment.title);
+                    }, 300);
+                    
+                    // 2. 清空内容
+                    analysisContent.innerHTML = '';
+                    console.log('🧹 内容已清空');
+                    
+                    // 3. 慢速打字显示内容（250ms每字符，符合人类打字速度）
+                    setTimeout(() => {
+                        console.log('⌨️ 开始打字效果:', segment.content);
+                        slowTypeWriter(analysisContent, segment.content, 250, () => {
+                            console.log(`✅ 第${index + 1}段分析完成:`, segment.title);
+                            
+                            // 更新Shaker情感
+                            const shakerAvatar = document.querySelector('.shaker-avatar');
+                            if (shakerAvatar) {
+                                updateShakerEmotion(shakerAvatar, getEmotionByFocus(segment.focus));
+                                console.log('😊 Shaker情感已更新:', getEmotionByFocus(segment.focus));
+                            }
+                        });
+                    }, 600);
+                    
+                }, index * 4000); // 每段间隔4秒（原始需求）
+            });
         }
 
         // 根据分析焦点获取情感
@@ -2519,6 +2896,153 @@
             revealNext();
         }
 
+        // 优化的思考片段处理
+        function handleOptimizedThoughtSegment(data) {
+            console.log('🧠 收到优化思考片段:', data.content);
+            
+            // 显示分析区域
+            showSection('shakerAnalysisSection');
+            
+            // 更新分析内容
+            const analysisContent = document.getElementById('analysisContent');
+            const analysisTitle = document.getElementById('analysisTitle');
+            
+            if (analysisContent && analysisTitle) {
+                analysisTitle.textContent = 'Shaker正在理解你的需求';
+                
+                // 使用打字机效果显示内容
+                typeWriterEffect(analysisContent, data.content, 60, () => {
+                    console.log('✅ 优化分析显示完成');
+                });
+                
+                // 更新Shaker头像情感
+                updateShakerEmotion(data.emotion || 'understanding');
+            }
+        }
+
+        // 优化的阶段转换处理
+        function handleOptimizedPhaseTransition(data) {
+            console.log('🔄 优化阶段转换:', data.phase);
+            
+            if (data.phase === 'recommendations') {
+                // 更新分析标题
+                const analysisTitle = document.getElementById('analysisTitle');
+                if (analysisTitle) {
+                    analysisTitle.style.transition = 'opacity 0.3s ease';
+                    analysisTitle.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        analysisTitle.textContent = '✨ 理解完成，开始为你调制';
+                        analysisTitle.style.opacity = '1';
+                    }, 300);
+                }
+                
+                // 显示调制区域并启动逐个揭秘
+                setTimeout(() => {
+                    showSection('cocktailMakingSection');
+                    
+                    // 滚动到调制区域
+                    document.getElementById('cocktailMakingSection')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    
+                    // 重置揭秘状态
+                    currentRevealIndex = 0;
+                    recommendationQueue = [];
+                    
+                    // 启动逐个揭秘过程
+                    setTimeout(() => {
+                        startSequentialReveal();
+                    }, 1000);
+                    
+                }, 1000);
+            }
+        }
+
+        // 优化的推荐数据处理 - 实时展示
+        function handleOptimizedRecommendationData(data) {
+            console.log('🍸 收到优化推荐:', data.index, data.content);
+            
+            if (data.content && data.content.recommendations && data.content.recommendations.length > 0) {
+                const recommendation = data.content.recommendations[0];
+                
+                console.log('🎯 推荐详情:', recommendation);
+                
+                // 立即处理推荐，无延迟
+                console.log('⚡ 立即处理推荐:', data.index);
+                
+                // 确保对应的卡片存在
+                let cardElement = document.getElementById(`makingCard${data.index}`);
+                if (!cardElement) {
+                    console.log('🔧 创建缺失的卡片:', data.index);
+                    const makingGrid = document.getElementById('makingGrid');
+                    cardElement = createMakingCard(data.index);
+                    makingGrid.appendChild(cardElement);
+                }
+                
+                // 立即启动调制动画
+                startMakingAnimation(data.index);
+                
+                // 2秒后显示推荐内容（动画进行中）
+                setTimeout(() => {
+                    console.log('📝 显示优化推荐内容:', data.index);
+                    displayRecommendationInCard(data.index, recommendation);
+                }, 2000);
+                
+            } else {
+                console.warn('🤔 推荐数据格式异常:', data);
+            }
+        }
+
+        // 处理分段思考
+        function handleThoughtSegment(data) {
+            console.log('🧠 收到思考片段:', data.segment, data.emotion, data.content);
+            
+            const analysisElement = document.getElementById('shakerAnalysisText');
+            const shakerAvatar = document.querySelector('.shaker-avatar');
+            const sectionTitle = document.querySelector('#shakerAnalysisSection .section-title');
+            
+            console.log('🎯 找到元素:', {
+                analysisElement: !!analysisElement,
+                shakerAvatar: !!shakerAvatar,
+                sectionTitle: !!sectionTitle
+            });
+            
+            if (!analysisElement) {
+                console.error('❌ 找不到 shakerAnalysisText 元素');
+                return;
+            }
+            
+            // 更新标题显示进度
+            if (sectionTitle) {
+                const titles = [
+                    'Shaker正在理解你的选择...',
+                    'Shaker正在分析你的心情...',
+                    'Shaker正在思考最佳搭配...',
+                    'Shaker正在准备推荐...'
+                ];
+                const titleIndex = Math.min(data.segment, titles.length - 1);
+                sectionTitle.textContent = titles[titleIndex];
+            }
+            
+            // 更新Shaker表情
+            if (shakerAvatar) {
+                updateShakerEmotion(shakerAvatar, data.emotion);
+            }
+            
+            // 累积显示内容，不清除之前的
+            const currentContent = analysisElement.textContent || '';
+            const newContent = currentContent + (currentContent ? ' ' : '') + data.content;
+            
+            console.log('⌨️ 开始打字机效果:', data.content.substring(0, 50) + '...');
+            
+            // 打字机效果显示新内容
+            typeWriterEffect(analysisElement, newContent, 80, () => {
+                console.log('✅ 思考片段显示完成:', data.segment);
+            });
+        }
+
         // 更新Shaker情感表情
         function updateShakerEmotion(avatarElement, emotion) {
             const emotionEmojis = {
@@ -2570,6 +3094,62 @@
             }
             
             typeChar();
+        }
+
+        // 处理真实API分析数据 - 累积显示
+        function handleAnalysisData(data) {
+            console.log('🔍 处理分析数据:', data.content);
+            
+            if (data.content) {
+                streamState.analysisText += data.content;
+                
+                const analysisElement = document.getElementById('shakerAnalysisText');
+                if (analysisElement) {
+                    // 直接显示累积的内容，保持打字光标
+                    analysisElement.innerHTML = streamState.analysisText + '<span class="typing-cursor"></span>';
+                    
+                    // 自动滚动
+                    analysisElement.scrollTop = analysisElement.scrollHeight;
+                } else {
+                    console.error('❌ 找不到 shakerAnalysisText 元素');
+                }
+            }
+        }
+
+        // 处理阶段转换
+        function handlePhaseTransition(data) {
+            console.log('🔄 阶段转换:', data.message);
+            
+            // 更新分析区域标题
+            const sectionTitle = document.querySelector('#shakerAnalysisSection .section-title');
+            if (sectionTitle) {
+                sectionTitle.textContent = '分析完成！准备为你调制鸡尾酒...';
+            }
+            
+            // 移除打字光标
+            const analysisElement = document.getElementById('shakerAnalysisText');
+            if (analysisElement) {
+                const currentText = analysisElement.textContent || streamState.analysisText;
+                analysisElement.innerHTML = currentText;
+            }
+            
+            // 平滑滚动到调制区域并显示
+            setTimeout(() => {
+                showSection('cocktailMakingSection');
+                
+                // 自动滚动到调制区域
+                setTimeout(() => {
+                    const makingSection = document.getElementById('cocktailMakingSection');
+                    if (makingSection) {
+                        makingSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }, 300);
+                
+                initializeMakingCards();
+            }, 1500); // 给用户更多时间阅读完整分析
         }
 
         // 初始化调制卡片 - 支持动态数量
@@ -3321,6 +3901,43 @@
             }, 800);
         }
 
+        // 处理推荐数据 - 逐个流式显示
+        function handleRecommendationData(data) {
+            console.log('🍸 收到推荐:', data.index, data.content);
+            
+            if (data.content && data.content.recommendations && data.content.recommendations.length > 0) {
+                const recommendation = data.content.recommendations[0];
+                
+                console.log('🎯 推荐详情:', recommendation);
+                
+                // 立即开始处理推荐（不重复初始化卡片）
+                console.log('🎬 立即开始处理推荐:', data.index);
+                
+                // 确保对应的卡片存在
+                let cardElement = document.getElementById(`makingCard${data.index}`);
+                if (!cardElement) {
+                    console.log('🔧 创建缺失的卡片:', data.index);
+                    const makingGrid = document.getElementById('makingGrid');
+                    cardElement = createMakingCard(data.index);
+                    makingGrid.appendChild(cardElement);
+                }
+                
+                // 先启动调制动画
+                setTimeout(() => {
+                    startMakingAnimation(data.index);
+                }, data.index * 500);
+                
+                // 动画进行中显示推荐内容
+                setTimeout(() => {
+                    console.log('📝 显示推荐内容:', data.index);
+                    displayRecommendationInCard(data.index, recommendation);
+                }, data.index * 500 + 2500); // 动画2.5秒后显示内容
+                
+            } else {
+                console.warn('🤔 推荐数据格式异常:', data);
+            }
+        }
+
         // 在卡片中流式显示推荐
         function displayRecommendationInCard(index, recommendation) {
             console.log('🍸 显示推荐卡片:', index, recommendation);
@@ -3453,6 +4070,19 @@
                     recommendation
                 });
             }
+        }
+
+        // 处理流式完成
+        function handleStreamComplete() {
+            console.log('🎉 流式推荐完成');
+            
+            // 不切换section，保持推荐卡片可见
+            console.log('✅ 推荐流程完成，保持当前显示状态');
+            
+            // 延迟显示"再来一杯"按钮
+            setTimeout(() => {
+                showAnotherDrinkButton();
+            }, 2000); // 2秒后显示，让用户先欣赏推荐结果
         }
 
         // 显示"再来一杯"按钮
@@ -3722,8 +4352,5 @@
 
         // 暴露全局函数供HTML调用
         window.getRecommendation = getRecommendation;
-        window.nextStep = nextStep;
-        window.prevStep = prevStep;
-        window.startRecommendation = startAnotherDrink; // 重新推荐使用startAnotherDrink
-        window.startAnotherDrink = startAnotherDrink; // 重新探索按钮
         window.closeCocktailDetails = closeCocktailDetails;
+        window.startAnotherDrink = startAnotherDrink;

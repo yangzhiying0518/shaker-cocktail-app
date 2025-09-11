@@ -70,85 +70,6 @@ class APIClient {
         }
     }
 
-    // 流式推荐
-    async getStreamRecommendation(userInput, callbacks = {}) {
-        const { onData, onError, onComplete } = callbacks;
-        
-        try {
-            console.log('📤 启动流式推荐:', userInput);
-            
-            const response = await fetch(`${this.baseURL}${API_CONFIG.ENDPOINTS.STREAM_RECOMMEND}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'text/event-stream',
-                    'Cache-Control': 'no-cache'
-                },
-                body: JSON.stringify(userInput)
-            });
-
-            if (!response.ok) {
-                throw new Error(`流式连接失败: ${response.status} ${response.statusText}`);
-            }
-
-            return this.handleStreamResponse(response, callbacks);
-        } catch (error) {
-            console.error('❌ 流式推荐失败:', error);
-            if (onError) onError(error);
-            throw error;
-        }
-    }
-
-    // 处理流式响应
-    async handleStreamResponse(response, callbacks) {
-        const { onData, onError, onComplete } = callbacks;
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        try {
-            while (true) {
-                const { done, value } = await reader.read();
-                
-                if (done) {
-                    console.log('✅ 流式读取完成');
-                    if (onComplete) onComplete();
-                    break;
-                }
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                
-                // 保留最后一行（可能不完整）
-                buffer = lines.pop() || '';
-
-                for (const line of lines) {
-                    if (line.trim() && line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.slice(6));
-                            console.log('📦 流式数据:', data.type, data);
-                            
-                            if (onData) onData(data);
-                            
-                            // 处理特殊事件
-                            if (data.type === 'error') {
-                                const error = new Error(data.message || '推荐服务出错');
-                                if (onError) onError(error);
-                                break;
-                            }
-                        } catch (parseError) {
-                            console.warn('⚠️ 解析流式数据失败:', parseError, 'Line:', line);
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('❌ 读取流式数据失败:', error);
-            if (onError) onError(error);
-        } finally {
-            reader.releaseLock();
-        }
-    }
 
     // 获取材料列表
     async getIngredients() {
@@ -233,7 +154,6 @@ export const apiClient = new APIClient();
 export const api = {
     // 推荐相关
     getRecommendation: (userInput) => apiClient.getRecommendation(userInput),
-    getStreamRecommendation: (userInput, callbacks) => apiClient.getStreamRecommendation(userInput, callbacks),
     
     // 数据相关
     getIngredients: () => apiClient.getIngredients(),

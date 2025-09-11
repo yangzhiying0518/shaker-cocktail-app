@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const AIServiceFactory = require('./services/ai-service-factory');
-const StreamService = require('./services/stream-service');
 
 // 导入优化工具
 const connectionPool = require('./utils/connection-pool');
@@ -65,147 +64,31 @@ app.use(express.json());
 // 创建AI服务实例
 const aiProvider = process.env.AI_PROVIDER || 'volcano'; // 默认使用火山引擎
 const aiService = AIServiceFactory.createService(aiProvider);
-const streamService = new StreamService();
 
 console.log(`🤖 使用AI服务提供商: ${aiProvider.toUpperCase()}`);
 
 
 
-// 优化的流式推荐API - 添加缓存检查
-app.post('/api/stream-recommendation', async (req, res) => {
-    const startTime = Date.now();
-    
-    try {
-        const userInput = req.body;
-        
-        // 不再强制验证字段，允许任意输入
-
-        console.log('🍸 收到流式推荐请求:', userInput);
-        
-        // 设置SSE响应头
-        res.writeHead(200, {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Cache-Control'
-        });
-
-        // 发送连接成功信号
-        res.write(`data: ${JSON.stringify({
-            type: 'connected',
-            message: 'Shaker开始为您分析...'
-        })}\n\n`);
-
-        // 检查缓存 - 如果有缓存，快速返回
-        const cachedResult = cacheManager.get(userInput);
-        if (cachedResult) {
-            const responseTime = Date.now() - startTime;
-            console.log(`⚡ [流式缓存命中] 响应时间: ${responseTime}ms`);
-            
-            // 模拟分析过程（快速版本）
-            res.write(`data: ${JSON.stringify({
-                type: 'segmented_analysis',
-                segments: [
-                    { title: '理解您的需求', content: '基于之前的分析，我已经了解您的偏好...', focus: 'scene' },
-                    { title: '准备推荐', content: '正在为您调制最适合的鸡尾酒...', focus: 'preparation' }
-                ]
-            })}\n\n`);
-            
-            setTimeout(() => {
-                res.write(`data: ${JSON.stringify({
-                    type: 'phase_transition',
-                    phase: 'recommendations',
-                    message: '分析完成，开始调制推荐...'
-                })}\n\n`);
-                
-                // 发送缓存的推荐结果
-                if (cachedResult.recommendations) {
-                    cachedResult.recommendations.forEach((recommendation, index) => {
-                        setTimeout(() => {
-                            res.write(`data: ${JSON.stringify({
-                                type: 'recommendation',
-                                index: index,
-                                content: { recommendations: [recommendation] },
-                                glassType: recommendation.glassType || '🍸'
-                            })}\n\n`);
-                        }, index * 800);
-                    });
-                    
-                    setTimeout(() => {
-                        res.write(`data: ${JSON.stringify({
-                            type: 'complete',
-                            message: '推荐完成（来自缓存）',
-                            cached: true
-                        })}\n\n`);
-                        res.end();
-                    }, cachedResult.recommendations.length * 800 + 500);
-                }
-            }, 1500);
-            
-            return;
-        }
-
-        // 使用去重处理流式请求
-        await requestDeduplicator.deduplicateRequest(userInput, async () => {
-            return new Promise((resolve, reject) => {
-                // 启动流式推荐服务
-                streamService.streamRecommendation(
-                    userInput,
-                    // onData - 数据回调
-                    (data) => {
-                        res.write(`data: ${JSON.stringify(data)}\n\n`);
-                    },
-                    // onError - 错误回调
-                    (error) => {
-                        console.error('❌ 流式推荐错误:', error);
-                        
-                        // 检查连接状态再写入
-                        if (!res.headersSent && !res.destroyed) {
-                            try {
-                                res.write(`data: ${JSON.stringify({
-                                    type: 'error',
-                                    message: `Shaker遇到了一些困难: ${error.message}`,
-                                    source: 'ai_service_error'
-                                })}\n\n`);
-                                res.end();
-                            } catch (writeError) {
-                                console.log('⚠️ 响应流已关闭，跳过错误写入');
-                            }
-                        }
-                        reject(error);
-                    },
-                    // onEnd - 结束回调
-                    () => {
-                        const responseTime = Date.now() - startTime;
-                        console.log(`✅ 流式推荐完成 (${responseTime}ms)`);
-                        res.write(`data: ${JSON.stringify({
-                            type: 'done',
-                            responseTime: responseTime
-                        })}\n\n`);
-                        res.end();
-                        resolve();
-                    }
-                );
-            });
-        });
-        
-    } catch (error) {
-        console.error('流式API错误:', error);
-        res.write(`data: ${JSON.stringify({
-            type: 'error',
-            message: '服务器内部错误: ' + error.message
-        })}\n\n`);
-        res.end();
-    }
-});
 
 // 优化的推荐API - 添加缓存和去重
 app.post('/api/recommend', async (req, res) => {
     const startTime = Date.now();
     
     try {
-        const userInput = req.body;
+        let userInput = req.body;
+        
+        // 🎲 空白输入随机化处理
+        const isEmpty = !userInput.scene && (!userInput.moods || userInput.moods.length === 0) && 
+                       (!userInput.ingredients || Object.keys(userInput.ingredients).length === 0) && 
+                       (!userInput.preferences || Object.keys(userInput.preferences).length === 0) && 
+                       !userInput.special_requirements;
+        
+        if (isEmpty) {
+            // 为空白输入添加随机时间戳，避免缓存重复
+            const randomSeed = Date.now() + Math.random();
+            userInput._randomSeed = randomSeed;
+            console.log('🎲 [空白输入] 添加随机种子:', randomSeed);
+        }
         
         // 不再强制验证字段，允许任意输入
 
@@ -232,19 +115,49 @@ app.post('/api/recommend', async (req, res) => {
         const result = await requestDeduplicator.deduplicateRequest(userInput, async () => {
             console.log(`🤖 使用 ${aiProvider.toUpperCase()} 生成推荐...`);
             
-            // 设置合理的超时时间
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('AI服务响应超时')), 50000) // 50秒超时
-            );
+            // 多样性验证重试逻辑
+            const maxRetries = 3;
+            let lastError = null;
             
-            const aiPromise = aiService.getCocktailRecommendation(userInput);
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`🎯 [尝试 ${attempt}/${maxRetries}] 开始生成推荐...`);
+                    
+                    // 设置合理的超时时间
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('AI服务响应超时')), 50000) // 50秒超时
+                    );
+                    
+                    const aiPromise = aiService.getCocktailRecommendation(userInput);
+                    
+                    const recommendations = await Promise.race([aiPromise, timeoutPromise]);
+                    
+                    console.log(`✅ [尝试 ${attempt}] 推荐生成成功，通过多样性验证`);
+                    
+                    // 3. 缓存结果
+                    cacheManager.set(userInput, recommendations);
+                    
+                    return recommendations;
+                    
+                } catch (error) {
+                    lastError = error;
+                    
+                    if (error.message.includes('推荐多样性验证失败')) {
+                        console.warn(`⚠️ [尝试 ${attempt}] 多样性验证失败: ${error.message}`);
+                        if (attempt < maxRetries) {
+                            console.log(`🔄 [重试] 准备第 ${attempt + 1} 次尝试...`);
+                            continue; // 重试
+                        }
+                    } else {
+                        // 非多样性验证错误，直接抛出
+                        throw error;
+                    }
+                }
+            }
             
-            const recommendations = await Promise.race([aiPromise, timeoutPromise]);
-            
-            // 3. 缓存结果
-            cacheManager.set(userInput, recommendations);
-            
-            return recommendations;
+            // 所有重试都失败了
+            console.error(`❌ [重试失败] ${maxRetries} 次尝试后仍然无法生成多样化推荐`);
+            throw new Error(`经过 ${maxRetries} 次尝试，仍无法生成多样化的推荐内容。最后错误: ${lastError.message}`);
         });
         
         const responseTime = Date.now() - startTime;
@@ -432,13 +345,17 @@ app.listen(PORT, async () => {
     // 显示缓存统计
     console.log('💾 缓存管理器已就绪');
     
-    // 缓存预热（临时禁用用于测试）
-    // setTimeout(async () => {
-    //     try {
-    //         await cacheManager.preWarmCache(aiService);
-    //     } catch (error) {
-    //         console.warn('⚠️ 缓存预热失败:', error.message);
-    //     }
-    // }, 5000); // 5秒后开始预热
-    console.log('🔧 [测试模式] 缓存预热已禁用');
+    // 缓存预热（生产环境启用）
+    if (process.env.NODE_ENV === 'production') {
+        setTimeout(async () => {
+            try {
+                await cacheManager.preWarmCache(aiService);
+            } catch (error) {
+                console.warn('⚠️ 缓存预热失败:', error.message);
+            }
+        }, 10000); // 10秒后开始预热，给服务器更多启动时间
+        console.log('🔥 [生产模式] 缓存预热已启用');
+    } else {
+        console.log('🔧 [开发模式] 缓存预热已禁用');
+    }
 });
