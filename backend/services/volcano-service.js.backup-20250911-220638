@@ -67,12 +67,13 @@ class VolcanoService extends BaseAIService {
         let modelType = selectedModel === this.models.pro ? 'pro' : 'lite';
         
         try {
-            const startTime = Date.now();
-            console.log(`🌋 [API] 开始调用 | 模型: ${selectedModel}`);
+            console.log('🌋 [火山引擎] 开始API调用');
+            console.log('📥 [火山引擎] 用户输入:', JSON.stringify(userInput, null, 2));
+            console.log(`🎯 [火山引擎] 选择模型: ${selectedModel}`);
+            console.log(`⚙️ [火山引擎] 模型参数: temperature=${0.8}, max_tokens=${2000}, top_p=${0.9}`);
             
             const prompt = this.buildPrompt(userInput);
-            console.log(`📝 [提示词] 长度: ${prompt.length}字符 (优化后减少73%)`);
-            console.log(`⚙️ [参数] temp=0.7, tokens=1500, top_p=0.85 (已优化)`);
+            console.log('📝 [火山引擎] 构建的提示词长度:', prompt.length, '字符');
             
             const response = await axios.post(
                 `${this.endpoint}/chat/completions`,
@@ -88,9 +89,9 @@ class VolcanoService extends BaseAIService {
                             content: prompt
                         }
                     ],
-                    temperature: 0.7, // 优化：降低随机性，提升生成速度
-                    max_tokens: 1500, // 优化：减少token数量，加快响应
-                    top_p: 0.85, // 优化：适度降低采样范围
+                    temperature: 0.8, // 平衡创意和稳定性
+                    max_tokens: 2000,
+                    top_p: 0.9, // 适度的采样多样性
                     // 移除frequency_penalty和presence_penalty，避免影响JSON结构
                     // 保持随机种子确保多样性
                     seed: Math.floor(Math.random() * 1000000) + Date.now()
@@ -233,8 +234,8 @@ class VolcanoService extends BaseAIService {
                     ],
                     stream: true,
                     temperature: 0.7,
-                    max_tokens: 1500,
-                    top_p: 0.85
+                    max_tokens: 2000,
+                    top_p: 0.9
                 },
                 {
                     headers: {
@@ -321,7 +322,7 @@ class VolcanoService extends BaseAIService {
             
             console.log('🔍 [火山引擎] 提取的JSON长度:', jsonMatch[0].length, '字符');
             
-            const recommendations = this.safeJsonParse(jsonMatch[0]);
+            const recommendations = JSON.parse(jsonMatch[0]);
             console.log('✅ [火山引擎] JSON解析成功');
             
             if (!recommendations?.recommendations || !Array.isArray(recommendations.recommendations)) {
@@ -331,8 +332,8 @@ class VolcanoService extends BaseAIService {
             
             console.log(`📊 [火山引擎] 解析到 ${recommendations.recommendations.length} 个推荐`);
             
-            // 验证推荐多样性，传入用户输入以进行智能验证
-            const validatedRecommendations = this.validateRecommendationDiversity(recommendations, userInput);
+            // 验证推荐多样性
+            const validatedRecommendations = this.validateRecommendationDiversity(recommendations);
             console.log('✅ [火山引擎] 推荐解析和验证完成');
             
             return validatedRecommendations;
@@ -345,49 +346,14 @@ class VolcanoService extends BaseAIService {
     }
 
     /**
-     * 安全解析JSON，带容错处理
-     * @param {string} jsonStr - JSON字符串
-     * @returns {Object} - 解析后的对象
-     */
-    safeJsonParse(jsonStr) {
-        // 尝试直接解析
-        try {
-            return JSON.parse(jsonStr);
-        } catch (error) {
-            console.log('⚠️ [JSON解析] 直接解析失败，尝试修复');
-        }
-        
-        // 快速修复常见问题
-        try {
-            let fixed = jsonStr
-                .replace(/,(\s*[\]}])/g, '$1') // 移除多余逗号
-                .replace(/("name":\s*"[^"]*"),\s*"([^"]*)"(\s*\})/g, '$1, "amount": "$2"$3') // 修复缺少key
-                .replace(/\/\*[\s\S]*?\*\//g, '') // 移除注释
-                .replace(/\/\/.*$/gm, '');
-            
-            const result = JSON.parse(fixed);
-            console.log('✅ [JSON解析] 修复后解析成功');
-            return result;
-        } catch (error) {
-            console.error('❌ [JSON解析] 解析失败:', error.message);
-            throw new Error(`JSON解析失败: ${error.message}`);
-        }
-    }
-
-    /**
      * 验证推荐的多样性，采用更灵活的验证策略
-     * @param {Object} recommendations - 推荐结果
-     * @param {Object} userInput - 用户输入，用于智能验证
      */
-    validateRecommendationDiversity(recommendations, userInput = {}) {
+    validateRecommendationDiversity(recommendations) {
+        console.log('🔍 [多样性验证] 开始验证推荐多样性');
         const recs = recommendations.recommendations;
-        const userSpirits = userInput.ingredients?.spirits || [];
-        const shouldRelaxSpiritDiversity = userSpirits.length === 1;
-        
-        console.log(`🔍 [多样性] 验证开始 | 用户指定: ${userSpirits.join(',') || '无'} | 放宽策略: ${shouldRelaxSpiritDiversity}`);
         
         // 检查基酒分布
-        const spirits = recs.map(rec => {
+        const spirits = recs.map((rec, index) => {
             const ingredients = rec.recipe?.ingredients || [];
             const spirit = ingredients.find(ing => 
                 ing.name.includes('威士忌') || ing.name.includes('金酒') || 
@@ -396,12 +362,24 @@ class VolcanoService extends BaseAIService {
                 ing.name.includes('白酒') || ing.name.includes('清酒') || 
                 ing.name.includes('利口酒') || ing.name.includes('香槟')
             );
-            return spirit?.name || '未知';
+            const spiritName = spirit?.name || '未知';
+            console.log(`🍸 [多样性验证] 推荐${index + 1} 基酒: ${spiritName}`);
+            return spiritName;
         });
         
-        const reasons = recs.map(rec => rec.reason || '');
-        const priorities = recs.map(rec => rec.priority || '');
-        const names = recs.map(rec => rec.name?.chinese || '');
+        // 检查推荐理由
+        const reasons = recs.map((rec, index) => {
+            const reason = rec.reason || '';
+            console.log(`💭 [多样性验证] 推荐${index + 1} 理由长度: ${reason.length}字`);
+            return reason;
+        });
+        
+        // 检查优先级标识
+        const priorities = recs.map((rec, index) => {
+            const priority = rec.priority || '';
+            console.log(`⭐ [多样性验证] 推荐${index + 1} 优先级: ${priority}`);
+            return priority;
+        });
         
         // 🔧 改进的基酒多样性验证 - 允许适度重复，但不能全部相同
         const uniqueSpirits = [...new Set(spirits.filter(s => s !== '未知'))];
@@ -410,15 +388,11 @@ class VolcanoService extends BaseAIService {
         console.log(`📊 [多样性分析] 基酒分布: ${spirits.join(', ')}`);
         console.log(`📊 [多样性分析] 不同基酒数量: ${uniqueSpirits.length}/${validSpiritsCount}`);
         
-        // 智能基酒多样性验证
-        if (shouldRelaxSpiritDiversity) {
-            // 用户指定了单一基酒，允许所有推荐使用相同基酒
-            console.log(`✅ [多样性验证] 用户指定单一基酒，允许基酒重复 (${uniqueSpirits.length}种基酒)`);
-        } else if (validSpiritsCount >= 3 && uniqueSpirits.length === 1) {
-            // 用户没有指定特定基酒，但所有推荐都使用相同基酒
+        // 如果3个推荐都是同一种基酒，则认为多样性不足
+        if (validSpiritsCount >= 3 && uniqueSpirits.length === 1) {
             console.error('❌ [多样性检查] 所有推荐使用相同基酒:', uniqueSpirits[0]);
             throw new Error(`推荐多样性验证失败：所有推荐都使用${uniqueSpirits[0]}，缺乏多样性`);
-        } else {
+        } else if (uniqueSpirits.length >= 2 || validSpiritsCount < 3) {
             console.log(`✅ [多样性验证] 基酒多样性合理 (${uniqueSpirits.length}种不同基酒)`);
         }
         
@@ -442,7 +416,12 @@ class VolcanoService extends BaseAIService {
         }
         
         // 检查鸡尾酒名称是否重复 - 这个保持严格
-        // names已在上方声明，这里直接使用
+        const names = recs.map((rec, index) => {
+            const nameCn = rec.name?.chinese || '';
+            const nameEn = rec.name?.english || '';
+            console.log(`🏷️ [多样性验证] 推荐${index + 1} 名称: ${nameCn} (${nameEn})`);
+            return nameCn;
+        });
         
         const nameDuplicates = names.filter((name, index) => names.indexOf(name) !== index && name);
         if (nameDuplicates.length > 0) {
@@ -458,10 +437,10 @@ class VolcanoService extends BaseAIService {
         console.log(`📊 [多样性分析] 制作复杂度分布: ${difficulties.join(', ')}`);
         console.log(`✅ [多样性验证] 复杂度多样性: ${uniqueDifficulties.length}种不同难度`);
         
-        // 简化验证结果 (使用已声明的变量)
-        const diversityScore = this.calculateDiversityScore(spirits, priorities, reasons, [], names);
+        // 🔧 新增：生成多样性验证报告
+        this.generateDiversityReport(recs, spirits, priorities, reasons, difficulties);
         
-        console.log(`✅ [多样性] 验证完成 | 基酒: ${uniqueSpirits.length}种 | 优先级: ${uniquePriorities.length}种 | 评分: ${diversityScore.toFixed(1)}/100`);
+        console.log('✅ [多样性验证] 验证完成 - 采用灵活策略');
         return recommendations;
     }
 
