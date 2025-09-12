@@ -2406,13 +2406,7 @@
                 // 立即滚动到推荐区域，显示加载状态
                 showSection('cocktailMakingSection');
                 setTimeout(() => {
-                    const makingSection = document.getElementById('cocktailMakingSection');
-                    if (makingSection) {
-                        makingSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
+                    scrollToRecommendationArea();
                 }, 500);
                 
                 // 先显示3个加载中的卡片
@@ -3683,6 +3677,10 @@
 
             const container = document.getElementById('resultsGrid');
             container.innerHTML = '';
+            
+            // 设置动态布局属性
+            container.setAttribute('data-count', recommendations.length.toString());
+            console.log(`🎯 设置结果网格布局为 ${recommendations.length} 个推荐`);
 
             recommendations.forEach((cocktail, index) => {
                 const card = document.createElement('div');
@@ -3749,6 +3747,55 @@
         }
 
 
+
+        // 优化的滚动到推荐区域函数
+        function scrollToRecommendationArea() {
+            const makingSection = document.getElementById('cocktailMakingSection');
+            if (!makingSection) {
+                console.warn('⚠️ 推荐区域元素不存在');
+                return;
+            }
+
+            // 使用 requestAnimationFrame 确保DOM完全渲染
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const sectionRect = makingSection.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    const sectionHeight = sectionRect.height;
+                    
+                    console.log('📊 滚动调试信息:', {
+                        sectionTop: sectionRect.top,
+                        sectionHeight: sectionHeight,
+                        viewportHeight: viewportHeight,
+                        currentScrollY: window.scrollY
+                    });
+                    
+                    // 计算最佳滚动位置
+                    const sectionTop = makingSection.offsetTop;
+                    
+                    // 如果推荐区域内容高度超过视口的80%，使用顶部对齐并留出合理边距
+                    if (sectionHeight > viewportHeight * 0.8) {
+                        const scrollTarget = sectionTop - Math.min(100, viewportHeight * 0.1); // 10%视口高度或100px的顶部边距
+                        console.log('📍 大内容滚动 - 目标位置:', scrollTarget);
+                        
+                        window.scrollTo({
+                            top: Math.max(0, scrollTarget), // 确保不会滚动到负值
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        // 内容适中时，让推荐区域在视口中居中显示
+                        const centerOffset = (viewportHeight - sectionHeight) / 2;
+                        const scrollTarget = sectionTop - centerOffset;
+                        console.log('📍 居中滚动 - 目标位置:', scrollTarget);
+                        
+                        window.scrollTo({
+                            top: Math.max(0, scrollTarget),
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
 
         // 工具函数
         function getAlcoholLevelText(value) {

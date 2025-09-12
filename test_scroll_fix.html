@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滚动修复测试 - Shaker</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f5f0, #e8f5e8);
+        }
+        
+        .test-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .test-content {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            background: #228b22;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: #1a6b1a;
+        }
+        
+        /* 模拟推荐区域样式 */
+        .mock-recommendation-section {
+            min-height: 80vh;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f0f8f0, #e0f0e0);
+        }
+        
+        .mock-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+        
+        .mock-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            min-height: 300px;
+        }
+        
+        @media (max-width: 1024px) {
+            .mock-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section" style="background: #ffebee;">
+        <div class="test-content">
+            <h1>🧪 滚动修复测试</h1>
+            <p>这是第一个区域，模拟Shaker分析阶段</p>
+            <button class="btn" onclick="testScroll()">测试滚动到推荐区域</button>
+        </div>
+    </div>
+    
+    <div class="test-section" style="background: #e8f5e9;">
+        <div class="test-content">
+            <h2>🌿 中间过渡区域</h2>
+            <p>这是中间区域，增加页面高度</p>
+        </div>
+    </div>
+    
+    <div id="mockRecommendationArea" class="mock-recommendation-section">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2>🍸 为你推荐的鸡尾酒</h2>
+            <p>这是模拟的推荐区域，测试滚动效果</p>
+        </div>
+        
+        <div class="mock-grid">
+            <div class="mock-card">
+                <h3>🍸 莫吉托</h3>
+                <p>清新薄荷与朗姆酒的完美结合</p>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+                    <p><strong>主要材料：</strong></p>
+                    <p>白朗姆酒 60ml</p>
+                    <p>薄荷叶 6-8片</p>
+                    <p>青柠汁 30ml</p>
+                </div>
+            </div>
+            
+            <div class="mock-card">
+                <h3>🍹 金汤力</h3>
+                <p>经典英式鸡尾酒，简单而优雅</p>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+                    <p><strong>主要材料：</strong></p>
+                    <p>金酒 45ml</p>
+                    <p>汤力水 150ml</p>
+                    <p>柠檬片 1片</p>
+                </div>
+            </div>
+            
+            <div class="mock-card">
+                <h3>🍓 草莓伏特加气泡饮</h3>
+                <p>甜美草莓与气泡的清爽组合</p>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+                    <p><strong>主要材料：</strong></p>
+                    <p>伏特加 40ml</p>
+                    <p>草莓 3-4颗</p>
+                    <p>苏打水 100ml</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn" onclick="testScrollToTop()">返回顶部</button>
+            <button class="btn" onclick="testCenterScroll()">居中滚动测试</button>
+        </div>
+    </div>
+    
+    <div class="test-section" style="background: #fff3e0;">
+        <div class="test-content">
+            <h2>📊 测试结果区域</h2>
+            <p>这是底部区域，用于测试滚动边界</p>
+            <div id="scrollInfo" style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+                <p>滚动信息将在这里显示</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 复制优化后的滚动函数
+        function scrollToRecommendationArea() {
+            const makingSection = document.getElementById('mockRecommendationArea');
+            if (!makingSection) {
+                console.warn('⚠️ 推荐区域元素不存在');
+                return;
+            }
+
+            // 使用 requestAnimationFrame 确保DOM完全渲染
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const sectionRect = makingSection.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    const sectionHeight = sectionRect.height;
+                    
+                    const scrollInfo = {
+                        sectionTop: sectionRect.top,
+                        sectionHeight: sectionHeight,
+                        viewportHeight: viewportHeight,
+                        currentScrollY: window.scrollY
+                    };
+                    
+                    console.log('📊 滚动调试信息:', scrollInfo);
+                    updateScrollInfo(scrollInfo);
+                    
+                    // 计算最佳滚动位置
+                    const sectionTop = makingSection.offsetTop;
+                    
+                    // 如果推荐区域内容高度超过视口的80%，使用顶部对齐并留出合理边距
+                    if (sectionHeight > viewportHeight * 0.8) {
+                        const scrollTarget = sectionTop - Math.min(100, viewportHeight * 0.1); // 10%视口高度或100px的顶部边距
+                        console.log('📍 大内容滚动 - 目标位置:', scrollTarget);
+                        
+                        window.scrollTo({
+                            top: Math.max(0, scrollTarget), // 确保不会滚动到负值
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        // 内容适中时，让推荐区域在视口中居中显示
+                        const centerOffset = (viewportHeight - sectionHeight) / 2;
+                        const scrollTarget = sectionTop - centerOffset;
+                        console.log('📍 居中滚动 - 目标位置:', scrollTarget);
+                        
+                        window.scrollTo({
+                            top: Math.max(0, scrollTarget),
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+        
+        function testScroll() {
+            console.log('🧪 开始滚动测试');
+            scrollToRecommendationArea();
+        }
+        
+        function testScrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function testCenterScroll() {
+            const makingSection = document.getElementById('mockRecommendationArea');
+            makingSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+        
+        function updateScrollInfo(info) {
+            const infoElement = document.getElementById('scrollInfo');
+            infoElement.innerHTML = `
+                <h4>📊 滚动信息</h4>
+                <p><strong>区域顶部位置：</strong> ${info.sectionTop}px</p>
+                <p><strong>区域高度：</strong> ${info.sectionHeight}px</p>
+                <p><strong>视口高度：</strong> ${info.viewportHeight}px</p>
+                <p><strong>当前滚动位置：</strong> ${info.currentScrollY}px</p>
+                <p><strong>高度比例：</strong> ${(info.sectionHeight / info.viewportHeight * 100).toFixed(1)}%</p>
+            `;
+        }
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const viewportHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            console.log(`📍 滚动位置: ${scrollY}px / ${documentHeight}px`);
+        });
+    </script>
+</body>
+</html>

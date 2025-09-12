@@ -2409,17 +2409,32 @@
         .making-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            gap: 2rem;
             margin-top: 2rem;
-            min-height: auto;
-            overflow: visible;
-            width: 100%;
             max-width: 1200px;
+            width: 100%;
             margin-left: auto;
             margin-right: auto;
-            align-items: start;
-            /* 移除高度限制，让内容自然显示 */
-            height: auto;
+            transition: all 0.3s ease;
+            padding: 2rem 0;
+        }
+
+        /* 调制网格动态布局：根据推荐数量调整 */
+        .making-grid[data-count="1"] {
+            grid-template-columns: 1fr;
+            max-width: 450px;
+            justify-items: center;
+        }
+
+        .making-grid[data-count="2"] {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 800px;
+            gap: 3rem;
+        }
+
+        .making-grid[data-count="3"] {
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1200px;
         }
 
         .cocktail-making-card {
@@ -3654,12 +3669,35 @@
             }
         }
 
+        /* 调制网格响应式设计 */
+        @media (max-width: 1024px) {
+            .making-grid,
+            .making-grid[data-count="1"],
+            .making-grid[data-count="2"],
+            .making-grid[data-count="3"] {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                max-width: 500px;
+            }
+        }
+
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            .making-grid[data-count="2"] {
+                max-width: 750px;
+                gap: 2.5rem;
+            }
+            
+            .making-grid[data-count="1"] {
+                max-width: 400px;
+            }
+        }
+
         /* 响应式调整 - 优化移动端布局 */
         @media (max-width: 768px) {
             .making-grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
-                max-height: none;
+                padding: 1rem 0;
             }
             
             .simple-cocktail-card {
@@ -3693,9 +3731,32 @@
 
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
-            margin-top: 3rem;
+            margin-top: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.3s ease;
+        }
+
+        /* 动态布局：根据推荐数量调整网格 */
+        .results-grid[data-count="1"] {
+            grid-template-columns: 1fr;
+            max-width: 450px;
+            justify-items: center;
+        }
+
+        .results-grid[data-count="2"] {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 800px;
+            gap: 3rem;
+        }
+
+        .results-grid[data-count="3"] {
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1200px;
         }
 
         .cocktail-card {
@@ -3761,8 +3822,13 @@
                 grid-template-columns: 1fr;
             }
             
-            .results-grid {
+            .results-grid,
+            .results-grid[data-count="1"],
+            .results-grid[data-count="2"],
+            .results-grid[data-count="3"] {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
+                max-width: 500px;
             }
             
             .step-navigation {
