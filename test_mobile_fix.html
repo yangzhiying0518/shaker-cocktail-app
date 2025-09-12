@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端适配测试 - Shaker</title>
+    <link rel="stylesheet" href="frontend/css/styles-inline.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-header {
+            background: #228b22;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .debug-info {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            z-index: 200;
+        }
+        
+        .test-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        /* 确保使用正确的CSS变量 */
+        :root {
+            --bg-warm: rgba(245, 245, 220, 0.9);
+            --border-natural: rgba(143, 188, 143, 0.3);
+            --forest-green: #228b22;
+            --shadow-soft: 0 4px 20px rgba(34, 139, 34, 0.1);
+            --shadow-warm: 0 8px 32px rgba(139, 69, 19, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>📱 移动端适配测试</h1>
+        <p>测试场景卡片在手机端的显示效果</p>
+    </div>
+    
+    <div class="debug-info" id="debugInfo">
+        <div>屏幕宽度: <span id="screenWidth"></span>px</div>
+        <div>视口宽度: <span id="viewportWidth"></span>px</div>
+        <div>设备像素比: <span id="devicePixelRatio"></span></div>
+    </div>
+
+    <!-- 测试场景选择区域 -->
+    <section class="choice-section test-section" id="sceneSection">
+        <div class="container">
+            <h2 class="section-title">✨ 选择你的时光</h2>
+            <p class="section-subtitle">每一个时刻，都值得用一杯特别的酒来纪念</p>
+            <div class="scene-grid" id="sceneOptions">
+                <div class="scene-card" data-value="聚会派对">
+                    <span class="scene-icon">🎉</span>
+                    <h4 class="scene-title">聚会派对</h4>
+                    <p class="scene-desc">朋友聚会、生日庆祝、社交活动</p>
+                </div>
+                <div class="scene-card" data-value="浪漫约会">
+                    <span class="scene-icon">💕</span>
+                    <h4 class="scene-title">浪漫约会</h4>
+                    <p class="scene-desc">情侣约会、纪念日、浪漫晚餐</p>
+                </div>
+                <div class="scene-card" data-value="独处放松">
+                    <span class="scene-icon">🧘</span>
+                    <h4 class="scene-title">独处放松</h4>
+                    <p class="scene-desc">下班后、阅读时光、放松心情</p>
+                </div>
+                <div class="scene-card" data-value="商务会面">
+                    <span class="scene-icon">🤝</span>
+                    <h4 class="scene-title">商务会面</h4>
+                    <p class="scene-desc">商务聚餐、工作庆祝、客户招待</p>
+                </div>
+                <div class="scene-card" data-value="夜晚时光">
+                    <span class="scene-icon">🌙</span>
+                    <h4 class="scene-title">夜晚时光</h4>
+                    <p class="scene-desc">夜店聚会、深夜聊天、不眠夜</p>
+                </div>
+                <div class="scene-card" data-value="午后惬意">
+                    <span class="scene-icon">☀️</span>
+                    <h4 class="scene-title">午后惬意</h4>
+                    <p class="scene-desc">下午茶时光、悠闲午后、享受生活</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 测试心情选择区域 -->
+    <section class="choice-section test-section" id="moodSection">
+        <div class="container">
+            <h2 class="section-title">💫 描述你的心情</h2>
+            <p class="section-subtitle">选择1-3个最符合你当前状态的心情</p>
+            <div class="mood-grid" id="moodOptions">
+                <div class="mood-card" data-value="春日愉悦">
+                    <span class="mood-icon">🌻</span>
+                    <h4 class="mood-title">春日愉悦</h4>
+                    <p class="mood-desc">心情如春花般绽放，充满活力</p>
+                </div>
+                <div class="mood-card" data-value="雨后忧郁">
+                    <span class="mood-icon">🌧️</span>
+                    <h4 class="mood-title">雨后忧郁</h4>
+                    <p class="mood-desc">如雨后森林般沉静，需要抚慰</p>
+                </div>
+                <div class="mood-card" data-value="夏日激情">
+                    <span class="mood-icon">☀️</span>
+                    <h4 class="mood-title">夏日激情</h4>
+                    <p class="mood-desc">如火焰般热烈，充满期待</p>
+                </div>
+                <div class="mood-card" data-value="秋叶宁静">
+                    <span class="mood-icon">🍂</span>
+                    <h4 class="mood-title">秋叶宁静</h4>
+                    <p class="mood-desc">如秋日般平和，寻求内心平衡</p>
+                </div>
+                <div class="mood-card" data-value="山峰自信">
+                    <span class="mood-icon">⛰️</span>
+                    <h4 class="mood-title">山峰自信</h4>
+                    <p class="mood-desc">如高山般坚定，充满力量</p>
+                </div>
+                <div class="mood-card" data-value="深林沉思">
+                    <span class="mood-icon">🌳</span>
+                    <h4 class="mood-title">深林沉思</h4>
+                    <p class="mood-desc">如古树般深邃，专注思考</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="test-section" style="background: #f0f8f0; text-align: center; padding: 3rem 1rem;">
+        <h2>📊 测试结果</h2>
+        <div id="testResults" style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px; text-align: left;">
+            <h3>布局检查结果：</h3>
+            <div id="layoutResults"></div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <button onclick="runLayoutTest()" style="background: #228b22; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+                🧪 运行布局测试
+            </button>
+            <button onclick="toggleSelection()" style="background: #ff6b6b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin-left: 1rem;">
+                🎯 测试选中效果
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 更新调试信息
+        function updateDebugInfo() {
+            document.getElementById('screenWidth').textContent = screen.width;
+            document.getElementById('viewportWidth').textContent = window.innerWidth;
+            document.getElementById('devicePixelRatio').textContent = window.devicePixelRatio;
+        }
+
+        // 运行布局测试
+        function runLayoutTest() {
+            const results = [];
+            
+            // 测试场景网格
+            const sceneGrid = document.querySelector('.scene-grid');
+            const sceneCards = document.querySelectorAll('.scene-card');
+            const sceneGridStyle = window.getComputedStyle(sceneGrid);
+            
+            results.push(`<h4>🎭 场景网格测试：</h4>`);
+            results.push(`网格列数: ${sceneGridStyle.gridTemplateColumns}`);
+            results.push(`网格间距: ${sceneGridStyle.gap}`);
+            results.push(`卡片数量: ${sceneCards.length}`);
+            
+            // 检查卡片尺寸
+            if (sceneCards.length > 0) {
+                const firstCard = sceneCards[0];
+                const cardRect = firstCard.getBoundingClientRect();
+                results.push(`单个卡片宽度: ${cardRect.width.toFixed(1)}px`);
+                results.push(`单个卡片高度: ${cardRect.height.toFixed(1)}px`);
+            }
+            
+            // 测试心情网格
+            const moodGrid = document.querySelector('.mood-grid');
+            const moodCards = document.querySelectorAll('.mood-card');
+            const moodGridStyle = window.getComputedStyle(moodGrid);
+            
+            results.push(`<h4>💫 心情网格测试：</h4>`);
+            results.push(`网格列数: ${moodGridStyle.gridTemplateColumns}`);
+            results.push(`网格间距: ${moodGridStyle.gap}`);
+            results.push(`卡片数量: ${moodCards.length}`);
+            
+            // 检查容器
+            const container = document.querySelector('.container');
+            const containerStyle = window.getComputedStyle(container);
+            results.push(`<h4>📦 容器测试：</h4>`);
+            results.push(`容器padding: ${containerStyle.padding}`);
+            results.push(`容器最大宽度: ${containerStyle.maxWidth}`);
+            
+            // 检查视口
+            results.push(`<h4>📱 视口信息：</h4>`);
+            results.push(`视口宽度: ${window.innerWidth}px`);
+            results.push(`是否移动端: ${window.innerWidth <= 768 ? '是' : '否'}`);
+            
+            document.getElementById('layoutResults').innerHTML = results.join('<br>');
+        }
+
+        // 测试选中效果
+        function toggleSelection() {
+            const sceneCards = document.querySelectorAll('.scene-card');
+            const moodCards = document.querySelectorAll('.mood-card');
+            
+            // 随机选中一些卡片
+            sceneCards.forEach((card, index) => {
+                if (index < 2) {
+                    card.classList.toggle('selected');
+                }
+            });
+            
+            moodCards.forEach((card, index) => {
+                if (index < 3) {
+                    card.classList.toggle('selected');
+                }
+            });
+        }
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', () => {
+            updateDebugInfo();
+            runLayoutTest();
+        });
+
+        // 初始化
+        updateDebugInfo();
+        setTimeout(runLayoutTest, 500); // 等待CSS加载完成
+
+        // 添加卡片点击事件
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.scene-card') || e.target.closest('.mood-card')) {
+                const card = e.target.closest('.scene-card, .mood-card');
+                card.classList.toggle('selected');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -404,10 +404,15 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        /* 响应式 */
+        /* 响应式 - 移动端单列布局 */
         @media (max-width: 768px) {
             .scene-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .scene-card {
+                padding: 1.5rem 1rem;
             }
         }
 
@@ -546,10 +551,11 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        /* 响应式 */
+        /* 响应式 - 心情网格移动端优化 */
         @media (max-width: 768px) {
-            .mood-grid, .scene-grid {
+            .mood-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
             }
             
             .preference-grid {
@@ -3800,10 +3806,16 @@
             color: var(--text-muted);
         }
 
-        /* 响应式设计 */
+        /* 响应式设计 - 移动端容器优化 */
         @media (max-width: 768px) {
             .container {
                 padding: 0 1rem;
+                max-width: 100%;
+            }
+            
+            .choice-section {
+                padding: 2rem 0;
+                min-height: auto;
             }
             
             .hero-title {
