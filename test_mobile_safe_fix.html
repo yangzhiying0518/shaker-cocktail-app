@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端安全修复测试 - Shaker</title>
+    <link rel="stylesheet" href="frontend/css/styles-inline.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-header {
+            background: #228b22;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .test-info {
+            background: #f0f8f0;
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #228b22;
+        }
+        
+        .viewport-info {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            z-index: 200;
+        }
+        
+        .test-section {
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .comparison {
+            display: grid;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .before-after {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #228b22;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: #f0f8f0;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .comparison {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>📱 移动端安全修复测试</h1>
+        <p>恢复原始2列布局 + 优化显示效果</p>
+    </div>
+    
+    <div class="viewport-info" id="viewportInfo">
+        视口信息加载中...
+    </div>
+    
+    <div class="test-info">
+        <h3>🎯 修复方案说明</h3>
+        <ul>
+            <li><strong>恢复原始设计</strong>：移动端2列布局（之前是正常的）</li>
+            <li><strong>优化显示效果</strong>：调整padding、字体大小、间距</li>
+            <li><strong>保持安全性</strong>：最小化修改，不影响其他功能</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>✨ 选择你的时光</h2>
+        <p>每一个时刻，都值得用一杯特别的酒来纪念</p>
+        
+        <div class="comparison">
+            <div class="before-after">
+                <div class="label">修复后效果（当前）</div>
+                <div class="scene-grid">
+                    <div class="scene-card" data-value="聚会派对">
+                        <div class="scene-icon">🎉</div>
+                        <div class="scene-title">聚会派对</div>
+                        <div class="scene-desc">朋友聚会、生日庆祝、社交活动</div>
+                    </div>
+                    <div class="scene-card" data-value="浪漫约会">
+                        <div class="scene-icon">💕</div>
+                        <div class="scene-title">浪漫约会</div>
+                        <div class="scene-desc">情侣约会、纪念日、浪漫晚餐</div>
+                    </div>
+                    <div class="scene-card" data-value="独处放松">
+                        <div class="scene-icon">🧘</div>
+                        <div class="scene-title">独处放松</div>
+                        <div class="scene-desc">下班后、阅读时光、放松心情</div>
+                    </div>
+                    <div class="scene-card" data-value="商务会面">
+                        <div class="scene-icon">💼</div>
+                        <div class="scene-title">商务会面</div>
+                        <div class="scene-desc">商务聚餐、工作庆祝、客户招待</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="before-after">
+                <div class="label">修复要点检查</div>
+                <div style="padding: 1rem;">
+                    <h4>📋 检查清单：</h4>
+                    <ul>
+                        <li>✅ 移动端显示2列布局</li>
+                        <li>✅ 卡片内容完整显示</li>
+                        <li>✅ 文字大小适中可读</li>
+                        <li>✅ 间距合理不拥挤</li>
+                        <li>✅ 图标大小适配</li>
+                        <li>✅ 触摸目标足够大</li>
+                    </ul>
+                    
+                    <h4>🔧 技术改进：</h4>
+                    <ul>
+                        <li><code>grid-template-columns: repeat(2, 1fr)</code></li>
+                        <li><code>padding: 1.2rem 0.8rem</code></li>
+                        <li><code>font-size: 0.9rem</code></li>
+                        <li><code>gap: 1rem</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 显示视口信息
+        function updateViewportInfo() {
+            const info = document.getElementById('viewportInfo');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            
+            info.innerHTML = `
+                宽度: ${width}px<br>
+                高度: ${height}px<br>
+                DPR: ${dpr}<br>
+                ${width <= 768 ? '📱 移动端' : '💻 桌面端'}
+            `;
+        }
+        
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+        
+        // 添加卡片点击效果
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // 移除其他选中状态
+                document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('selected'));
+                // 添加选中状态
+                this.classList.add('selected');
+            });
+        });
+        
+        console.log('🎯 移动端安全修复测试页面已加载');
+        console.log('📱 请在不同设备上测试效果');
+    </script>
+</body>
+</html>
